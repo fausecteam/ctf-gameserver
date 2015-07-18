@@ -34,7 +34,8 @@ Gameserver via stdin/out using the protocol specified in the
 following.
 
 Ideally checker scripts don't need any persistent state. However if
-they do, there will be a way to do that. Expect ++jsonb++.
+they do, there will be a way to do that. Expect ++jsonb++. Do _not_
+expect to run on the same host for the next tick.
 
 Protocol
 --------
@@ -43,21 +44,23 @@ All requests and responses are terminated by a single newline character.
 
 FLAG <tick> <payload>::
   Asks for the valid flag in <tick> containing the <payload>. The
-  payload is provided hexencoded. The gameserver answers with the one
+  payload field is optional and, if present, contains exactly 8
+  hexencoded bytes. The gameserver answers with the one
   properly signed flag.
 
-RESULT <result>::
-  Tells the gameserver it has successfully finished operation. <result>
-  is used to communicate the final result back to the gameserver. It
-  may be one of the values in the Table below.
+Success of the checker is comunicated via it's return-code as listed
+below. The checker should write any additional information in
+free-form to stderr. This output should be in a form suitable to be
+displayed to participating teams.
 
-.Result codes
-[width="50%",options="header",cols="2,10"]
+.Return codes
+[width="60%",options="header",cols="4,>2,15"]
 |==========================================================
-| <result> | description 
-| OK       | Service is running fine and flag was submitted
-| TIMEOUT  | Service could not be reached / is offline
-| NOTFOUND | The flag we submitted could not be found
+| result     | exitcode | description 
+| OK         |        0 | Service is running fine and flag was submitted
+| TIMEOUT    |        1 | Service could not be reached / is offline
+| NOTWORKING |        2 | The service is reachable but does not react properly to requests
+| NOTFOUND   |        3 | The flag we submitted could not be found
 |==========================================================
 
 
