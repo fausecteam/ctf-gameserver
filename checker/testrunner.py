@@ -21,16 +21,18 @@ def run_job(args):
     job = Popen([args.script, str(args.tick), args.ip], stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=True)
     while job.poll() is None:
         line = job.stdout.readline().strip().split()
-        if args.verbose:
-            sys.stderr.write(repr(line) + "\n")
         if len(line) == 0:
             continue
+        if args.verbose:
+            sys.stderr.write(repr(line) + "\n")
         if line[0] == "FLAG":
             payload = None
             if len(line) > 2:
                 payload = codecs.decode(line[2], 'hex')
 
             generatedflag = flag.generate(args.team, args.service, payload, args.first + args.duration *  int(line[1]))
+            if args.verbose:
+                sys.stderr.write(generatedflag + "\n")
             job.stdin.write(generatedflag)
             job.stdin.write("\n")
             job.stdin.flush()
