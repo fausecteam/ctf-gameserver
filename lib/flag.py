@@ -21,7 +21,7 @@ VALID=900
 
 SECRET=b'\x1d\x14H\xb4y\xc6\x93\x8d\x0e\xae'
 
-keccak = Keccak.Keccak()
+keccak = Keccak.Keccak(100)
 # timestamp + team + service + payload
 datalength = 4 + 1 + 1 + PAYLOADLEN
 
