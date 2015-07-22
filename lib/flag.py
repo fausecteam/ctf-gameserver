@@ -54,7 +54,12 @@ def verify(flag):
     
     rawdata = base64.b64decode(flag.split('_')[1])
     protecteddata, mac = rawdata[:datalength], rawdata[datalength:]
-    computedmac = keccak.Keccak((len(protecteddata), protecteddata.encode('hex')), n=MACLEN).decode('hex')
+    computedmac = codecs.encode(SECRET, 'hex') + codecs.encode(protecteddata, 'hex')
+    computedmac = keccak.Keccak(((len(SECRET) + len(protecteddata))*8,
+                         computedmac.decode('latin-1')),
+                        n=MACLEN)
+
+    computedmac = codecs.decode(computedmac, 'hex')
     if not computedmac == mac:
         return False
 
