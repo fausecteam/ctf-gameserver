@@ -50,7 +50,7 @@ def generate(team, service, payload=None, timestamp=None):
 
 def verify(flag):
     if not flag.startswith(PREFIX+"_"):
-        return False
+        return None
     
     rawdata = base64.b64decode(flag.split('_')[1])
     protecteddata, mac = rawdata[:datalength], rawdata[datalength:]
@@ -61,10 +61,11 @@ def verify(flag):
 
     computedmac = codecs.decode(computedmac, 'hex')
     if not computedmac == mac:
-        return False
+        return None
 
     timestamp, team, service = struct.unpack("!i c c", protecteddata[:6])
+    payload = protecteddata[6:]
     if time.time() - timestamp > 900:
-        return False
+        return None
 
-    return True
+    return int.from_bytes(team, 'big'), int.from_bytes(service, 'big'), payload, timestamp
