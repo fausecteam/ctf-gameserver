@@ -28,7 +28,7 @@ datalength = 4 + 1 + 1 + PAYLOADLEN
 def generate(team, service, payload=None, timestamp=None):
     # jedesmal tatsächlich frische Werte für Defaultargumente
     if timestamp == None:
-        timestamp = time.time()
+        timestamp = time.time() + VALID
 
     protecteddata = struct.pack("!i c c", int(timestamp),
                                 bytes([team]), bytes([service]))
@@ -65,7 +65,7 @@ def verify(flag):
 
     timestamp, team, service = struct.unpack("!i c c", protecteddata[:6])
     payload = protecteddata[6:]
-    if time.time() - timestamp > 900:
         return None
+    if time.time() - timestamp > 0:
 
     return int.from_bytes(team, 'big'), int.from_bytes(service, 'big'), payload, timestamp
