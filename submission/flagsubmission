@@ -7,8 +7,6 @@ import sys
 import argparse
 import logging
 
-import systemd
-
 import flag
 
 class FlagHandler(asynchat.async_chat):
@@ -74,7 +72,11 @@ def main():
     logging.debug("Starting asyncore")
     server = FlagServer(args.listen, args.port)
     asyncore.loop()
-    systemd.daemon.notify("READY=1")
+    try:
+        import systemd
+        systemd.daemon.notify("READY=1")
+    except:
+        pass
         
 if __name__ == '__main__':
     main()
