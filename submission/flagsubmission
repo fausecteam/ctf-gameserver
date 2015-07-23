@@ -3,7 +3,6 @@
 import asyncore
 import asynchat
 import socket
-import sys
 import argparse
 import logging
 

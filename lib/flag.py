@@ -2,9 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import time
-import random
 import struct
-import os
 import Keccak
 import base64
 import codecs
