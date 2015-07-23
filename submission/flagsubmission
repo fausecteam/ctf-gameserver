@@ -11,7 +11,7 @@ import systemd
 
 import flag
 
-class EchoHandler(asynchat.async_chat):
+class FlagHandler(asynchat.async_chat):
     def __init__(self, sock, addr):
         asynchat.async_chat.__init__(self, sock=sock)
         self.addr = addr
@@ -40,7 +40,7 @@ class EchoHandler(asynchat.async_chat):
             self.push(u"Thank you for your submission!\n".encode('utf-8'))
             self.buffer = b''
 
-class EchoServer(asyncore.dispatcher):
+class FlagServer(asyncore.dispatcher):
     def __init__(self, host, port):
         asyncore.dispatcher.__init__(self)
         self.create_socket(family=socket.AF_INET6)
@@ -51,9 +51,7 @@ class EchoServer(asyncore.dispatcher):
 
     def handle_accepted(self, sock, addr):
         self.logger.info('Incoming connection from %s' % repr(addr))
-        handler = EchoHandler(sock, addr)
-
-
+        handler = FlagHandler(sock, addr)
 
 def main():
     logging.basicConfig(format='%(asctime)s %(levelname)s(%(name)s): %(message)s', datefmt='%m/%d/%Y %H:%M:%S')
@@ -73,7 +71,7 @@ def main():
     logging.getLogger().setLevel(numeric_level)
     
     logging.debug("Starting asyncore")
-    server = EchoServer(args.listen, args.port)
+    server = FlagServer(args.listen, args.port)
     asyncore.loop()
     systemd.daemon.notify("READY=1")
         
