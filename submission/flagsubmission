@@ -17,7 +17,8 @@ class FlagHandler(asynchat.async_chat):
         try:
             curflag = self.buffer.decode('us-ascii')
         except UnicodeDecodeError as e:
-            self.push(u"Flags should be of the Format [-_a-zA-Z0-9]+".encode('utf-8'))
+            self.push(u"Flags should be of the Format [-_a-zA-Z0-9]+\n"
+                      .encode('utf-8'))
             return
 
         try:
