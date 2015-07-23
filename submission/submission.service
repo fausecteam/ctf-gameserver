@@ -1,0 +1,8 @@
+[Unit]
+Description=CTF Flag-Submission Service
+
+[Service]
+Type=notify
+ExecStart=flagsubmission
+User=nobody
+Group=nogroup
