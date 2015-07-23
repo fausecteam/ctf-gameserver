@@ -10,8 +10,39 @@ import logging
 import flag
 
 class FlagHandler(asynchat.async_chat):
+    def handle_flag(self):
+        if self.buffer == b'':
+            self.push(b"418 I'm a teapot!\n")
+            return
+
+        try:
+            curflag = self.buffer.decode('us-ascii')
+        except UnicodeDecodeError as e:
+            self.push(u"Flags should be of the Format [-_a-zA-Z0-9]+".encode('utf-8'))
+            return
+
+        try:
+            team, service, _, timestamp = flag.verify(curflag)
+        except flag.InvalidFlagFormat:
+            self.push(b"Flag not recognized\n")
+            return
+        except flag.InvalidFlagMAC:
+            self.push(b"Not a valid Flag\n")
+            return
+        except flag.FlagExpired as e:
+            self.push((u"Flag expired since %.1f seconds\n" % e.args).encode('utf-8'))
+            return
+
+        if team == self.team:
+            self.push(b"Can't submit a flag for your own team\n")
+            return
+
+        self.push(u"Thank you for your submission!\n".encode('utf-8'))
+
+
     def __init__(self, sock, addr):
         asynchat.async_chat.__init__(self, sock=sock)
+        self.team = -1
         self.addr = addr
         self.set_terminator(b"\n")
         self.logger = logging.getLogger(str(addr[0]))
@@ -24,19 +55,8 @@ class FlagHandler(asynchat.async_chat):
 
     def found_terminator(self):
         self.logger.debug(repr(self.buffer))
-        try:
-            flag = self.buffer.decode('us-ascii')
-        except UnicodeDecodeError as e:
-            self.push(u"Flags should be of the Format [-_a-zA-Z0-9]+".encode('utf-8'))
-            return
-
-        flagdata = flag.verify(flag)
-        if flagdata is None:
-            self.push(b"Not valid\n")
-        else:
-            team, service, _, timestamp = flagdata
-            self.push(u"Thank you for your submission!\n".encode('utf-8'))
-            self.buffer = b''
+        self.handle_flag()
+        self.buffer = b''
 
 class FlagServer(asyncore.dispatcher):
     def __init__(self, host, port):
@@ -48,7 +68,7 @@ class FlagServer(asyncore.dispatcher):
         self.logger = logging.getLogger("server")
 
     def handle_accepted(self, sock, addr):
-        self.logger.info('Incoming connection from %s' % repr(addr))
+        self.logger.info('Incoming connection from %s', repr(addr))
         handler = FlagHandler(sock, addr)
 
 def main():
@@ -65,10 +85,9 @@ def main():
                         help="Port to listen on")
     args = parser.parse_args()
 
-    
     numeric_level = getattr(logging, args.loglevel.upper())
     logging.getLogger().setLevel(numeric_level)
-    
+
     logging.debug("Starting asyncore")
     server = FlagServer(args.listen, args.port)
     asyncore.loop()
@@ -77,6 +96,6 @@ def main():
         systemd.daemon.notify("READY=1")
     except:
         pass
-        
+
 if __name__ == '__main__':
     main()
