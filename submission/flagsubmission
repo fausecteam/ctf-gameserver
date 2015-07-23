@@ -94,7 +94,7 @@ def main():
     try:
         import systemd
         systemd.daemon.notify("READY=1")
-    except:
+    except ImportError:
         pass
 
 if __name__ == '__main__':
