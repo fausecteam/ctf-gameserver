@@ -48,9 +48,21 @@ def generate(team, service, payload=None, timestamp=None):
     
     return "%s_%s" % (PREFIX, base64.b64encode(protecteddata + mac).decode('latin-1'))
 
+class FlagVerificationError(Exception):
+    pass
+
+class InvalidFlagFormat(FlagVerificationError):
+    pass
+
+class InvalidFlagMAC(FlagVerificationError):
+    pass
+
+class FlagExpired(FlagVerificationError):
+    pass
+
 def verify(flag):
     if not flag.startswith(PREFIX+"_"):
-        return None
+        raise InvalidFlagFormat("Flag is not in the expected format")
     
     rawdata = base64.b64decode(flag.split('_')[1])
     protecteddata, mac = rawdata[:datalength], rawdata[datalength:]
@@ -61,11 +73,11 @@ def verify(flag):
 
     computedmac = codecs.decode(computedmac, 'hex')
     if not computedmac == mac:
-        return None
+        raise InvalidFlagMAC("MAC does not match")
 
     timestamp, team, service = struct.unpack("!i c c", protecteddata[:6])
     payload = protecteddata[6:]
-        return None
     if time.time() - timestamp > 0:
+        raise FlagExpired(time.time() - timestamp)
 
     return int.from_bytes(team, 'big'), int.from_bytes(service, 'big'), payload, timestamp
