@@ -15,11 +15,11 @@ MACLEN = 80
 # length of the Payload (in bytes)
 PAYLOADLEN = 8
 # flaggenprefix
-PREFIX="FAUST"
+PREFIX = "FAUST"
 # gültigkeit in sekunden
-VALID=900
+VALID = 900
 
-SECRET=b'\x1d\x14H\xb4y\xc6\x93\x8d\x0e\xae'
+SECRET = b'\x1d\x14H\xb4y\xc6\x93\x8d\x0e\xae'
 
 keccak = Keccak.Keccak(100)
 # timestamp + team + service + payload
@@ -45,7 +45,7 @@ def generate(team, service, payload=None, timestamp=None):
                         n=MACLEN)
 
     mac = codecs.decode(mac, 'hex')
-    
+
     return "%s_%s" % (PREFIX, base64.b64encode(protecteddata + mac).decode('latin-1'))
 
 class FlagVerificationError(Exception):
@@ -63,7 +63,7 @@ class FlagExpired(FlagVerificationError):
 def verify(flag):
     if not flag.startswith(PREFIX+"_"):
         raise InvalidFlagFormat("Flag is not in the expected format")
-    
+
     rawdata = base64.b64decode(flag.split('_')[1])
     protecteddata, mac = rawdata[:datalength], rawdata[datalength:]
     computedmac = codecs.encode(SECRET, 'hex') + codecs.encode(protecteddata, 'hex')
