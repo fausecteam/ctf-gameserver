@@ -54,7 +54,8 @@ class FlagServer(asyncore.dispatcher):
         handler = FlagHandler(sock, addr)
 
 def main():
-    logging.basicConfig(format='%(asctime)s %(levelname)s(%(name)s): %(message)s', datefmt='%m/%d/%Y %H:%M:%S')
+    logging.basicConfig(format='%(asctime)s %(levelname)s(%(name)s): %(message)s',
+                        datefmt='%m/%d/%Y %H:%M:%S')
 
     parser = argparse.ArgumentParser(description="Flag submission system")
     parser.add_argument('-v', '--loglevel', default='WARNING', type=str,
