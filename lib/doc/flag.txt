@@ -1,0 +1,38 @@
+Flags
+=====
+Christoph Egger <Christoph.Egger@fau.de>
+
+Format
+------
+
+Flags look like ++FAUST_VbDgYwwNs6w3AwAAAABEFEtvyHhdDRuN++. Separated
+by ++_++ there is the prefix (++FAUST++) and base64 encoded data with
+the following content: ++$$${timestamp}${teamid}${serviceid}${payload}${hmac}$$++ 
+
+As a result, flags can be recreated (as long as no custom payload is
+used or the payload is known) at any time. It is possible to check any
+flag for validity without looking it up in some database as well as
+verifying that it has not expired or is submitted by the owning team.
+
+.Fields
+[width="60%",options="header",cols="5,>5,20"]
+|===============================================================================
+| Field     | Size (bits) | Description
+| timestamp | 32          | Flag is valid until timestamp
+| teamid    | 8           | Team responsible of protecting this flag
+| serviceid | 8           | Service this flag was submitted to
+| payload   | 64          | Custom data stored in the Flag, defaults to crc32 padded with zeros
+| hmac      | 80          | 80 bits from the keccak-100 sponge seeded with some secret
+|===============================================================================
+
+API
+---
+
+[source,python]
+--------------------------------------------------------------------------------
+generate(team, service, payload=None, timestamp=None):
+    return "FAUST_..."
+
+verify(flag):
+    return int(team), int(service), bytes(payload), int(timestamp)
+--------------------------------------------------------------------------------
