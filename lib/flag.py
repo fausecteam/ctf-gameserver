@@ -62,7 +62,11 @@ def verify(flag):
     if not flag.startswith(PREFIX+"_"):
         raise InvalidFlagFormat("Flag is not in the expected format")
 
-    rawdata = base64.b64decode(flag.split('_')[1])
+    try:
+        rawdata = base64.b64decode(flag.split('_')[1])
+    except binascii.Error:
+        raise InvalidFlagFormat("Flag is not in the expected format")
+
     protecteddata, mac = rawdata[:datalength], rawdata[datalength:]
     computedmac = codecs.encode(SECRET, 'hex') + codecs.encode(protecteddata, 'hex')
     computedmac = keccak.Keccak(((len(SECRET) + len(protecteddata))*8,
