@@ -50,7 +50,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.security.SecurityMiddleware',
 )
 
-ROOT_URLCONF = 'ctf_gameserver.urls'
+ROOT_URLCONF = 'ctf_gameserver.web.urls'
 
 TEMPLATES = [
     {
@@ -68,7 +68,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'ctf_gameserver.wsgi.application'
+WSGI_APPLICATION = 'ctf_gameserver.web.wsgi.application'
 
 
 # Database
