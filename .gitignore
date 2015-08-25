@@ -1,0 +1,7 @@
+*~
+__pycache__/
+
+# Vim
+*.swp
+*.swo
+/tags
