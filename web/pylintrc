@@ -1,0 +1,14 @@
+[FORMAT]
+max-line-length = 109
+
+[MESSAGES CONTROL]
+; Disable all "too-many-"/"too-few-" style checks, complaints about `global` statements, missing docstrings,
+; 'TODO' messages and messages about locally disabled messages
+disable = design, global-statement, missing-docstring, fixme, locally-disabled
+
+[TYPECHECK]
+; Don't issue "no-member" warnings for the default attributes of models, model instances and views
+generated-members = objects, id, request
+
+[REPORTS]
+reports = no
