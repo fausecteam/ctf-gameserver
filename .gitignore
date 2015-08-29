@@ -5,3 +5,6 @@ __pycache__/
 *.swp
 *.swo
 /tags
+
+# Web component
+/web/ctf_gameserver/web/dev-db.sqlite3
