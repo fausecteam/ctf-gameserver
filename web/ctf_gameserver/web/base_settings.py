@@ -16,7 +16,8 @@ INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.messages',
     'django.contrib.admin',
-    'django.contrib.staticfiles'
+    'django.contrib.staticfiles',
+    'ctf_gameserver.web.registration'
 )
 
 # Ordering of the middlewares is important, see

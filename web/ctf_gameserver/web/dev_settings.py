@@ -8,6 +8,9 @@ options.
 from .base_settings import *
 
 
+COMPETITION_NAME = 'Development CTF'
+
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',

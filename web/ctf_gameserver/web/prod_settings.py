@@ -8,6 +8,9 @@ https://docs.djangoproject.com/en/1.8/ref/settings/.
 from .base_settings import *
 
 
+# The human-readable title of your CTF
+COMPETITION_NAME = ''
+
 # Set to True if your site is available exclusively through HTTPS and not via plaintext HTTP
 HTTPS = False
 
