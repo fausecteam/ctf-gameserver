@@ -1,0 +1,55 @@
+{% load static %}
+
+<!DOCTYPE html>
+
+<html lang="{{ LANGUAGE_CODE }}">
+    <head>
+        <meta charset="utf-8" />
+
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+        <link rel="stylesheet" href="{% static 'ext/bootstrap/css/bootstrap.min.css' %}" />
+        <link rel="stylesheet" href="{% static 'ext/bootstrap/css/bootstrap-theme.min.css' %}" />
+
+        <!-- Load the scripts asynchronously in the right order -->
+        <script src="{% static 'ext/jquery.min.js' %}" defer="defer"></script>
+        <script src="{% static 'ext/bootstrap/js/bootstrap.min.js' %}" defer="defer"></script>
+
+        <title>{% block title %}{% endblock %} | {{ COMPETITION_NAME }}</title>
+    </head>
+
+
+    <body>
+        <nav class="navbar navbar-static-top navbar-inverse">
+            <div class="container">
+                <!-- "Hamburger menu" for small screens -->
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#main-menu">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+
+                    <!-- TODO -->
+                    <a class="navbar-brand" href="/">{{ COMPETITION_NAME }}</a>
+                </div>
+
+                <div class="collapse navbar-collapse" id="main-menu">
+                    <ul class="nav navbar-nav">
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container">
+            {% if messages %}
+            {% for message in messages %}
+                <div class="alert {{ message.tags }}" role="alert">{{ message }}</div>
+            {% endfor %}
+            {% endif %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </body>
+</html>
