@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="page-header">
+    <h1>{% block title %}500 Internal server error{% endblock %}</h1>
+</div>
+
+<p>
+    {% trans 'Oops, something went horribly wrong.' %}
+</p>
+{% endblock %}

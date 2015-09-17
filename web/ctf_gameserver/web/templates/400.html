@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="page-header">
+    <h1>{% block title %}400 Bad request{% endblock %}</h1>
+</div>
+
+<p>
+    {% trans 'Sorry to tell you, but something is wrong with your request.' %}
+</p>
+{% endblock %}

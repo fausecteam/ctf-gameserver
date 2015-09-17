@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="page-header">
+    <h1>{% block title %}403 Forbidden{% endblock %}</h1>
+</div>
+
+<p>
+    {% trans 'You are not allowed to do that.' %}
+</p>
+{% endblock %}

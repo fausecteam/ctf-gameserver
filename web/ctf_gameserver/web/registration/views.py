@@ -1,6 +1,5 @@
 from django.db import transaction
-from django.http import HttpResponseRedirect, HttpResponseBadRequest
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.utils.translation import ugettext as _
 from django.contrib import messages
 from django.contrib.auth import get_user_model
@@ -28,7 +27,7 @@ def register(request):
                                         'formal email adress. Please click the conformation link inside'
                                         'that email in order to complete your sign-up.'))
             # TODO
-            return HttpResponseRedirect('/')
+            return redirect('/')
     else:
         user_form = forms.UserForm(prefix='team')
         team_form = forms.TeamForm(prefix='team')
@@ -44,7 +43,7 @@ def confirm_email(request):
         token = request.GET['token']
     except KeyError:
         messages.error(request, _('Missing parameters, email address could not be confirmed.'))
-        return HttpResponseBadRequest()
+        return render(request, '400.html', status=400)
 
     error_message = _('Invalid user or token, email address could not be confirmed.')
 
@@ -53,14 +52,14 @@ def confirm_email(request):
         user = User._default_manager.get(pk=user_pk)
     except User.DoesNotExist:
         messages.error(request, error_message)
-        return HttpResponseBadRequest()
+        return render(request, '400.html', status=400)
 
     if email_token_generator.check_token(user, token):    # pylint: disable=no-member
         User._default_manager.filter(pk=user_pk).update(is_active=True)
         messages.success(request, _('Email address confirmed. You are now completely signed up.'))
     else:
         messages.error(request, error_message)
-        return HttpResponseBadRequest()
+        return render(request, '400.html', status=400)
 
     # TODO
-    return HttpResponseRedirect('/')
+    return redirect('/')
