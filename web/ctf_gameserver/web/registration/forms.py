@@ -31,6 +31,12 @@ class UserForm(ModelForm):
                        'password resets or prize pay-outs.')
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Make 'Formal email' field required, despite not being required in the User model
+        self.fields['email'].required = True
+
     def save(self, commit=True):
         """
         save() variant which always sets the user to inactive. It should stay that way until the email
