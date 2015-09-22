@@ -77,7 +77,7 @@ class TeamForm(ModelForm):
         help_texts = {
             'informal_email': _("A less authorative contact address, e.g. your team's mailing list. It will "
                                 "receive all relevant information for participants."),
-            'image': _('Optional. Your logo or similar.'),
+            'image': _('Your logo or similar.'),
         }
 
     def save(self, user, commit=True):   # pylint: disable=arguments-differ
