@@ -1,4 +1,4 @@
-from django.forms import ModelForm
+from django import forms
 from django.core.mail import send_mail
 from django.template import Context, loader
 from django.conf import settings
@@ -10,7 +10,7 @@ from .models import Team
 from .util import email_token_generator
 
 
-class UserForm(ModelForm):
+class UserForm(forms.ModelForm):
     """
     The portion of the registration form which ends up in the 'User' model. Designed to be used in
     conjunction with TeamForm.
@@ -18,9 +18,11 @@ class UserForm(ModelForm):
     work with user models other than django.contrib.auth.models.User out-of-the-box.
     """
 
+    password_repetition = forms.CharField(widget=forms.PasswordInput)
+
     class Meta:
         model = User
-        fields = ['username', 'password', 'email']
+        fields = ['username', 'password', 'password_repetition', 'email']
         labels = {
             'username': _('Name'),
             'email': _('Formal email')
@@ -30,12 +32,24 @@ class UserForm(ModelForm):
             'email': _('Your authorative contact address. It will be used sensitive requests, such as '
                        'password resets or prize pay-outs.')
         }
+        widgets = {
+            'password': forms.PasswordInput
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         # Make 'Formal email' field required, despite not being required in the User model
         self.fields['email'].required = True
+
+    def clean_password_repetition(self):
+        password = self.cleaned_data.get('password')
+        repetition = self.cleaned_data.get('password_repetition')
+
+        if password and repetition and password != repetition:
+            raise forms.ValidationError(_("The passwords don't match!"), code='password_mismatch')
+
+        return repetition
 
     def save(self, commit=True):
         """
@@ -71,7 +85,7 @@ class UserForm(ModelForm):
                   [self.instance.email])
 
 
-class TeamForm(ModelForm):
+class TeamForm(forms.ModelForm):
     """
     The portion of the registration form which ends up in the 'Team' model. Designed to be used in
     conjunction with UserForm.
