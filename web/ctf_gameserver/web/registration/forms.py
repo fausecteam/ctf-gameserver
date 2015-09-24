@@ -57,6 +57,7 @@ class UserForm(forms.ModelForm):
         address is confirmed.
         """
         user = super().save(commit=False)
+        user.set_password(self.cleaned_data['password'])
         user.is_active = False
 
         if commit:
