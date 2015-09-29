@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load form_as_div %}
+
+{% block content %}
+<div class="page-header">
+    <h1>{% block title %}{% trans 'Login' %}{% endblock %}</h1>
+</div>
+
+{% if next %}
+<p class="lead">
+    {% if user.is_authenticated %}
+    {% blocktrans %}
+    Your account doesn't have access to this page. To proceed, please login with an account that has
+    access.
+    {% endblocktrans %}
+    {% else %}
+    {% blocktrans %}
+    Please login to see this page.
+    {% endblocktrans %}
+    {% endif %}
+</p>
+{% endif %}
+
+<form method="post">
+    {% csrf_token %}
+
+    {{ form|as_div }}
+
+    <button type="submit" class="btn btn-primary">{% trans 'Login' %}</button>
+
+    <p class="pull-right">
+        <a href="{% url 'password_reset' %}">{% trans 'Forgot password?' %}</a>
+    </p>
+</form>
+{% endblock %}
