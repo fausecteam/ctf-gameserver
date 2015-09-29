@@ -32,7 +32,7 @@ def register(request):
         user_form = forms.UserForm(prefix='user')
         team_form = forms.TeamForm(prefix='team')
 
-    return render(request, 'registration.html', {'user_form': user_form, 'team_form': team_form})
+    return render(request, 'register.html', {'user_form': user_form, 'team_form': team_form})
 
 
 @transaction.atomic
