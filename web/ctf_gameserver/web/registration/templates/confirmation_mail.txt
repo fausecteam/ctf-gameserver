@@ -1,4 +1,4 @@
-Hi,
+{% load i18n %}{% autoescape off %}{% url 'confirm_email' as confirm_path %}{% blocktrans %}Hi,
 
 someone (hopefully you) has registered a team for {{ competition_name }}
 and specified your email address as contact address.
@@ -6,7 +6,7 @@ and specified your email address as contact address.
 If you don't know what this is about, you can just ignore this mail.
 
 Otherwise, please visit this page to confirm your address:
-{{ protocol }}://{{ host }}{% url 'confirm_email' %}?user={{ user }}&token={{ token }}
+{{ protocol }}://{{ domain }}{{ confirm_path }}?user={{ user }}&token={{ token }}
 
 Welcome to {{ competition_name }} and best regards,
-The organizing Team
+The organizing Team{% endblocktrans %}{% endautoescape %}

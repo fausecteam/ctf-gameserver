@@ -77,11 +77,11 @@ class UserForm(forms.ModelForm):
         context = Context({
             'competition_name': settings.COMPETITION_NAME,
             'protocol': 'https' if request.is_secure() else 'http',
-            'host': get_current_site(request),
+            'domain': get_current_site(request),
             'user': self.instance.pk,
             'token': email_token_generator.make_token(self.instance)
         })
-        message = loader.get_template('confirmation_mail.txt').render(context)
+        message = loader.render_to_string('confirmation_mail.txt', context)
 
         send_mail(settings.COMPETITION_NAME+' email confirmation', message, settings.DEFAULT_FROM_EMAIL,
                   [self.instance.email])
