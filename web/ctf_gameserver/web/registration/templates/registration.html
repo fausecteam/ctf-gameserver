@@ -13,7 +13,7 @@
     {% endblocktrans %}
 </p>
 
-<form action="." method="post">
+<form method="post">
     {% csrf_token %}
 
     {{ user_form|as_div }}
