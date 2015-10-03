@@ -22,9 +22,13 @@ urlpatterns = [
         registration_views.register,
         name='register'
     ),    # noqa
-    url(r'^confirm/$',
+    url(r'^confirm-email/$',
         registration_views.confirm_email,
         name='confirm_email'
+    ),
+    url(r'^edit-team/$',
+        registration_views.edit_team,
+        name='edit_team'
     ),
 
     url(r'^login/$',

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load form_as_div %}
+
+{% block content %}
+<div class="page-header">
+    <h1>{% block title %}{% trans 'Edit team' %}{% endblock %}</h1>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+
+    {{ user_form|as_div }}
+    {{ team_form|as_div }}
+
+    <button type="submit" class="btn btn-primary">{% trans 'Save' %}</button>
+</form>
+{% endblock %}

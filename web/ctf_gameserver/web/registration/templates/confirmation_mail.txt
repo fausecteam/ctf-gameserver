@@ -1,7 +1,7 @@
 {% load i18n %}{% autoescape off %}{% url 'confirm_email' as confirm_path %}{% blocktrans %}Hi,
 
-someone (hopefully you) has registered a team for {{ competition_name }}
-and specified your email address as contact address.
+someone (hopefully you) specified your email address as contact address for
+a {{ competition_name }} team.
 
 If you don't know what this is about, you can just ignore this mail.
 

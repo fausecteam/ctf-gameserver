@@ -43,23 +43,46 @@ class UserForm(forms.ModelForm):
         # Make 'Formal email' field required, despite not being required in the User model
         self.fields['email'].required = True
 
+        if self.instance.pk:
+            # Editing an existing user
+            self.fields['username'].widget.attrs['readonly'] = True
+            self.fields['password'].required = False
+            self.fields['password_repetition'].required = False
+
+    def clean_username(self):
+        if self.instance.pk:
+            # Field is read-only, so discard its user-provided value
+            return self.instance.username
+
+        return self.cleaned_data['username']
+
     def clean_password_repetition(self):
         password = self.cleaned_data.get('password')
         repetition = self.cleaned_data.get('password_repetition')
 
-        if password and repetition and password != repetition:
+        if password != repetition:
             raise forms.ValidationError(_("The passwords don't match!"), code='password_mismatch')
 
         return repetition
 
     def save(self, commit=True):
         """
-        save() variant which always sets the user to inactive. It should stay that way until the email
-        address is confirmed.
+        save() variant which hashes the password and sets the user to inactive when the email address has
+        been changed. It should stay that way until the address is confirmed.
         """
         user = super().save(commit=False)
-        user.set_password(self.cleaned_data['password'])
-        user.is_active = False
+
+        if self.cleaned_data['password']:
+            user.set_password(self.cleaned_data['password'])
+        else:
+            # Provide the correct change status to the view
+            try:
+                self.changed_data.remove('password')
+            except ValueError:
+                pass
+
+        if 'email' in self.changed_data:
+            user.is_active = False
 
         if commit:
             user.save()
