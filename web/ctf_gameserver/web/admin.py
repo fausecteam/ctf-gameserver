@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin
 
 from .registration.models import Team
+from .registration.admin import InlineTeamAdmin
 from .util import format_lazy
 
 
@@ -24,14 +25,15 @@ admin_site = CTFAdminSite()    # pylint: disable=invalid-name
 @admin.register(User, site=admin_site)
 class CTFUserAdmin(UserAdmin):
     """
-    Custom variant of UserAdmin which adjusts the displayed, filterable and editable fields.
+    Custom variant of UserAdmin which adjusts the displayed, filterable and editable fields and adds an
+    InlineModelAdmin for the associated team.
     """
 
     class TeamListFilter(admin.SimpleListFilter):
         """
         Admin list filter which allows filtering of user lists by whether they are associated with a Team.
         """
-        title = _('belonging to team')
+        title = _('associated team')
         parameter_name = 'has_team'
 
         def lookups(self, request, model_admin):
@@ -57,17 +59,18 @@ class CTFUserAdmin(UserAdmin):
         except Team.DoesNotExist:
             return False
 
-    user_has_team.short_description = _('Belonging to team')
+    user_has_team.short_description = _('Associated team')
     # Display on/off icons instead of strings for the user_has_team values
     user_has_team.boolean = True
     user_has_team.admin_order_field = 'team'
 
-    list_display = ('username', 'email', 'is_active', 'is_superuser', 'user_has_team')
+    list_display = ('username', 'is_active', 'is_superuser', 'user_has_team')
     list_filter = ('is_active', 'is_superuser', TeamListFilter)
-    search_fields = ('username', 'email')
+    search_fields = ('username', 'email', 'team__informal_email', 'team__country')
 
     fieldsets = (
         (None, {'fields': ('username', 'password', 'email')}),
         (_('Permissions'), {'fields': ('is_active', 'is_superuser')}),
         (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
     )
+    inlines = [InlineTeamAdmin]

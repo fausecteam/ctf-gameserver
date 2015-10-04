@@ -119,6 +119,9 @@ class TeamForm(forms.ModelForm):
     class Meta:
         model = Team
         fields = ['informal_email', 'image', 'country']
+        labels = {
+            'informal_email': _('Informal email')
+        }
         help_texts = {
             'informal_email': _("A less authorative contact address, e.g. your team's mailing list. It will "
                                 "receive all relevant information for participants."),

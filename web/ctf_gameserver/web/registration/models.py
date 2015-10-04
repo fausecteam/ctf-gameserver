@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.utils.translation import ugettext_lazy as _
 
 
 class Team(models.Model):
@@ -11,7 +12,7 @@ class Team(models.Model):
 
     user = models.OneToOneField(settings.AUTH_USER_MODEL)
 
-    informal_email = models.EmailField()
+    informal_email = models.EmailField(_('Informal email address'))
     image = models.FileField(null=True, blank=True)
     # TODO: Change this to a selection field
     country = models.CharField(max_length=100)
