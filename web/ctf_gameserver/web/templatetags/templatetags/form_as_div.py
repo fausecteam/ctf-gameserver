@@ -84,8 +84,7 @@ def as_div(form):
     for field in form.hidden_fields():
         # Display errors for hidden fields in the global error list
         for error in field.errors:
-            top_errors.append(_('(Hidden field %(name)s): %(error)s')
-                              .format({'name': field.name, 'error': conditional_escape(error)}))
+            top_errors.append(format_html(_('Hidden field {name}: {error}'), name=field.name, error=error))
         output.append(str(field))
 
     for field in form.visible_fields():

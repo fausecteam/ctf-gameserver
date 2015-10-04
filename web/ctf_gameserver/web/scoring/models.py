@@ -85,4 +85,5 @@ class GameControl(models.Model):
 
         if cls.objects.count() > 0 and self.id != cls.objects.get().id:
             # pylint: disable=no-member
-            raise ValidationError(_('Only a single instance of {} can be created').format(cls.__name__))
+            raise ValidationError(_('Only a single instance of {cls} can be created')
+                                  .format(cls=cls.__name__))
