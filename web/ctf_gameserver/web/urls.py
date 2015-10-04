@@ -1,9 +1,9 @@
 from django.conf.urls import include, url
-from django.contrib import admin
 from django.contrib.auth import views as auth_views
 
 from .registration import views as registration_views
 from .registration.forms import TeamAuthenticationForm, FormalPasswordResetForm
+from .admin import admin_site
 
 # pylint: disable=invalid-name, bad-continuation
 
@@ -64,5 +64,5 @@ urlpatterns = [
         name='password_reset_complete'
     ),
 
-    url(r'^admin/', include(admin.site.urls))
+    url(r'^admin/', include(admin_site.urls))
 ]

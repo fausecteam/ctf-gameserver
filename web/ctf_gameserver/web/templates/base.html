@@ -51,6 +51,9 @@
                             </a>
                             <ul class="dropdown-menu">
                                 <li><a href="{% url 'edit_team' %}">{% trans 'Edit' %}</a></li>
+                                {% if user.is_superuser %}
+                                <li><a href="{% url 'admin:index' %}">{% trans 'Administration' %}</a></li>
+                                {% endif %}
                                 <li><a href="{% url 'logout' %}">{% trans 'Logout' %}</a></li>
                             </ul>
                         </li>
