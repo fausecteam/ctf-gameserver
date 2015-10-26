@@ -20,6 +20,8 @@ class Team(models.Model):
     class Meta:
         ordering = ['user__username']
 
+    objects = models.Manager()
+
     class ActiveObjectsManager(models.Manager):
         def get_queryset(self):
             return super().get_queryset().filter(user__is_active=True)
