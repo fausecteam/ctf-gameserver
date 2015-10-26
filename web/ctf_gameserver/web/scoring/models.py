@@ -68,13 +68,16 @@ class StatusCheck(models.Model):
 
 class GameControl(models.Model):
     """
-    Single-column database table to store control information for the competition.
+    Single-row database table to store control information for the competition.
     """
 
     # Make start end and NULL-able (for the initial state), but not blank-able (have to be set upon editing)
     start = models.DateTimeField(null=True)
     end = models.DateTimeField(null=True)
     current_tick = models.PositiveSmallIntegerField(default=0, editable=False)
+
+    class Meta:
+        verbose_name_plural = 'Game control'
 
     def clean(self):
         """
