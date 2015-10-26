@@ -74,6 +74,7 @@ class GameControl(models.Model):
     # Make start end and NULL-able (for the initial state), but not blank-able (have to be set upon editing)
     start = models.DateTimeField(null=True)
     end = models.DateTimeField(null=True)
+    paused = models.BooleanField(default=False)
     current_tick = models.PositiveSmallIntegerField(default=0, editable=False)
 
     class Meta:

@@ -10,7 +10,7 @@ class Team(models.Model):
     particularly attuned to django.contrib.auth.models.User, but should work with other user models as well.
     """
 
-    user = models.OneToOneField(settings.AUTH_USER_MODEL)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, primary_key=True)
 
     informal_email = models.EmailField(_('Informal email address'))
     image = models.FileField(null=True, blank=True)
