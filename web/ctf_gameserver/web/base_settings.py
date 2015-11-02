@@ -6,11 +6,14 @@ rest of the code.
 
 import os
 
+from django.core.urlresolvers import reverse_lazy
 from django.contrib.messages import constants as messages
 
 # This file's directory, to conveniently build absolute paths using `os.path.join(BASE_DIR, )`
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+
+HOME_URL = reverse_lazy('flatpage', kwargs={'path': ''})
 
 INSTALLED_APPS = (
     'django.contrib.contenttypes',
@@ -48,7 +51,8 @@ TEMPLATES = [{
             'django.contrib.messages.context_processors.messages',
             'django.template.context_processors.i18n',
             'django.template.context_processors.static',
-            'ctf_gameserver.web.context_processors.competition_name'
+            'ctf_gameserver.web.context_processors.competition_name',
+            'ctf_gameserver.web.context_processors.home_url'
         ]
     }
 }]
@@ -61,7 +65,7 @@ WSGI_APPLICATION = 'ctf_gameserver.web.wsgi.application'
 STATIC_URL = '/static/'
 LOGIN_URL = '/login/'
 LOGOUT_URL = '/logout/'
-LOGIN_REDIRECT_URL = '/'    # TODO
+LOGIN_REDIRECT_URL = HOME_URL
 
 # Make message level tags match the CSS classes from Bootstrap
 MESSAGE_TAGS = {

@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.conf.urls import include, url
 from django.contrib.auth import views as auth_views
 
@@ -39,8 +40,7 @@ urlpatterns = [
     ),
     url(r'^logout/$',
         auth_views.logout,
-        # TODO
-        {'next_page': '/'},
+        {'next_page': settings.HOME_URL},
         name='logout'
     ),
     url(r'^reset-password/$',

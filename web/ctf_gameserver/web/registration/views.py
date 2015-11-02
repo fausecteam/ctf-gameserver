@@ -1,5 +1,6 @@
 from django.db import transaction
 from django.shortcuts import render, redirect
+from django.conf import settings
 from django.utils.translation import ugettext as _
 from django.contrib import messages
 from django.contrib.auth import logout, get_user_model, update_session_auth_hash
@@ -29,8 +30,7 @@ def register(request):
                                         'formal email adress. Please open the link inside that email in '
                                         'order to complete your sign-up.'))
 
-            # TODO
-            return redirect('/')
+            return redirect(settings.HOME_URL)
     else:
         user_form = forms.UserForm(prefix='user')
         team_form = forms.TeamForm(prefix='team')
@@ -68,8 +68,7 @@ def edit_team(request):
                                             'adress. Please visit the link inside that email. Until then, '
                                             'your team has been deactivated and you have been logged out.'))
 
-            # TODO
-            return redirect('/')
+            return redirect(settings.HOME_URL)
     else:
         user_form = forms.UserForm(prefix='user', instance=request.user)
         team_form = forms.TeamForm(prefix='team', instance=team)
@@ -103,5 +102,4 @@ def confirm_email(request):
         messages.error(request, error_message)
         return render(request, '400.html', status=400)
 
-    # TODO
-    return redirect('/')
+    return redirect(settings.HOME_URL)
