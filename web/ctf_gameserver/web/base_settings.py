@@ -21,7 +21,8 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'ctf_gameserver.web.templatetags',
     'ctf_gameserver.web.registration',
-    'ctf_gameserver.web.scoring'
+    'ctf_gameserver.web.scoring',
+    'ctf_gameserver.web.flatpages'
 )
 
 # Ordering of the middlewares is important, see

@@ -2,6 +2,7 @@ from django.conf.urls import include, url
 from django.contrib.auth import views as auth_views
 
 from .registration import views as registration_views
+from .flatpages import views as flatpages_views
 from .admin import admin_site
 from .forms import TeamAuthenticationForm, FormalPasswordResetForm
 
@@ -64,5 +65,9 @@ urlpatterns = [
         name='password_reset_complete'
     ),
 
-    url(r'^admin/', include(admin_site.urls))
+    url(r'^admin/', include(admin_site.urls)),
+    url(r'^(?P<path>([\w-]+/)*)$',
+        flatpages_views.flatpage,
+        name='flatpage'
+    )
 ]

@@ -17,9 +17,6 @@ class Team(models.Model):
     # TODO: Change this to a selection field
     country = models.CharField(max_length=100)
 
-    class Meta:
-        ordering = ['user__username']
-
     objects = models.Manager()
 
     class ActiveObjectsManager(models.Manager):
