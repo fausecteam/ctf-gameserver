@@ -1,5 +1,7 @@
 from django.conf import settings
 
+from .flatpages import models
+
 
 # pylint: disable=unused-argument
 def competition_name(request):
@@ -10,9 +12,12 @@ def competition_name(request):
     return {'COMPETITION_NAME': settings.COMPETITION_NAME}
 
 
-def home_url(request):
+def flatpage_nav(request):
     """
-    Context processor which adds the home page's URL to the context.
+    Context processor which adds data required for the main navigation of flatpages to the context.
     """
 
-    return {'HOME_URL': settings.HOME_URL}
+    categories = models.Category.objects.all()
+    pages = models.Flatpage.objects_without_category.all()
+
+    return {'all_categories': categories, 'pages_without_category': pages, 'HOME_URL': settings.HOME_URL}

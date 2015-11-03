@@ -12,10 +12,11 @@ class Category(models.Model):
     """
 
     title = models.CharField(max_length=100)
+    ordering = models.PositiveSmallIntegerField(default=10)
     slug = models.CharField(max_length=100)
 
     class Meta:
-        ordering = ('title',)
+        ordering = ('ordering', 'title')
 
     def __str__(self):
         return self.title
@@ -45,6 +46,14 @@ class Flatpage(models.Model):
         )
         ordering = ('category', 'ordering', 'title')
 
+    class ObjectsWithoutCategoryManager(models.Manager):
+        def get_queryset(self):
+            return super().get_queryset().filter(category=None).exclude(title='')
+
+    objects = models.Manager()
+    # QuerySet that only returns Flatpages without a category, but not the home page
+    objects_without_category = ObjectsWithoutCategoryManager()
+
     def __str__(self):
         return self.title
 
@@ -54,20 +63,40 @@ class Flatpage(models.Model):
         when category is NULL. Django's constraint validation skips this case, and the actual constraint's
         behavior is database-specific.
         """
-        if self.category is None:
-            if self._default_manager.filter(category=self.category, title=self.title).exists():
-                raise self.unique_error_message(self.__class__, ('category', 'title'))
+        if self.category is None and self._default_manager.filter(
+            category = self.category,
+            title = self.title
+        ).exclude(pk=self.pk).exists():
+            raise self.unique_error_message(self.__class__, ('category', 'title'))
 
     def get_absolute_url(self):
-        # Missing URL parts cannot be None or "", but have to be omitted from 'kwargs' parameter
-        kwargs = {}
+        if self.is_home_page():
+            return reverse('home_flatpage')
+        elif self.category is None:
+            return reverse('no_category_flatpage', kwargs={'slug': self.slug})
+        else:
+            return reverse('category_flatpage', kwargs={'category': self.category.slug, 'slug': self.slug})
 
-        if self.category is not None:
-            kwargs['category'] = self.category.slug
-        if self.slug:
-            kwargs['slug'] = self.slug
+    @property
+    def siblings(self):
+        """
+        Access siblings of this page, i.e. pages in the same category. For convenience, this includes this
+        page itself.
+        """
+        return self._default_manager.filter(category=self.category)
 
-        return reverse('flatpage', kwargs=kwargs)
+    def has_siblings(self):
+        """
+        Indicates whether the page has any siblings. This does not include the page itself, so it is False
+        when `len(self.siblings) == 1`.
+        """
+        return self.siblings.exclude(pk=self.pk).exists()
+
+    def is_home_page(self):
+        """
+        Indicates whether the page is the home page.
+        """
+        return not self.title and self.category is None
 
     def render_content(self):
         """

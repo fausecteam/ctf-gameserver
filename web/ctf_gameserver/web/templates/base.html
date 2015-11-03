@@ -37,6 +37,23 @@
 
                 <div class="collapse navbar-collapse" id="main-menu">
                     <ul class="nav navbar-nav">
+                        {% for category in all_categories %}
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">
+                                {{ category.title }} <span class="caret"></span>
+                            </a>
+
+                            <ul class="dropdown-menu">
+                                {% for page in category.flatpage_set.all %}
+                                <li><a href="{{ page.get_absolute_url }}">{{ page.title }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        <li>
+                        {% endfor %}
+
+                        {% for page in pages_without_category %}
+                        <li><a href="{{ page.get_absolute_url }}">{{ page.title }}</a></li>
+                        {% endfor %}
                     </ul>
 
                     <ul class="nav navbar-nav navbar-right">
@@ -48,6 +65,7 @@
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">
                                 {{ user.username }} <span class="caret"></span>
                             </a>
+
                             <ul class="dropdown-menu">
                                 <li><a href="{% url 'edit_team' %}">{% trans 'Edit' %}</a></li>
                                 {% if user.is_superuser %}

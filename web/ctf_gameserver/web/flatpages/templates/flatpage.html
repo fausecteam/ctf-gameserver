@@ -6,14 +6,32 @@
 <div class="page-header">
     <h1>
         {% block title %}
-        {% if page.title %}
-        {{ page.title }}
-        {% else %}
+        {% if page.is_home_page %}
         {{ COMPETITION_NAME }}
+        {% else %}
+        {{ page.title }}
         {% endif %}
         {% endblock %}
     </h1>
 </div>
 
-{{ page.render_content }}
+<div class="row">
+    {% if sidebar_links %}
+    <div class="col-sm-3 hidden-xs">
+        <ul class="nav nav-pills nav-stacked">
+            {% for linked_page in sidebar_links %}
+            <li {% if linked_page == page %}class="active"{% endif %}>
+                <a href="{{ linked_page.get_absolute_url }}">{{ linked_page.title }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="col-sm-9 col-xs-12">
+    {% else %}
+    <div class="col-xs-12">
+    {% endif %}
+        {{ page.render_content }}
+    </div>
+</div>
 {% endblock %}

@@ -3,11 +3,16 @@ from django.shortcuts import render, get_object_or_404
 from .models import Flatpage
 
 
-def flatpage(request, category, slug):
+def flatpage(request, category=None, slug=''):
     if category is None:
-        slug_string = slug if slug is not None else ''
-        page = get_object_or_404(Flatpage, category=None, slug=slug_string)
+        page = get_object_or_404(Flatpage, category=None, slug=slug)
     else:
         page = get_object_or_404(Flatpage, category__slug=category, slug=slug)
 
-    return render(request, 'flatpage.html', {'page': page})
+    # Hide sidebar links for pages without category
+    if page.category is not None and page.has_siblings():
+        sidebar_links = page.siblings
+    else:
+        sidebar_links = []
+
+    return render(request, 'flatpage.html', {'page': page, 'sidebar_links': sidebar_links})

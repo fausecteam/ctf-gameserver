@@ -11,7 +11,8 @@ class CategoryAdmin(admin.ModelAdmin):
     Admin object for the flatpage Categories.
     """
 
-    list_display = ('title',)
+    list_display = ('title', 'ordering')
+    list_editable = ('ordering',)
     search_fields = ('title',)
 
     form = forms.CategoryAdminForm

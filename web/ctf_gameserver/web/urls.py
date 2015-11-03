@@ -66,9 +66,19 @@ urlpatterns = [
     ),
 
     url(r'^admin/', include(admin_site.urls)),
-    # `??` gives the 'category' group lower priority, so that paths without category will end up in 'slug'
-    url(r'^((?P<category>[\w-]+)/)??((?P<slug>[\w-]+)/)?$',
+
+    # Multiple seperate URL patterns have to be used to work around
+    # https://code.djangoproject.com/ticket/9176
+    url(r'^$',
         flatpages_views.flatpage,
-        name='flatpage'
+        name='home_flatpage'
+    ),
+    url(r'^(?P<slug>[\w-]+)/$',
+        flatpages_views.flatpage,
+        name='no_category_flatpage'
+    ),
+    url(r'^(?P<category>[\w-]+)/(?P<slug>[\w-]+)/$',
+        flatpages_views.flatpage,
+        name='category_flatpage'
     )
 ]

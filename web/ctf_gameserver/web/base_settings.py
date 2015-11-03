@@ -13,8 +13,7 @@ from django.contrib.messages import constants as messages
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
-# No arguments for the home page
-HOME_URL = reverse_lazy('flatpage')
+HOME_URL = reverse_lazy('home_flatpage')
 
 INSTALLED_APPS = (
     'django.contrib.contenttypes',
@@ -53,7 +52,7 @@ TEMPLATES = [{
             'django.template.context_processors.i18n',
             'django.template.context_processors.static',
             'ctf_gameserver.web.context_processors.competition_name',
-            'ctf_gameserver.web.context_processors.home_url'
+            'ctf_gameserver.web.context_processors.flatpage_nav'
         ]
     }
 }]

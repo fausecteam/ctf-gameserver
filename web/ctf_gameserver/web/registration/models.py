@@ -17,12 +17,11 @@ class Team(models.Model):
     # TODO: Change this to a selection field
     country = models.CharField(max_length=100)
 
-    objects = models.Manager()
-
     class ActiveObjectsManager(models.Manager):
         def get_queryset(self):
             return super().get_queryset().filter(user__is_active=True)
 
+    objects = models.Manager()
     # QuerySet that only returns Teams whose associated user object is not marked as inactive
     active_objects = ActiveObjectsManager()
 
