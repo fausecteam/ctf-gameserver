@@ -66,7 +66,8 @@ urlpatterns = [
     ),
 
     url(r'^admin/', include(admin_site.urls)),
-    url(r'^(?P<path>([\w-]+/)*)$',
+    # `??` gives the 'category' group lower priority, so that paths without category will end up in 'slug'
+    url(r'^((?P<category>[\w-]+)/)??((?P<slug>[\w-]+)/)?$',
         flatpages_views.flatpage,
         name='flatpage'
     )

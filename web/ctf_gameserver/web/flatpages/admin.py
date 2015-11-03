@@ -2,27 +2,35 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib import admin
 
 from ctf_gameserver.web.admin import admin_site
-from .models import Flatpage
-from .forms import FlatpageAdminForm, FlatpageChangelistForm
+from . import models, forms
 
 
-@admin.register(Flatpage, site=admin_site)
+@admin.register(models.Category, site=admin_site)
+class CategoryAdmin(admin.ModelAdmin):
+    """
+    Admin object for the flatpage Categories.
+    """
+
+    list_display = ('title',)
+    search_fields = ('title',)
+
+    form = forms.CategoryAdminForm
+
+
+@admin.register(models.Flatpage, site=admin_site)
 class FlatpageAdmin(admin.ModelAdmin):
     """
-    Admin object for the Flatpage objects from the custom flatpages implementation.
+    Admin object for Flatpage objects from the custom flatpages implementation.
     """
 
-    list_display = ('title', 'parent', 'ordering')
-    list_editable = ('parent', 'ordering')
-    list_filter = ('parent',)
+    list_display = ('title', 'category', 'ordering')
+    list_editable = ('category', 'ordering')
+    list_filter = ('category',)
     search_fields = ('title', 'content')
 
-    form = FlatpageAdminForm
+    form = forms.FlatpageAdminForm
     fieldsets = (
         (None, {'fields': ('title', 'content')}),
-        (_('Menu hierarchy'), {'fields': ('parent', 'ordering')})
+        (_('Menu hierarchy'), {'fields': ('category', 'ordering')})
     )
     view_on_site = True
-
-    def get_changelist_form(self, request, **kwargs):
-        return FlatpageChangelistForm

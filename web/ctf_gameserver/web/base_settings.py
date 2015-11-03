@@ -13,7 +13,8 @@ from django.contrib.messages import constants as messages
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
-HOME_URL = reverse_lazy('flatpage', kwargs={'path': ''})
+# No arguments for the home page
+HOME_URL = reverse_lazy('flatpage')
 
 INSTALLED_APPS = (
     'django.contrib.contenttypes',
