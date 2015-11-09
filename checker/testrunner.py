@@ -7,7 +7,7 @@
 #
 #   for i in {1..10}
 #   do
-#     ./testrunner.py --first 1437258032 --tick $i --ip $someip --team 1 --service 1 ./mychecker
+#     ./testrunner.py --first 1437258032 --backend `mktemp -d` --tick $i --ip $someip --team 1 --service 1 dummy:DummyChecker
 #   done
 
 import time
@@ -16,50 +16,40 @@ import argparse
 import flag
 import codecs
 import sys
+import importlib
 
 def run_job(args):
-    job = Popen([args.script, str(args.tick), args.ip], stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=True)
-    while job.poll() is None:
-        line = job.stdout.readline().strip().split()
-        if len(line) == 0:
-            continue
-        if args.verbose:
-            sys.stderr.write(repr(line) + "\n")
-        if line[0] == "FLAG":
-            payload = None
-            if len(line) > 2:
-                payload = codecs.decode(line[2], 'hex')
+    checkermod, checkerclass = args.checker.split(":")
+    checkermod = importlib.import_module(checkermod)
+    checkerclass = getattr(checkermod, checkerclass)
 
-            generatedflag = flag.generate(args.team, args.service, payload, args.first + args.duration *  int(line[1]))
-            if args.verbose:
-                sys.stderr.write(generatedflag + "\n")
-            job.stdin.write(generatedflag)
-            job.stdin.write("\n")
-            job.stdin.flush()
+    checker = checkerclass(args.tick, args.team, args.service, args.ip)
+    checker.set_starttime(args.first)
+    checker.set_backend(args.backend)
+    result = checker.run()
 
-    result = job.returncode
     if 0 == result:
-        print("OK", repr(job.stderr.read()))
+        print("OK")
     elif 1 == result:
-        print("TIMEOUT", repr(job.stderr.read()))
+        print("TIMEOUT")
     elif 2 == result:
-        print("NOTWORKING", repr(job.stderr.read()))
+        print("NOTWORKING")
     elif 3 == result:
-        print("NOTFOUND", repr(job.stderr.read()))
+        print("NOTFOUND")
 
 def main():
     parser = argparse.ArgumentParser(description="CTF checker runner")
-    parser.add_argument('script', type=str,
-                        help="Checker script to run")
+    parser.add_argument('checker', type=str,
+                        help="module:classname of checker")
     parser.add_argument('--verbose', action="store_true")
     parser.add_argument('--ip', type=str, required=True)
     parser.add_argument('--tick', type=int, required=True)
     parser.add_argument('--team', type=int, required=True)
     parser.add_argument('--service', type=int, required=True)
-    parser.add_argument('--duration', type=int, default=120,
-                        help="tick duration in seconds")
     parser.add_argument('--first', type=int, default=int(time.time()) // 60 * 60,
                         help="timestamp of first tick")
+    parser.add_argument('--backend', type=str, default='/tmp',
+                        help='location to store persistent data')
     
     args = parser.parse_args()
     if args.verbose:
