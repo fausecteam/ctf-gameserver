@@ -17,15 +17,20 @@ import flag
 import codecs
 import sys
 import importlib
+import logging
 
 def run_job(args):
+    logging.debug("Importing checker")
     checkermod, checkerclass = args.checker.split(":")
     checkermod = importlib.import_module(checkermod)
     checkerclass = getattr(checkermod, checkerclass)
 
+    logging.debug("Initializing checker")
     checker = checkerclass(args.tick, args.team, args.service, args.ip)
     checker.set_starttime(args.first)
     checker.set_backend(args.backend)
+
+    logging.debug("Running checker")
     result = checker.run()
 
     if 0 == result:
@@ -38,6 +43,7 @@ def run_job(args):
         print("NOTFOUND")
 
 def main():
+    logging.basicConfig()
     parser = argparse.ArgumentParser(description="CTF checker runner")
     parser.add_argument('checker', type=str,
                         help="module:classname of checker")
@@ -50,13 +56,19 @@ def main():
                         help="timestamp of first tick")
     parser.add_argument('--backend', type=str, default='/tmp',
                         help='location to store persistent data')
-    
+    parser.add_argument('-v', '--loglevel', default='WARNING', type=str,
+                        choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+                        help='Loglevel')
+
     args = parser.parse_args()
-    if args.verbose:
-        sys.stderr.write(str(args) + "\n")
+
+    numeric_level = getattr(logging, args.loglevel.upper())
+    logging.getLogger().setLevel(numeric_level)
+
+    logging.debug(repr(args))
     starttime = time.time()
     run_job(args)
-    print("Processing took %.2f seconds" % (time.time() - starttime,))
+    logging.info("Processing took %.2f seconds" % (time.time() - starttime,))
 
 if __name__ == '__main__':
     main()
