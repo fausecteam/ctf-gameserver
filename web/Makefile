@@ -1,10 +1,16 @@
 SOURCE_DIR ?= ctf_gameserver/web
 EXT_DIR ?= $(SOURCE_DIR)/static/ext
 
-.PHONY: lint
+.PHONY: all db lint
 .INTERMEDIATE: bootstrap.zip
 
-dependencies: $(EXT_DIR)/jquery.min.js $(EXT_DIR)/bootstrap
+all: db $(EXT_DIR)/jquery.min.js $(EXT_DIR)/bootstrap
+
+
+# Cannot use `$(SOURCE_DIR)/dev-db.sqlite3` as target name since the database might be different from the
+# SQLite file
+db:
+	./manage.py migrate
 
 $(EXT_DIR)/jquery.min.js:
 	mkdir -p $(EXT_DIR)
