@@ -12,6 +12,7 @@
 
         <link rel="stylesheet" href="{% static 'ext/bootstrap/css/bootstrap.min.css' %}" />
         <link rel="stylesheet" href="{% static 'ext/bootstrap/css/bootstrap-theme.min.css' %}" />
+        <link rel="stylesheet" href="{% static 'style.css' %}" />
 
         <!-- Load the scripts asynchronously in the right order -->
         <script src="{% static 'ext/jquery.min.js' %}" defer="defer"></script>
@@ -80,7 +81,7 @@
             </div>
         </nav>
 
-        <div class="container">
+        <div id="page-content" class="container">
             {% if messages %}
             {% for message in messages %}
                 <div class="alert {{ message.tags }}" role="alert">{{ message }}</div>

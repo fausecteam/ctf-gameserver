@@ -1,0 +1,8 @@
+/*
+ * Style sheet for some custom styles which cannot be achieved with Bootstrap.
+ */
+
+
+#page-content {
+    margin-bottom: 60px;
+}
