@@ -138,3 +138,32 @@ class TeamForm(forms.ModelForm):
             team.save()
 
         return team
+
+
+class DeleteForm(forms.Form):
+    """
+    Simple form with one password field for confirmation when deleting a Team.
+    """
+
+    password = forms.CharField(widget=forms.PasswordInput)
+
+    def __init__(self, data=None, user=None, *args, **kwargs):
+        """
+        Custom initializer which takes the user account to be deleted as an additional argument.
+        """
+        super().__init__(data, *args, **kwargs)
+
+        # Have to set a default value in the method signature because 'data' should always be first
+        if user is None:
+            raise TypeError("'user' argument must not be None")
+
+        self.user = user
+
+    def clean_password(self):
+        """
+        Ensures that the entered password is valid for the specified user account.
+        """
+        if not self.user.check_password(self.cleaned_data['password']):
+            raise forms.ValidationError(_('Please enter the correct password!'))
+
+        return self.cleaned_data['password']

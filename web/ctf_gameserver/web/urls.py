@@ -32,6 +32,10 @@ urlpatterns = [
         registration_views.edit_team,
         name='edit_team'
     ),
+    url(r'^delete-team/$',
+        registration_views.delete_team,
+        name='delete_team'
+    ),
 
     url(r'^login/$',
         auth_views.login,

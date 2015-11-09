@@ -14,5 +14,44 @@
     {{ team_form|as_div }}
 
     <button type="submit" class="btn btn-primary">{% trans 'Save' %}</button>
+    <a href="{% url 'delete_team' %}" class="btn btn-danger pull-right">{% trans 'Delete team' %}</a>
 </form>
+
+
+{% if delete_form %}
+<div class="modal show" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">{% trans 'Delete team' %}</h2>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="modal-body">
+                    <p>
+                        {% blocktrans with user.username as username %}
+                        Do you really want to <strong>delete</strong> your team {{ username }}? There is
+                        <strong>no way</strong> to undo this!
+                        {% endblocktrans %}
+                    </p>
+                    <p>
+                        {% blocktrans %}
+                        Please enter your password for confirmation.
+                        {% endblocktrans %}
+                    </p>
+                    {{ delete_form|as_div }}
+                </div>
+
+                <div class="modal-footer">
+                    <a href="{% url 'edit_team' %}" class="btn btn-default">{% trans 'Abort' %}</a>
+                    <button type="submit" class="btn btn-danger">{% trans 'Delete' %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop fade in"></div>
+{% endif %}
 {% endblock %}

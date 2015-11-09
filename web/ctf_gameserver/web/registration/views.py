@@ -73,7 +73,48 @@ def edit_team(request):
         user_form = forms.UserForm(prefix='user', instance=request.user)
         team_form = forms.TeamForm(prefix='team', instance=team)
 
-    return render(request, 'edit_team.html', {'user_form': user_form, 'team_form': team_form})
+    return render(request, 'edit_team.html', {
+        'user_form': user_form,
+        'team_form': team_form,
+        'delete_form': None
+    })
+
+
+@login_required
+@transaction.atomic
+def delete_team(request):
+    """
+    View for deletion of a User and the associated Team.
+    This renders the 'edit_team' template with a modal overlay for deletion. The modal is rendered in static
+    HTML instead of showing it dynamically to avoid the need for (custom) JavaScript, espcially when handling
+    form errors in the the modal.
+    """
+
+    try:
+        team = request.user.team
+    except Team.DoesNotExist:
+        team = None
+
+    # These forms will only be visible in the background
+    user_form = forms.UserForm(prefix='user', instance=request.user)
+    team_form = forms.TeamForm(prefix='team', instance=team)
+
+    if request.method == 'POST':
+        delete_form = forms.DeleteForm(request.POST, prefix='delete', user=request.user)
+
+        if delete_form.is_valid():
+            request.user.delete()
+            logout(request)
+
+            return redirect(settings.HOME_URL)
+    else:
+        delete_form = forms.DeleteForm(prefix='delete', user=request.user)
+
+    return render(request, 'edit_team.html', {
+        'user_form': user_form,
+        'team_form': team_form,
+        'delete_form': delete_form
+    })
 
 
 @transaction.atomic
