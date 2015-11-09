@@ -11,7 +11,8 @@ class AbstractChecker(metaclass=ABCMeta):
     right thing in terms of backend depending on whether you test
     locally or the checker is run during the Contest. They must
     implement the place_flag and check_flag methods and may add
-    individual __init__ code
+    individual __init__ code. You may override the run method but need
+    to keep it morally the same
 
     ident used for store/retrieve are supposed to match
     [A-Za-z0-9_-]+. It must be uniq for every (service,target)
