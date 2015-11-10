@@ -65,7 +65,7 @@ class AbstractChecker(metaclass=ABCMeta):
 
         oldesttick = max(self._tick - self._lookback, -1)
         for tick in range(self._tick, oldesttick, -1):
-            logging.debug("Checking for flag of tick %d" % tick)
+            logging.debug("Checking for flag of tick %d", tick)
             result = self.check_flag(tick)
             if result != 0:
                 return result
