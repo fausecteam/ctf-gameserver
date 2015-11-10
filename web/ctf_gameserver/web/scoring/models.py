@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
 from ctf_gameserver.web.registration.models import Team
@@ -71,7 +72,8 @@ class GameControl(models.Model):
     Single-row database table to store control information for the competition.
     """
 
-    # Make start end and NULL-able (for the initial state), but not blank-able (have to be set upon editing)
+    # Start and end times for the whole competition: Make them NULL-able (for the initial state), but not
+    # blank-able (have to be set upon editing)
     start = models.DateTimeField(null=True)
     end = models.DateTimeField(null=True)
     paused = models.BooleanField(default=False)
@@ -105,3 +107,12 @@ class GameControl(models.Model):
             # pylint: disable=no-member
             raise ValidationError(_('Only a single instance of {cls} can be created')
                                   .format(cls=cls.__name__))
+
+    def competition_running(self):
+        """
+        Indicates whether the competition is currently active.
+        """
+        if self.start is None or self.end is None or self.paused:
+            return False
+
+        return self.start < timezone.now() < self.end
