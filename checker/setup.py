@@ -9,4 +9,5 @@ setup(name='Checker',
       author_email='Christoph.Egger@fau.de',
       url='http://faustctf.net/',
       packages=['checker'],
+      license='MIT',
      )
