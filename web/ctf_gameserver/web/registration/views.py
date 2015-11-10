@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.contrib.auth import logout, get_user_model, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 
+from ctf_gameserver.web.scoring.decorators import registration_open_required
 from . import forms
 from .models import Team
 from .util import email_token_generator
@@ -13,6 +14,7 @@ from .util import email_token_generator
 User = get_user_model()    # pylint: disable=invalid-name
 
 
+@registration_open_required
 @transaction.atomic
 def register(request):
 
@@ -39,6 +41,7 @@ def register(request):
 
 
 @login_required
+@registration_open_required
 @transaction.atomic
 def edit_team(request):
 
@@ -81,6 +84,7 @@ def edit_team(request):
 
 
 @login_required
+@registration_open_required
 @transaction.atomic
 def delete_team(request):
     """

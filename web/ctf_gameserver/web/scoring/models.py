@@ -76,6 +76,7 @@ class GameControl(models.Model):
     end = models.DateTimeField(null=True)
     paused = models.BooleanField(default=False)
     current_tick = models.PositiveSmallIntegerField(default=0, editable=False)
+    registration_open = models.BooleanField(default=True)
 
     class Meta:
         verbose_name_plural = 'Game control'
