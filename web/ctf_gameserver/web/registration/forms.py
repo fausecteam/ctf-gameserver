@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.contrib.sites.shortcuts import get_current_site
 
 from .models import Team
-from .util import email_token_generator
+from .util import email_token_generator, get_country_names
 
 
 class UserForm(forms.ModelForm):
@@ -115,6 +115,8 @@ class TeamForm(forms.ModelForm):
     conjunction with UserForm.
     """
 
+    country = forms.ChoiceField(choices=[(name, name) for name in get_country_names()])
+
     class Meta:
         model = Team
         fields = ['informal_email', 'image', 'country']
@@ -126,6 +128,13 @@ class TeamForm(forms.ModelForm):
                                 "receive all relevant information for participants."),
             'image': _('Your logo or similar.'),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Add 'empty' option to the country choices, see https://stackoverflow.com/a/16279536
+        # Editing the existing list in place doesn't work since choices are stored in the widget as well
+        self.fields['country'].choices = [('', '----------')] + self.fields['country'].choices
 
     def save(self, user, commit=True):   # pylint: disable=arguments-differ
         """

@@ -14,7 +14,6 @@ class Team(models.Model):
 
     informal_email = models.EmailField(_('Informal email address'))
     image = models.FileField(null=True, blank=True)
-    # TODO: Change this to a selection field
     country = models.CharField(max_length=100)
 
     class ActiveObjectsManager(models.Manager):

@@ -9,3 +9,4 @@ __pycache__/
 # Web component
 /web/ctf_gameserver/web/dev-db.sqlite3
 /web/ctf_gameserver/web/static/ext/
+/web/ctf_gameserver/web/registration/countrynames.txt

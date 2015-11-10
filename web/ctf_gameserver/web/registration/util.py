@@ -1,3 +1,7 @@
+import os
+import locale
+import csv
+
 from django.utils.http import int_to_base36
 from django.utils.crypto import salted_hmac
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
@@ -28,3 +32,24 @@ class EmailConfirmationTokenGenerator(PasswordResetTokenGenerator):
         return '%s-%s' % (ts_b36, hash)
 
 email_token_generator = EmailConfirmationTokenGenerator()    # pylint: disable=invalid-name
+
+
+def get_country_names():
+    """
+    Returns a list of (English) country names from the Open Geocode 'Country Codes to Country Names mapping'
+    list, which has to be available as a file called "countrynames.txt" in the same directory as this source
+    file.
+    """
+
+    def get_name(row):
+        # 'BGN English short name' (column 18) of the countrynames file looks like the most feasible
+        # property, use 'ISO 3166-1 English short name' (column 5) as a fallback
+        return row[18] if row[18] else row[5]
+
+    csv_file_name = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'countrynames.txt')
+
+    with open(csv_file_name, encoding='utf8') as csv_file:
+        csv_reader = csv.reader(filter(lambda row: not row.startswith('#'), csv_file), delimiter=';',
+                                skipinitialspace=True)
+
+        return sorted((get_name(row) for row in csv_reader), key=locale.strxfrm)

@@ -4,7 +4,7 @@ EXT_DIR ?= $(SOURCE_DIR)/static/ext
 .PHONY: all db lint
 .INTERMEDIATE: bootstrap.zip
 
-all: db $(EXT_DIR)/jquery.min.js $(EXT_DIR)/bootstrap
+all: db $(EXT_DIR)/jquery.min.js $(EXT_DIR)/bootstrap $(SOURCE_DIR)/registration/countrynames.txt
 
 
 # Cannot use `$(SOURCE_DIR)/dev-db.sqlite3` as target name since the database might be different from the
@@ -23,6 +23,9 @@ $(EXT_DIR)/bootstrap: bootstrap.zip
 	mkdir -p $(EXT_DIR)
 	unzip -n $< -d $(EXT_DIR)
 	mv -v $(EXT_DIR)/bootstrap-3.3.5-dist $(EXT_DIR)/bootstrap
+
+$(SOURCE_DIR)/registration/countrynames.txt:
+	curl http://www.opengeocode.org/download/countrynames.txt -o $@
 
 
 lint:
