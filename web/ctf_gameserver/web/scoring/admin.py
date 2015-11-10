@@ -25,5 +25,5 @@ class GameControlAdmin(admin.ModelAdmin):
         return False
 
     def changelist_view(self, extra_context=None):
-        game_control = models.GameControl.objects.get_or_create()[0]
+        game_control = models.GameControl.objects.get()
         return redirect('admin:scoring_gamecontrol_change', game_control.pk, permanent=True)

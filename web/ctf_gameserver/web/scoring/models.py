@@ -81,6 +81,19 @@ class GameControl(models.Model):
     class Meta:
         verbose_name_plural = 'Game control'
 
+    class GetOrCreateManager(models.Manager):
+        def get_queryset(self):
+            queryset = super().get_queryset()
+
+            if not queryset.exists():
+                game_control = queryset.model()
+                game_control.save()
+
+            return queryset
+
+    # Change default manager to create the single GameControl instance if it's not already present
+    objects = GetOrCreateManager()
+
     def clean(self):
         """
         Ensures that only one instance of the class gets created.
