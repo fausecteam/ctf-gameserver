@@ -26,12 +26,17 @@ class AbstractChecker(metaclass=ABCMeta):
 
     @abstractmethod
     def check_flag(self, tick):
-        "Check for the flag from tick on the tested team's server"
+        """Check for the flag from tick on the tested team's server
+
+        To be reimplemented by users
+        """
         pass
 
     @abstractmethod
     def place_flag(self):
-        "Place flag on the tested team's server"
+        """Place flag on the tested team's server
+
+        To be reimplemented by users"""
         pass
 
     @abstractmethod
@@ -41,6 +46,7 @@ class AbstractChecker(metaclass=ABCMeta):
 
     @abstractmethod
     def store_blob(self, ident, blob):
+        "store binary blob on persistent storage"
         pass
 
     @abstractmethod
@@ -50,6 +56,7 @@ class AbstractChecker(metaclass=ABCMeta):
 
     @abstractmethod
     def retrieve_blob(self, ident):
+        "return binary blob from persistent storage"
         pass
 
     @abstractmethod
