@@ -10,6 +10,7 @@ all: db $(EXT_DIR)/jquery.min.js $(EXT_DIR)/bootstrap $(SOURCE_DIR)/registration
 # Cannot use `$(SOURCE_DIR)/dev-db.sqlite3` as target name since the database might be different from the
 # SQLite file
 db:
+	./manage.py migrate auth
 	./manage.py migrate
 
 $(EXT_DIR)/jquery.min.js:
