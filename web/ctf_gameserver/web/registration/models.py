@@ -14,6 +14,7 @@ class Team(models.Model):
 
     informal_email = models.EmailField(_('Informal email address'))
     image = models.FileField(null=True, blank=True)
+    affiliation = models.CharField(max_length=100, blank=True)
     country = models.CharField(max_length=100)
 
     class ActiveObjectsManager(models.Manager):
