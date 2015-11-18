@@ -24,6 +24,11 @@ class AbstractChecker(metaclass=ABCMeta):
         self._tickduration = 300
         self._lookback = 5
 
+    @property
+    def tick(self):
+        """Returns the current tick"""
+        return self._tick
+
     @abstractmethod
     def check_flag(self, tick):
         """Check for the flag from tick on the tested team's server
