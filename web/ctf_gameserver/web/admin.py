@@ -64,13 +64,13 @@ class CTFUserAdmin(UserAdmin):
     user_has_team.boolean = True
     user_has_team.admin_order_field = 'team'
 
-    list_display = ('username', 'is_active', 'is_superuser', 'user_has_team')
-    list_filter = ('is_active', 'is_superuser', TeamListFilter)
+    list_display = ('username', 'is_active', 'is_staff', 'is_superuser', 'user_has_team')
+    list_filter = ('is_active', 'is_staff', 'is_superuser', TeamListFilter)
     search_fields = ('username', 'email', 'team__informal_email', 'team__country')
 
     fieldsets = (
         (None, {'fields': ('username', 'password', 'email')}),
-        (_('Permissions'), {'fields': ('is_active', 'is_superuser')}),
+        (_('Permissions'), {'fields': ('is_active', 'is_staff', 'is_superuser')}),
         (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
     )
     inlines = [InlineTeamAdmin]
