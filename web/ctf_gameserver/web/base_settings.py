@@ -51,6 +51,7 @@ TEMPLATES = [{
             'django.contrib.messages.context_processors.messages',
             'django.template.context_processors.i18n',
             'django.template.context_processors.static',
+            'django.template.context_processors.media',
             'ctf_gameserver.web.context_processors.competition_name',
             'ctf_gameserver.web.context_processors.registration_open',
             'ctf_gameserver.web.context_processors.flatpage_nav'
@@ -64,6 +65,7 @@ ROOT_URLCONF = 'ctf_gameserver.web.urls'
 WSGI_APPLICATION = 'ctf_gameserver.web.wsgi.application'
 
 STATIC_URL = '/static/'
+MEDIA_URL = '/uploads/'
 LOGIN_URL = '/login/'
 LOGOUT_URL = '/logout/'
 LOGIN_REDIRECT_URL = HOME_URL

@@ -1,6 +1,19 @@
+from os.path import splitext
+
 from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
+
+
+def _gen_image_name(instance, filename):
+    """
+    Returns the upload path (relative to settings.MEDIA_ROOT) for the specified Team's image.
+    """
+
+    extension = splitext(filename)[1]
+
+    # Must "return a Unix-style path (with forward slashes)"
+    return 'team-images' + '/' + instance.user.username + extension
 
 
 class Team(models.Model):
@@ -13,7 +26,7 @@ class Team(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, primary_key=True)
 
     informal_email = models.EmailField(_('Informal email address'))
-    image = models.FileField(null=True, blank=True)
+    image = models.ImageField(upload_to=_gen_image_name, blank=True)
     affiliation = models.CharField(max_length=100, blank=True)
     country = models.CharField(max_length=100)
 

@@ -42,6 +42,11 @@ EMAIL_USE_SSL = False
 # Sender address for messages sent by the gameserver
 DEFAULT_FROM_EMAIL = ''
 
+# Filesystem path where user-uploaded files are stored
+# This directory must be served by the web server under the path defined by MEDIA_URL in 'base_settings.py'
+# ("/uploads" by default)
+MEDIA_ROOT = ''
+
 # A long, random string, which you are supposed to keep secret
 SECRET_KEY = ''
 

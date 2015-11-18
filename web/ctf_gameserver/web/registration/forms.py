@@ -9,6 +9,8 @@ from django.contrib.sites.shortcuts import get_current_site
 from .models import Team
 from .util import email_token_generator, get_country_names
 
+FIVE_MB = 5 * 1024**2
+
 
 class UserForm(forms.ModelForm):
     """
@@ -137,6 +139,12 @@ class TeamForm(forms.ModelForm):
         # Add 'empty' option to the country choices, see https://stackoverflow.com/a/16279536
         # Editing the existing list in place doesn't work since choices are stored in the widget as well
         self.fields['country'].choices = [('', '----------')] + self.fields['country'].choices
+
+    def clean_image(self):
+        if self.cleaned_data['image'] and self.cleaned_data['image'].size > FIVE_MB:
+            raise forms.ValidationError(_('The file must not be larger than 5 MB!'))
+
+        return self.cleaned_data['image']
 
     def save(self, user, commit=True):   # pylint: disable=arguments-differ
         """

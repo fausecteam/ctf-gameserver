@@ -20,7 +20,7 @@ def register(request):
 
     if request.method == 'POST':
         user_form = forms.UserForm(request.POST, prefix='user')
-        team_form = forms.TeamForm(request.POST, prefix='team')
+        team_form = forms.TeamForm(request.POST, request.FILES, prefix='team')
 
         # pylint: disable=no-member
         if user_form.is_valid() and team_form.is_valid():
@@ -52,7 +52,7 @@ def edit_team(request):
 
     if request.method == 'POST':
         user_form = forms.UserForm(request.POST, prefix='user', instance=request.user)
-        team_form = forms.TeamForm(request.POST, prefix='team', instance=team)
+        team_form = forms.TeamForm(request.POST, request.FILES, prefix='team', instance=team)
 
         # pylint: disable=no-member
         if user_form.is_valid() and team_form.is_valid():

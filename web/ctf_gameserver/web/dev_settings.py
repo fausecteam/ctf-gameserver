@@ -21,6 +21,8 @@ DATABASES = {
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = 'ctf-gameserver.web@localhost'
 
+MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
+
 SECRET_KEY = 'OnlySuitableForDevelopment'
 
 TIME_ZONE = 'UTC'

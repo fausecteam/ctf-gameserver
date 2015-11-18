@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.conf.urls import include, url
+from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 
 from .registration import views as registration_views
@@ -86,3 +87,6 @@ urlpatterns = [
         name='category_flatpage'
     )
 ]
+
+# This will only have an effect during development
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
