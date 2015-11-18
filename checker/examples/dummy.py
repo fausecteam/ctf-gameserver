@@ -8,3 +8,6 @@ class DummyChecker(BaseChecker):
 
     def check_flag(self, tick):
         return OK
+
+    def check_service(self):
+        return OK

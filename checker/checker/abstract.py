@@ -30,6 +30,11 @@ class AbstractChecker(metaclass=ABCMeta):
         return self._tick
 
     @abstractmethod
+    def check_service(self):
+        """ Check if the service is running as expected"""
+        pass
+
+    @abstractmethod
     def check_flag(self, tick):
         """Check for the flag from tick on the tested team's server
 
@@ -72,6 +77,11 @@ class AbstractChecker(metaclass=ABCMeta):
     def run(self):
         logging.debug("Placing flag")
         result = self.place_flag()
+        if result != 0:
+            return result
+
+        logging.debug("Check service availability")
+        result = self.check_service()
         if result != 0:
             return result
 
