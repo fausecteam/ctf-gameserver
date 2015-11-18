@@ -14,6 +14,8 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 HOME_URL = reverse_lazy('home_flatpage')
+THUMBNAIL_SIZE = (100, 100)
+
 
 INSTALLED_APPS = (
     'django.contrib.contenttypes',
