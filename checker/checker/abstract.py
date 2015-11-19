@@ -50,18 +50,8 @@ class AbstractChecker(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def store_yaml(self, ident, yaml):
-        "yaml needs to be a object that can be dumped by yaml.dump"
-        pass
-
-    @abstractmethod
     def store_blob(self, ident, blob):
         "store binary blob on persistent storage"
-        pass
-
-    @abstractmethod
-    def retrieve_yaml(self, ident):
-        "returns object as deserialized by yaml.load"
         pass
 
     @abstractmethod
