@@ -6,6 +6,7 @@ import struct
 import Keccak
 import base64
 import codecs
+import binascii
 import zlib
 
 # length of the MAC (in bits)
