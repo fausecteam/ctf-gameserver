@@ -1,0 +1,50 @@
+#!/usr/bin/python3
+
+import logging
+import argparse
+import importlib
+import sys
+
+def run(args):
+    logging.debug("Importing checker")
+    checkermod, checkerclass = args.checker.split(":")
+    checkermod = importlib.import_module(checkermod)
+    checkerclass = getattr(checkermod, checkerclass)
+
+    logging.debug("Initializing checker")
+    checker = checkerclass(args.tick, args.team, args.service, args.ip)
+    result = checker.run()
+
+    if 0 == result:
+        print("OK")
+    elif 1 == result:
+        print("TIMEOUT")
+    elif 2 == result:
+        print("NOTWORKING")
+    elif 3 == result:
+        print("NOTFOUND")
+    sys.stdout.flush()
+
+
+def main():
+    logging.basicConfig()
+    parser = argparse.ArgumentParser(description="CTF checker runner")
+    parser.add_argument('checker', type=str,
+                        help="module:classname of checker")
+    parser.add_argument('--service', type=int, required=True)
+    parser.add_argument('--ip', type=str, required=True)
+    parser.add_argument('--tick', type=int, required=True)
+    parser.add_argument('--team', type=int, required=True)
+    parser.add_argument('-v', '--loglevel', default='WARNING', type=str,
+                        choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+                        help='Loglevel')
+
+    args = parser.parse_args()
+
+    numeric_level = getattr(logging, args.loglevel.upper())
+    logging.getLogger().setLevel(numeric_level)
+
+    run(args)
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,83 @@
+#!/usr/bin/python3
+
+import logging
+import argparse
+import asyncio
+import asyncio.subprocess
+
+@asyncio.coroutine
+def run_checker(service, team, tick, checker, loglevel):
+    create = asyncio.create_subprocess_exec("./checkerslave",
+                                            "--service", str(service),
+                                            "--team", str(team),
+                                            "--tick", str(tick),
+                                            "--loglevel", loglevel,
+                                            "--ip", "10.66.%d.2" % team,
+                                            checker,
+                                            stdout=asyncio.subprocess.PIPE,
+                                            stderr=asyncio.subprocess.PIPE,
+                                            stdin=asyncio.subprocess.PIPE)
+
+    process = yield from create
+    while True:
+        line = yield from process.stdout.readline()
+        if process.returncode is not None:
+            print(repr(process.returncode))
+
+        if line == b'':
+            err = yield from process.stderr.read()
+            print(err.decode("utf-8"))
+            return
+
+        logging.debug(repr(line))
+        line = line.decode('us-ascii').split()
+
+        if "FLAG" == line[0]:
+            pass
+        elif "STORE" == line[0]:
+            pass
+        elif "RETRIEVE" == line[0]:
+            pass
+        elif line[0] in ["OK", "TIMEOUT", "NOTWORKING", "NOTFOUND"]:
+            job_finished(line[0])
+            break
+
+    yield from process.wait()
+    print("DONE (%d,%d,%d)" % (service, team, tick))
+
+
+def get_fresh_jobs(args):
+    loop = asyncio.get_event_loop()
+    loop.call_later(args.refresh, get_fresh_jobs, args)
+    for i in range(0, 2):
+        loop.create_task(run_checker(args.service, i, 12, args.checker, args.loglevel))
+
+
+def job_finished(state):
+    print(state)
+
+
+def main():
+    logging.basicConfig()
+    parser = argparse.ArgumentParser(description="CTF checker runner")
+    parser.add_argument('checker', type=str,
+                        help="module:classname of checker")
+    parser.add_argument('--verbose', action="store_true")
+    parser.add_argument('--service', type=int, required=True)
+    parser.add_argument('--refresh', type=float, required=True,
+                        help="Duration to sleep before rechecking for new tasks")
+    parser.add_argument('-v', '--loglevel', default='WARNING', type=str,
+                        choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+                        help='Loglevel')
+
+    args = parser.parse_args()
+
+    numeric_level = getattr(logging, args.loglevel.upper())
+    logging.getLogger().setLevel(numeric_level)
+
+    loop = asyncio.get_event_loop()
+    loop.call_soon(get_fresh_jobs, args)
+    loop.run_forever()
+
+if __name__ == '__main__':
+    main()
