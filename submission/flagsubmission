@@ -125,12 +125,12 @@ def main():
 
     logging.debug("Starting asyncore")
     server = FlagServer(args.listen, args.port, dbconnection)
-    asyncore.loop()
     try:
         import systemd
         systemd.daemon.notify("READY=1")
     except ImportError:
         pass
+    asyncore.loop()
 
 if __name__ == '__main__':
     main()
