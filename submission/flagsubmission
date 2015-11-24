@@ -6,10 +6,26 @@ import socket
 import argparse
 import logging
 
+import psycopg2
+
 import flag
 
 class FlagHandler(asynchat.async_chat):
-    def handle_flag(self):
+    def __init__(self, sock, addr, dbconnection):
+        asynchat.async_chat.__init__(self, sock=sock)
+        ip, _ = addr
+        self.team = ip.split('.')[2]
+        self._addr = addr
+        self.set_terminator(b"\n")
+        self._logger = logging.getLogger(str(addr[0]))
+        self._cursor = None
+        self._dbconnection = dbconnection
+        self.buffer = b''
+        self._logger.info("Accepted connection from Team %s", self.team)
+        self._banner()
+
+
+    def _handle_flag(self):
         if self.buffer == b'':
             self.push(b"418 I'm a teapot!\n")
             return
@@ -27,7 +43,7 @@ class FlagHandler(asynchat.async_chat):
             self.push(b"Flag not recognized\n")
             return
         except flag.InvalidFlagMAC:
-            self.push(b"Not a valid Flag\n")
+            self.push(b"Not such Flag\n")
             return
         except flag.FlagExpired as e:
             self.push((u"Flag expired since %.1f seconds\n" % e.args).encode('utf-8'))
@@ -37,39 +53,54 @@ class FlagHandler(asynchat.async_chat):
             self.push(b"Can't submit a flag for your own team\n")
             return
 
+        self._store_capture(team, service, timestamp)
         self.push(u"Thank you for your submission!\n".encode('utf-8'))
 
 
-    def __init__(self, sock, addr):
-        asynchat.async_chat.__init__(self, sock=sock)
-        self.team = -1
-        self.addr = addr
-        self.set_terminator(b"\n")
-        self.logger = logging.getLogger(str(addr[0]))
-        self.buffer = b''
+    def _store_capture(self, team, service, timestamp):
+        if not self._cursor:
+            self._cursor = self._dbconnection.cursor()
+
+        self._cursor.execute("""INSERT INTO scoring_capture
+                                       (flag_id, capturing_team_id, timestamp)
+                                  VALUES (
+                                     (SELECT id FROM scoring_flag
+                                      WHERE service_id = %s
+                                        AND protecting_team_id = %s
+                                        AND protection_time = timestamp)
+                                     %s
+                                     now())""", (service, team, self.team))
+        self._cursor.commit()
+
+    def _banner(self):
         self.push(u"FAUSTCTF Flagserver\n".encode('utf-8'))
         self.push(u"One flag per line please!\n".encode('utf-8'))
+
 
     def collect_incoming_data(self, data):
         self.buffer = self.buffer + data
 
+
     def found_terminator(self):
-        self.logger.debug(repr(self.buffer))
-        self.handle_flag()
+        self._logger.debug(repr(self.buffer))
+        self._handle_flag()
         self.buffer = b''
 
+
+
 class FlagServer(asyncore.dispatcher):
-    def __init__(self, host, port):
+    def __init__(self, host, port, dbconnection):
         asyncore.dispatcher.__init__(self)
-        self.create_socket(family=socket.AF_INET6)
+        self.create_socket(family=socket.AF_INET)
         self.set_reuse_addr()
         self.bind((host, port))
         self.listen(5)
-        self.logger = logging.getLogger("server")
+        self._logger = logging.getLogger("server")
+        self._dbconnection = dbconnection
 
     def handle_accepted(self, sock, addr):
-        self.logger.info('Incoming connection from %s', repr(addr))
-        handler = FlagHandler(sock, addr)
+        self._logger.info('Incoming connection from %s', repr(addr))
+        handler = FlagHandler(sock, addr, self._dbconnection)
 
 def main():
     logging.basicConfig(format='%(asctime)s %(levelname)s(%(name)s): %(message)s',
@@ -83,13 +114,17 @@ def main():
                         help='address or hostname to listen on')
     parser.add_argument('-p', '--port', type=int, default="6666",
                         help="Port to listen on")
+    parser.add_argument('--db', type=str, default="dbname=faustctf user=submission")
     args = parser.parse_args()
 
     numeric_level = getattr(logging, args.loglevel.upper())
     logging.getLogger().setLevel(numeric_level)
 
+    logging.debug("connecting to database")
+    dbconnection = psycopg2.connect(args.db)
+
     logging.debug("Starting asyncore")
-    server = FlagServer(args.listen, args.port)
+    server = FlagServer(args.listen, args.port, dbconnection)
     asyncore.loop()
     try:
         import systemd
