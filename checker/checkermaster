@@ -49,7 +49,13 @@ def run_checker(service, team, tick, checker, loglevel):
 def get_fresh_jobs(args):
     loop = asyncio.get_event_loop()
     loop.call_later(args.refresh, get_fresh_jobs, args)
-    for i in range(0, 2):
+
+    current_tasks = len(asyncio.Task.all_tasks(loop))
+    new_tasks = args.maxtasks - current_tasks
+    logging.info("Currently running %d tasks, starting up to %d fresh ones",
+                 current_tasks, new_tasks)
+
+    for i in range(0, new_tasks):
         loop.create_task(run_checker(args.service, i, 12, args.checker, args.loglevel))
 
 
@@ -64,6 +70,7 @@ def main():
                         help="module:classname of checker")
     parser.add_argument('--verbose', action="store_true")
     parser.add_argument('--service', type=int, required=True)
+    parser.add_argument('--maxtasks', type=int, required=True)
     parser.add_argument('--refresh', type=float, required=True,
                         help="Duration to sleep before rechecking for new tasks")
     parser.add_argument('--db', type=str, default="dbname=faustctf user=submission")
