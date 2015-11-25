@@ -66,6 +66,7 @@ def main():
     parser.add_argument('--service', type=int, required=True)
     parser.add_argument('--refresh', type=float, required=True,
                         help="Duration to sleep before rechecking for new tasks")
+    parser.add_argument('--db', type=str, default="dbname=faustctf user=submission")
     parser.add_argument('-v', '--loglevel', default='WARNING', type=str,
                         choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
                         help='Loglevel')
@@ -74,6 +75,9 @@ def main():
 
     numeric_level = getattr(logging, args.loglevel.upper())
     logging.getLogger().setLevel(numeric_level)
+
+    logging.debug("connecting to database")
+    dbconnection = psycopg2.connect(args.db)
 
     loop = asyncio.get_event_loop()
     loop.call_soon(get_fresh_jobs, args)
