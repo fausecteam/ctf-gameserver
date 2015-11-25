@@ -24,7 +24,8 @@ class Flag(models.Model):
     protecting_team = models.ForeignKey(Team)
     tick = models.PositiveSmallIntegerField()
     # NULL means the flag has been generated, but not yet placed
-    placement_time = models.DateTimeField(null=True, blank=True, default=None)
+    placement_start = models.DateTimeField(null=True, blank=True, default=None)
+    placement_end = models.DateTimeField(null=True, blank=True, default=None)
 
     class Meta:
         unique_together = ('service', 'protecting_team', 'tick')
@@ -53,8 +54,9 @@ class StatusCheck(models.Model):
     # For a discussion on the plural form of "status", refer to https://english.stackexchange.com/q/877
     STATUSES = {
         _('up'): 0,
-        _('faulty'): 1,
-        _('down'): 2
+        _('down'): 1,
+        _('faulty'): 2,
+        _('flag not found'): 3
     }
 
     service = models.ForeignKey(Service)
@@ -77,6 +79,10 @@ class GameControl(models.Model):
     start = models.DateTimeField(null=True)
     end = models.DateTimeField(null=True)
     paused = models.BooleanField(default=False)
+    # Tick duration in seconds
+    tick_duration = models.PositiveSmallIntegerField(default=180)
+    # Number of ticks a flag is valid for
+    valid_ticks = models.PositiveSmallIntegerField(default=5)
     current_tick = models.PositiveSmallIntegerField(default=0, editable=False)
     registration_open = models.BooleanField(default=True)
 

@@ -2,7 +2,7 @@ from django.shortcuts import redirect
 from django.contrib import admin
 
 from ctf_gameserver.web.admin import admin_site
-from . import models
+from . import models, forms
 
 
 admin_site.register(models.Flag)
@@ -17,6 +17,8 @@ class GameControlAdmin(admin.ModelAdmin):
     Admin object for the single GameControl object. Since at most one instance exists at any time, 'Add' and
     'Delete links' are hidden and a request for the object list will directly redirect to the instance.
     """
+
+    form = forms.GameControlAdminForm
 
     def has_add_permission(self, request):
         return False
