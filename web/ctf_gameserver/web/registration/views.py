@@ -71,6 +71,10 @@ def edit_team(request):
                                             'adress. Please visit the link inside that email. Until then, '
                                             'your team has been deactivated and you have been logged out.'))
                 return redirect(settings.HOME_URL)
+
+            # Work around the fact that FileField/ImageField will not automatically update to its new (bound)
+            # state
+            team_form = forms.TeamForm(prefix='team', instance=team)
     else:
         user_form = forms.UserForm(prefix='user', instance=request.user)
         team_form = forms.TeamForm(prefix='team', instance=team)
