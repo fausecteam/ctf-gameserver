@@ -38,6 +38,9 @@ class Capture(models.Model):
 
     flag = models.ForeignKey(Flag)
     capturing_team = models.ForeignKey(Team)
+    # Number of times the flag has been attempted to submit after the intial capture, to punish repeated
+    # submission
+    count = models.PositiveSmallIntegerField()
     timestamp = models.DateTimeField(auto_now_add=True)
 
     class Meta:
