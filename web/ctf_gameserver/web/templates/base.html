@@ -33,7 +33,10 @@
                         <span class="icon-bar"></span>
                     </button>
 
-                    <a class="navbar-brand" href="{{ HOME_URL }}">{{ COMPETITION_NAME }}</a>
+                    <a class="navbar-brand" href="{{ HOME_URL }}">
+                        <!--- PNG scales much better than SVG in browsers -->
+                        <img src="{% static 'faustctf.png' %}" alt="FAUST CTF" />
+                    </a>
                 </div>
 
                 <div class="collapse navbar-collapse" id="main-menu">

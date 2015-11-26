@@ -6,3 +6,7 @@
 #page-content {
     margin-bottom: 60px;
 }
+
+.navbar-brand img {
+    height: 100%;
+}
