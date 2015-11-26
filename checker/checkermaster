@@ -6,11 +6,57 @@ import asyncio
 import asyncio.subprocess
 import psycopg2
 import base64
-import flag
+import datetime
 
+import flag
 from checker import string_to_result
 
+MAXRUNTIME = datetime.timedelta(minutes = 1)
+conteststart = None
+flagvalidity = None
+tickduration = None
 open_tasks = dict()
+
+def do_store(line, dbconnection, service, team):
+    with dbconnection:
+        with dbconnection.cursor() as cursor:
+            ident = line[1]
+            data = psycopg2.Binary(base64.b64decode(line[2]))
+
+            cursor.execute("""INSERT INTO checkercache
+                                 (service_id,team_id,identifier,data)
+                              VALUES
+                                 (%s, %s, %s, %s)""",
+                           (service, team, ident, data))
+
+
+def do_retrieve(line, dbconnection, service, team):
+    with dbconnection:
+        with dbconnection.cursor() as cursor:
+            ident = line[1]
+            cursor.execute("""SELECT data FROM checkercache
+                              WHERE team_id = %s
+                                AND service_id = %s
+                                AND identifier = %s""",
+                           (team, service, ident))
+            data = cursor.fetchone()
+    if data != None:
+        data, = data
+        data = base64.b64encode(data)
+        return data
+    return b""
+
+
+def do_flag(line, service, team):
+    tick = int(line[1])
+    timestamp = conteststart.timestamp() + (flagvalidity + tick) * tickduration
+    payload = None
+    if len(line) > 2:
+        payload = codecs.decode(line[2], 'hex')
+    newflag = flag.generate(team=team, service=service, payload=payload,
+                            timestamp=timestamp)
+    return newflag
+
 
 @asyncio.coroutine
 def run_checker(service, team, tick, checker, loglevel, dbconnection):
@@ -43,48 +89,22 @@ def run_checker(service, team, tick, checker, loglevel, dbconnection):
         line = line.decode('us-ascii').split()
 
         if "FLAG" == line[0]:
-            tick = int(line[1])
-            payload = None
-            if len(line) > 2:
-                payload = codecs.decode(line[2], 'hex')
-            newflag = flag.generate(team=team, service=service, payload=payload)
+            newflag = do_flag(line, service, team)
             process.stdin.write(newflag.encode('us-ascii'))
             process.stdin.write(b"\n")
 
         elif "STORE" == line[0]:
             try:
-                with dbconnection:
-                    with dbconnection.cursor() as cursor:
-                        ident = line[1]
-                        data = psycopg2.Binary(base64.b64decode(line[2]))
-
-                        cursor.execute("""INSERT INTO checkercache
-                                             (service_id,team_id,identifier,data)
-                                          VALUES
-                                             (%s, %s, %s, %s) """,
-                                       (service, team, ident, data))
-
-                        process.stdin.write(b"OK\n")
+                do_store(line, dbconnection, service, team)
+                process.stdin.write(b"OK\n")
             except Exception as e:
                 process.stdin.write(b"FAIL\n")
                 logger.warn("Database store failed with %s", repr(e))
 
         elif "RETRIEVE" == line[0]:
             try:
-                with dbconnection:
-                    with dbconnection.cursor() as cursor:
-                        ident = line[1]
-                        cursor.execute("""SELECT data FROM checkercache
-                                          WHERE team_id = %s
-                                            AND service_id = %s
-                                            AND identifier = %s""",
-                                       (team, service, ident))
-                        data = cursor.fetchone()
-                        if data != None:
-                            data, = data
-                            data = base64.b64encode(data)
-                            process.stdin.write(data)
-                        process.stdin.write(b"\n")
+                data = do_retrieve(line, dbconnection, service, team)
+                process.stdin.write(data + b"\n")
 
             except Exception as e:
                 process.stdin.write(b"\n")
@@ -106,10 +126,10 @@ def get_fresh_jobs(args, gamedb, cachedb):
 
     tasks = list(open_tasks.keys())
     for task in tasks:
+        service, team, tick, starttime = open_tasks[task]
         if task.done():
             try:
                 result = string_to_result(task.result())
-                service, team, tick = open_tasks[task]
                 with gamedb:
                     with gamedb.cursor() as cursor:
                         cursor.execute("""INSERT INTO scoring_statuscheck
@@ -120,6 +140,11 @@ def get_fresh_jobs(args, gamedb, cachedb):
                         del open_tasks[task]
             except Exception as e:
                 print(repr(e))
+        elif starttime + MAXRUNTIME < datetime.datetime.now():
+            logging.warn("aborting job(service=%d, team=%d, tick=%d) due to timeout",
+                         service, team, tick)
+            if task.cancel():
+                del open_tasks[task]
 
     current_tasks = len(open_tasks)
     new_tasks = args.maxtasks - current_tasks
@@ -147,13 +172,11 @@ def get_fresh_jobs(args, gamedb, cachedb):
         for _, team, tick in jobs:
             task = loop.create_task(run_checker(args.service, team, tick, args.checker,
                                                 args.loglevel, cachedb))
-            open_tasks[task] = args.service, team, tick
+            open_tasks[task] = args.service, team, tick, datetime.datetime.now()
+        logging.info("started %d (of %d possible) new jobs", len(jobs), new_tasks)
 
     except Exception as e:
         print(repr(e))
-
-def job_finished(state):
-    print(state)
 
 
 def main():
@@ -182,6 +205,13 @@ def main():
     logging.debug("connecting to database")
     cachedb = psycopg2.connect(args.cachedb)
     gamedb = psycopg2.connect(args.cachedb)
+
+    with gamedb:
+        with gamedb.cursor() as cursor:
+            global conteststart, flagvalidity, tickduration
+            cursor.execute("""SELECT start, valid_ticks, tick_duration
+                              FROM scoring_gamecontrol""")
+            conteststart, flagvalidity, tickduration = cursor.fetchone()
 
     loop = asyncio.get_event_loop()
     loop.call_soon(get_fresh_jobs, args, gamedb, cachedb)

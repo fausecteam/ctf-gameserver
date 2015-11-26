@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from django.contrib.sites.shortcuts import get_current_site
 
 from .models import Team
+from .fields import ClearableThumbnailImageInput
 from .util import email_token_generator, get_country_names
 
 FIVE_MB = 5 * 1024**2
@@ -29,13 +30,13 @@ class UserForm(forms.ModelForm):
             'username': _('Name'),
             'email': _('Formal email')
         }
+        widgets = {
+            'password': forms.PasswordInput
+        }
         help_texts = {
             'username': None,
             'email': _('Your authorative contact address. It will be used sensitive requests, such as '
                        'password resets or prize pay-outs.')
-        }
-        widgets = {
-            'password': forms.PasswordInput
         }
 
     def __init__(self, *args, **kwargs):
@@ -124,6 +125,9 @@ class TeamForm(forms.ModelForm):
         fields = ['informal_email', 'image', 'affiliation', 'country']
         labels = {
             'informal_email': _('Informal email')
+        }
+        widgets = {
+            'image': ClearableThumbnailImageInput
         }
         help_texts = {
             'informal_email': _("A less authorative contact address, e.g. your team's mailing list (may "

@@ -3,7 +3,8 @@ import os
 from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
-from PIL import Image
+
+from .fields import ThumbnailImageField
 
 
 def _gen_image_name(instance, filename):
@@ -27,7 +28,7 @@ class Team(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, primary_key=True)
 
     informal_email = models.EmailField(_('Informal email address'))
-    image = models.ImageField(upload_to=_gen_image_name, blank=True)
+    image = ThumbnailImageField(upload_to=_gen_image_name, blank=True)
     affiliation = models.CharField(max_length=100, blank=True)
     country = models.CharField(max_length=100)
 
@@ -41,18 +42,3 @@ class Team(models.Model):
 
     def __str__(self):
         return self.user.username
-
-    def save(self, *args, **kwargs):
-        """
-        Custom save() variant which creates and saves a thumbnail image if the Team has an image set.
-        """
-        super().save(*args, **kwargs)
-
-        if self.image:
-            thumbnail_name = '{}_{:d}x{:d}.png'.format(os.path.splitext(self.image.name)[0],
-                                                       *settings.THUMBNAIL_SIZE)
-            thumbnail_name = os.path.join(settings.MEDIA_ROOT, thumbnail_name)
-
-            image = Image.open(self.image.file)
-            image.thumbnail(settings.THUMBNAIL_SIZE)
-            image.save(thumbnail_name)
