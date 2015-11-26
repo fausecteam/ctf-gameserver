@@ -8,6 +8,10 @@ import psycopg2
 import base64
 import flag
 
+from checker import string_to_result
+
+open_tasks = dict()
+
 @asyncio.coroutine
 def run_checker(service, team, tick, checker, loglevel, dbconnection):
     logger = logging.getLogger("service%02d-team%03d-tick%03d" % (service, team, tick))
@@ -99,7 +103,25 @@ def get_fresh_jobs(args, gamedb, cachedb):
     loop = asyncio.get_event_loop()
     loop.call_later(args.refresh, get_fresh_jobs, args, gamedb, cachedb)
 
-    current_tasks = len(asyncio.Task.all_tasks(loop))
+
+    tasks = list(open_tasks.keys())
+    for task in tasks:
+        if task.done():
+            try:
+                result = string_to_result(task.result())
+                service, team, tick = open_tasks[task]
+                with gamedb:
+                    with gamedb.cursor() as cursor:
+                        cursor.execute("""INSERT INTO scoring_statuscheck
+                                             (service_id, team_id, tick, status, timestamp)
+                                          VALUES
+                                             (%s, %s, %s, %s, now())""",
+                                       (service, team, tick, result))
+                        del open_tasks[task]
+            except Exception as e:
+                print(repr(e))
+
+    current_tasks = len(open_tasks)
     new_tasks = args.maxtasks - current_tasks
     logging.info("Currently running %d tasks, starting up to %d fresh ones",
                  current_tasks, new_tasks)
@@ -123,8 +145,10 @@ def get_fresh_jobs(args, gamedb, cachedb):
                                    [ (job[0],) for job in jobs ])
 
         for _, team, tick in jobs:
-            loop.create_task(run_checker(args.service, team, tick, args.checker,
-                                         args.loglevel, cachedb))
+            task = loop.create_task(run_checker(args.service, team, tick, args.checker,
+                                                args.loglevel, cachedb))
+            open_tasks[task] = args.service, team, tick
+
     except Exception as e:
         print(repr(e))
 
