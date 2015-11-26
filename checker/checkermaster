@@ -12,6 +12,9 @@ import flag
 from checker import string_to_result
 
 MAXRUNTIME = datetime.timedelta(minutes = 1)
+conteststart = None
+flagvalidity = None
+tickduration = None
 open_tasks = dict()
 
 @asyncio.coroutine
@@ -46,10 +49,12 @@ def run_checker(service, team, tick, checker, loglevel, dbconnection):
 
         if "FLAG" == line[0]:
             tick = int(line[1])
+            timestamp = conteststart.timestamp() + (flagvalidity + tick) * tickduration
             payload = None
             if len(line) > 2:
                 payload = codecs.decode(line[2], 'hex')
-            newflag = flag.generate(team=team, service=service, payload=payload)
+            newflag = flag.generate(team=team, service=service, payload=payload,
+                                    timestamp=timestamp)
             process.stdin.write(newflag.encode('us-ascii'))
             process.stdin.write(b"\n")
 
@@ -187,6 +192,13 @@ def main():
     logging.debug("connecting to database")
     cachedb = psycopg2.connect(args.cachedb)
     gamedb = psycopg2.connect(args.cachedb)
+
+    with gamedb:
+        with gamedb.cursor() as cursor:
+            global conteststart, flagvalidity, tickduration
+            cursor.execute("""SELECT start, valid_ticks, tick_duration
+                              FROM scoring_gamecontrol""")
+            conteststart, flagvalidity, tickduration = cursor.fetchone()
 
     loop = asyncio.get_event_loop()
     loop.call_soon(get_fresh_jobs, args, gamedb, cachedb)
