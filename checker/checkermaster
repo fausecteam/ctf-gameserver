@@ -11,6 +11,8 @@ import flag
 @asyncio.coroutine
 def run_checker(service, team, tick, checker, loglevel, dbconnection):
     logger = logging.getLogger("service%02d-team%03d-tick%03d" % (service, team, tick))
+    logger.info("running checker")
+    result = None
     create = asyncio.create_subprocess_exec("./checkerslave",
                                             "--service", str(service),
                                             "--team", str(team),
@@ -85,11 +87,12 @@ def run_checker(service, team, tick, checker, loglevel, dbconnection):
                 logger.warn("Database get failed with %s", repr(e))
 
         elif line[0] in ["OK", "TIMEOUT", "NOTWORKING", "NOTFOUND"]:
-            job_finished(line[0])
+            result = line[0]
             break
 
     yield from process.wait()
-    print("DONE (%d,%d,%d)" % (service, team, tick))
+    logger.info("checker finished with result %s", result)
+    return result
 
 
 def get_fresh_jobs(args, gamedb, cachedb):
