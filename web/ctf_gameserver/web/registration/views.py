@@ -109,6 +109,7 @@ def delete_team(request):
         if delete_form.is_valid():
             request.user.delete()
             logout(request)
+            messages.success(request, _('Your team has been deleted.'))
 
             return redirect(settings.HOME_URL)
     else:
