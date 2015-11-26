@@ -10,3 +10,9 @@
 .navbar-brand img {
     height: 100%;
 }
+
+#supporter-column img {
+    margin-top: 10px;
+    margin-bottom: 30px;
+    width: 100%;
+}
