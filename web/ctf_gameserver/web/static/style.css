@@ -7,8 +7,12 @@
     margin-bottom: 60px;
 }
 
+.navbar-brand {
+    padding: 10px 15px;
+}
+
 .navbar-brand img {
-    height: 100%;
+    height: 30px;
 }
 
 #supporter-column img {
