@@ -155,7 +155,7 @@ def get_fresh_jobs(args, gamedb, cachedb):
             task = loop.create_task(run_checker(args.service, team, tick, args.checker,
                                                 args.loglevel, cachedb))
             open_tasks[task] = args.service, team, tick, datetime.datetime.now()
-        logging.info("started %d (of %d possible) new jobs", len(jobs), newtasks)
+        logging.info("started %d (of %d possible) new jobs", len(jobs), new_tasks)
 
     except Exception as e:
         print(repr(e))
