@@ -8,8 +8,15 @@ import psycopg2
 import base64
 import flag
 
+from checker import string_to_result
+
+open_tasks = dict()
+
 @asyncio.coroutine
 def run_checker(service, team, tick, checker, loglevel, dbconnection):
+    logger = logging.getLogger("service%02d-team%03d-tick%03d" % (service, team, tick))
+    logger.info("running checker")
+    result = None
     create = asyncio.create_subprocess_exec("./checkerslave",
                                             "--service", str(service),
                                             "--team", str(team),
@@ -32,7 +39,7 @@ def run_checker(service, team, tick, checker, loglevel, dbconnection):
             print(err.decode("utf-8"))
             return
 
-        logging.debug(repr(line))
+        logger.debug(repr(line))
         line = line.decode('us-ascii').split()
 
         if "FLAG" == line[0]:
@@ -60,7 +67,7 @@ def run_checker(service, team, tick, checker, loglevel, dbconnection):
                         process.stdin.write(b"OK\n")
             except Exception as e:
                 process.stdin.write(b"FAIL\n")
-                logging.warn("Database store failed with %s", repr(e))
+                logger.warn("Database store failed with %s", repr(e))
 
         elif "RETRIEVE" == line[0]:
             try:
@@ -81,29 +88,69 @@ def run_checker(service, team, tick, checker, loglevel, dbconnection):
 
             except Exception as e:
                 process.stdin.write(b"\n")
-                logging.warn("Database get failed with %s", repr(e))
+                logger.warn("Database get failed with %s", repr(e))
 
         elif line[0] in ["OK", "TIMEOUT", "NOTWORKING", "NOTFOUND"]:
-            job_finished(line[0])
+            result = line[0]
             break
 
     yield from process.wait()
-    print("DONE (%d,%d,%d)" % (service, team, tick))
+    logger.info("checker finished with result %s", result)
+    return result
 
 
-def get_fresh_jobs(args, db):
+def get_fresh_jobs(args, gamedb, cachedb):
     loop = asyncio.get_event_loop()
-    loop.call_later(args.refresh, get_fresh_jobs, args, db)
+    loop.call_later(args.refresh, get_fresh_jobs, args, gamedb, cachedb)
 
-    current_tasks = len(asyncio.Task.all_tasks(loop))
+
+    tasks = list(open_tasks.keys())
+    for task in tasks:
+        if task.done():
+            try:
+                result = string_to_result(task.result())
+                service, team, tick = open_tasks[task]
+                with gamedb:
+                    with gamedb.cursor() as cursor:
+                        cursor.execute("""INSERT INTO scoring_statuscheck
+                                             (service_id, team_id, tick, status, timestamp)
+                                          VALUES
+                                             (%s, %s, %s, %s, now())""",
+                                       (service, team, tick, result))
+                        del open_tasks[task]
+            except Exception as e:
+                print(repr(e))
+
+    current_tasks = len(open_tasks)
     new_tasks = args.maxtasks - current_tasks
     logging.info("Currently running %d tasks, starting up to %d fresh ones",
                  current_tasks, new_tasks)
 
-    for i in range(0, new_tasks):
-        loop.create_task(run_checker(args.service, i, 12, args.checker,
-                                     args.loglevel, db))
+    try:
+        jobs = []
+        with gamedb:
+            with gamedb.cursor() as cursor:
+                cursor.execute("""SELECT sc.id, protecting_team_id, sc.tick
+                                  FROM scoring_flag sc, scoring_gamecontrol gc
+                                  WHERE placement_start is NULL
+                                    AND sc.tick = gc.current_tick
+                                    AND sc.service_id = %s
+                                  ORDER BY RANDOM()
+                                  LIMIT %s""",
+                               (args.service, new_tasks))
+                jobs = cursor.fetchall()
+                cursor.executemany("""UPDATE scoring_flag
+                                      SET placement_start = now()
+                                      WHERE id = %s""",
+                                   [ (job[0],) for job in jobs ])
 
+        for _, team, tick in jobs:
+            task = loop.create_task(run_checker(args.service, team, tick, args.checker,
+                                                args.loglevel, cachedb))
+            open_tasks[task] = args.service, team, tick
+
+    except Exception as e:
+        print(repr(e))
 
 def job_finished(state):
     print(state)
@@ -119,7 +166,10 @@ def main():
     parser.add_argument('--maxtasks', type=int, required=True)
     parser.add_argument('--refresh', type=float, required=True,
                         help="Duration to sleep before rechecking for new tasks")
-    parser.add_argument('--db', type=str, default="dbname=faustctf user=submission")
+    parser.add_argument('--gamedb', type=str,
+                        default="dbname=faustctf user=submission")
+    parser.add_argument('--cachedb', type=str,
+                        default="dbname=faustctf user=submission")
     parser.add_argument('-v', '--loglevel', default='WARNING', type=str,
                         choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
                         help='Loglevel')
@@ -130,10 +180,11 @@ def main():
     logging.getLogger().setLevel(numeric_level)
 
     logging.debug("connecting to database")
-    dbconnection = psycopg2.connect(args.db)
+    cachedb = psycopg2.connect(args.cachedb)
+    gamedb = psycopg2.connect(args.cachedb)
 
     loop = asyncio.get_event_loop()
-    loop.call_soon(get_fresh_jobs, args, dbconnection)
+    loop.call_soon(get_fresh_jobs, args, gamedb, cachedb)
     loop.run_forever()
 
 if __name__ == '__main__':

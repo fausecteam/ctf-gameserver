@@ -1,9 +1,7 @@
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.safestring import mark_safe
-import mistune
-
-_markdown = mistune.Markdown()
+from markdown import markdown
 
 
 class Category(models.Model):
@@ -102,4 +100,4 @@ class Flatpage(models.Model):
         """
         Returns the page's content as rendered HTML.
         """
-        return mark_safe(_markdown(self.content))
+        return mark_safe(markdown(self.content))
