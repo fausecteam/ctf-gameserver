@@ -6,3 +6,7 @@
 #page-content {
     margin-bottom: 60px;
 }
+
+.clearable-input-image {
+    vertical-align: top;
+}

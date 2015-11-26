@@ -66,3 +66,17 @@ class ThumbnailImageField(ImageField):
     """
 
     attr_class = ThumbnailImageFieldFile
+
+
+class ClearableThumbnailImageInput(ClearableFileInput):
+    """
+    Custom variant of the ClearableFileInput widget for rendering a ThumbnailImageField. It will display the
+    thumbnail image instead of the image's filename.
+    """
+
+    def get_template_substitution_values(self, value):
+        return {
+            'initial': format_html('<img class="clearable-input-image" src="{}" alt="{}" />',
+                                   value.get_thumbnail_url(), str(value)),
+            'initial_url': conditional_escape(value.url),
+        }
