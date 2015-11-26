@@ -101,10 +101,29 @@ def get_fresh_jobs(args, gamedb, cachedb):
     logging.info("Currently running %d tasks, starting up to %d fresh ones",
                  current_tasks, new_tasks)
 
-    for i in range(0, new_tasks):
-        loop.create_task(run_checker(args.service, i, 12, args.checker,
-                                     args.loglevel, db))
+    try:
+        jobs = []
+        with gamedb:
+            with gamedb.cursor() as cursor:
+                cursor.execute("""SELECT sc.id, protecting_team_id, sc.tick
+                                  FROM scoring_flag sc, scoring_gamecontrol gc
+                                  WHERE placement_start is NULL
+                                    AND sc.tick = gc.current_tick
+                                    AND sc.service_id = %s
+                                  ORDER BY RANDOM()
+                                  LIMIT %s""",
+                               (args.service, new_tasks))
+                jobs = cursor.fetchall()
+                cursor.executemany("""UPDATE scoring_flag
+                                      SET placement_start = now()
+                                      WHERE id = %s""",
+                                   [ (job[0],) for job in jobs ])
 
+        for _, team, tick in jobs:
+            loop.create_task(run_checker(args.service, team, tick, args.checker,
+                                         args.loglevel, cachedb))
+    except Exception as e:
+        print(repr(e))
 
 def job_finished(state):
     print(state)
