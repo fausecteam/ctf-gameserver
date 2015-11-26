@@ -92,9 +92,9 @@ def run_checker(service, team, tick, checker, loglevel, dbconnection):
     print("DONE (%d,%d,%d)" % (service, team, tick))
 
 
-def get_fresh_jobs(args, db):
+def get_fresh_jobs(args, gamedb, cachedb):
     loop = asyncio.get_event_loop()
-    loop.call_later(args.refresh, get_fresh_jobs, args, db)
+    loop.call_later(args.refresh, get_fresh_jobs, args, gamedb, cachedb)
 
     current_tasks = len(asyncio.Task.all_tasks(loop))
     new_tasks = args.maxtasks - current_tasks
@@ -120,7 +120,10 @@ def main():
     parser.add_argument('--maxtasks', type=int, required=True)
     parser.add_argument('--refresh', type=float, required=True,
                         help="Duration to sleep before rechecking for new tasks")
-    parser.add_argument('--db', type=str, default="dbname=faustctf user=submission")
+    parser.add_argument('--gamedb', type=str,
+                        default="dbname=faustctf user=submission")
+    parser.add_argument('--cachedb', type=str,
+                        default="dbname=faustctf user=submission")
     parser.add_argument('-v', '--loglevel', default='WARNING', type=str,
                         choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
                         help='Loglevel')
@@ -131,10 +134,11 @@ def main():
     logging.getLogger().setLevel(numeric_level)
 
     logging.debug("connecting to database")
-    dbconnection = psycopg2.connect(args.db)
+    cachedb = psycopg2.connect(args.cachedb)
+    gamedb = psycopg2.connect(args.cachedb)
 
     loop = asyncio.get_event_loop()
-    loop.call_soon(get_fresh_jobs, args, dbconnection)
+    loop.call_soon(get_fresh_jobs, args, gamedb, cachedb)
     loop.run_forever()
 
 if __name__ == '__main__':
