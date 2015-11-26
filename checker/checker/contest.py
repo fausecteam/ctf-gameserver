@@ -24,7 +24,7 @@ class ContestChecker(AbstractChecker):
 
     def store_blob(self, ident, blob):
         data = base64.b64encode(blob)
-        return self._rpc("STORE", ident, base64.b64encode(data).decode('latin-1'))
+        return self._rpc("STORE", ident, data.decode('latin-1'))
 
     def retrieve_blob(self, ident):
         data = self._rpc("RETRIEVE", ident)

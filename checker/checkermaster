@@ -4,9 +4,12 @@ import logging
 import argparse
 import asyncio
 import asyncio.subprocess
+import psycopg2
+import base64
+import flag
 
 @asyncio.coroutine
-def run_checker(service, team, tick, checker, loglevel):
+def run_checker(service, team, tick, checker, loglevel, dbconnection):
     create = asyncio.create_subprocess_exec("./checkerslave",
                                             "--service", str(service),
                                             "--team", str(team),
@@ -33,11 +36,53 @@ def run_checker(service, team, tick, checker, loglevel):
         line = line.decode('us-ascii').split()
 
         if "FLAG" == line[0]:
-            pass
+            tick = int(line[1])
+            payload = None
+            if len(line) > 2:
+                payload = codecs.decode(line[2], 'hex')
+            newflag = flag.generate(team=team, service=service, payload=payload)
+            process.stdin.write(newflag.encode('us-ascii'))
+            process.stdin.write(b"\n")
+
         elif "STORE" == line[0]:
-            pass
+            try:
+                with dbconnection:
+                    with dbconnection.cursor() as cursor:
+                        ident = line[1]
+                        data = psycopg2.Binary(base64.b64decode(line[2]))
+
+                        cursor.execute("""INSERT INTO checkercache
+                                             (service_id,team_id,identifier,data)
+                                          VALUES
+                                             (%s, %s, %s, %s) """,
+                                       (service, team, ident, data))
+
+                        process.stdin.write(b"OK\n")
+            except Exception as e:
+                process.stdin.write(b"FAIL\n")
+                logging.warn("Database store failed with %s", repr(e))
+
         elif "RETRIEVE" == line[0]:
-            pass
+            try:
+                with dbconnection:
+                    with dbconnection.cursor() as cursor:
+                        ident = line[1]
+                        cursor.execute("""SELECT data FROM checkercache
+                                          WHERE team_id = %s
+                                            AND service_id = %s
+                                            AND identifier = %s""",
+                                       (team, service, ident))
+                        data = cursor.fetchone()
+                        if data != None:
+                            data, = data
+                            data = base64.b64encode(data)
+                            process.stdin.write(data)
+                        process.stdin.write(b"\n")
+
+            except Exception as e:
+                process.stdin.write(b"\n")
+                logging.warn("Database get failed with %s", repr(e))
+
         elif line[0] in ["OK", "TIMEOUT", "NOTWORKING", "NOTFOUND"]:
             job_finished(line[0])
             break
@@ -46,9 +91,9 @@ def run_checker(service, team, tick, checker, loglevel):
     print("DONE (%d,%d,%d)" % (service, team, tick))
 
 
-def get_fresh_jobs(args):
+def get_fresh_jobs(args, db):
     loop = asyncio.get_event_loop()
-    loop.call_later(args.refresh, get_fresh_jobs, args)
+    loop.call_later(args.refresh, get_fresh_jobs, args, db)
 
     current_tasks = len(asyncio.Task.all_tasks(loop))
     new_tasks = args.maxtasks - current_tasks
@@ -56,7 +101,8 @@ def get_fresh_jobs(args):
                  current_tasks, new_tasks)
 
     for i in range(0, new_tasks):
-        loop.create_task(run_checker(args.service, i, 12, args.checker, args.loglevel))
+        loop.create_task(run_checker(args.service, i, 12, args.checker,
+                                     args.loglevel, db))
 
 
 def job_finished(state):
@@ -87,7 +133,7 @@ def main():
     dbconnection = psycopg2.connect(args.db)
 
     loop = asyncio.get_event_loop()
-    loop.call_soon(get_fresh_jobs, args)
+    loop.call_soon(get_fresh_jobs, args, dbconnection)
     loop.run_forever()
 
 if __name__ == '__main__':
