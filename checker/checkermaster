@@ -69,7 +69,7 @@ def run_checker(service, team, tick, checker, loglevel, dbconnection):
                                                         "--service", str(service),
                                                         "--team", str(team),
                                                         "--tick", str(tick),
-                                                        "--loglevel", loglevel,
+                                                        "--loglevel", logging.getLevelName(loglevel),
                                                         "--ip", "10.66.%d.2" % team,
                                                         checker,
                                                         stdout=asyncio.subprocess.PIPE,
@@ -171,9 +171,11 @@ def get_fresh_jobs(gamedb, cachedb, config):
                                    [ (job[0],) for job in jobs ])
 
         for _, team, tick in jobs:
-            task = loop.create_task(run_checker(args.service, team, tick, args.checker,
-                                                args.loglevel, cachedb))
-            open_tasks[task] = args.service, team, tick, datetime.datetime.now()
+            service = int(config['CTF']['serviceid'])
+            checker = config['CTF']['checker']
+            task = loop.create_task(run_checker(service, team, tick, checker,
+                                                logging.getLogger().level, cachedb))
+            open_tasks[task] = service, team, tick, datetime.datetime.now()
         logging.info("started %d (of %d possible) new jobs", len(jobs), new_tasks)
 
     except Exception as e:
