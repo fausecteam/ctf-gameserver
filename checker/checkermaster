@@ -64,18 +64,17 @@ def run_checker(service, team, tick, checker, loglevel, dbconnection):
     logger = logging.getLogger("service%02d-team%03d-tick%03d" % (service, team, tick))
     logger.info("running checker")
     result = None
-    create = asyncio.create_subprocess_exec("./checkerslave",
-                                            "--service", str(service),
-                                            "--team", str(team),
-                                            "--tick", str(tick),
-                                            "--loglevel", loglevel,
-                                            "--ip", "10.66.%d.2" % team,
-                                            checker,
-                                            stdout=asyncio.subprocess.PIPE,
-                                            stderr=asyncio.subprocess.PIPE,
-                                            stdin=asyncio.subprocess.PIPE)
+    process = yield from asyncio.create_subprocess_exec("./checkerslave",
+                                                        "--service", str(service),
+                                                        "--team", str(team),
+                                                        "--tick", str(tick),
+                                                        "--loglevel", loglevel,
+                                                        "--ip", "10.66.%d.2" % team,
+                                                        checker,
+                                                        stdout=asyncio.subprocess.PIPE,
+                                                        stderr=asyncio.subprocess.PIPE,
+                                                        stdin=asyncio.subprocess.PIPE)
 
-    process = yield from create
     while True:
         line = yield from process.stdout.readline()
         if process.returncode is not None:
