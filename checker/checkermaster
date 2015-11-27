@@ -2,6 +2,7 @@
 
 import logging
 import argparse
+import configparser
 import asyncio
 import asyncio.subprocess
 import psycopg2
@@ -119,9 +120,9 @@ def run_checker(service, team, tick, checker, loglevel, dbconnection):
     return result
 
 
-def get_fresh_jobs(args, gamedb, cachedb):
+def get_fresh_jobs(gamedb, cachedb, config):
     loop = asyncio.get_event_loop()
-    loop.call_later(args.refresh, get_fresh_jobs, args, gamedb, cachedb)
+    loop.call_later(int(config['CTF']['refresh']), get_fresh_jobs, gamedb, cachedb, config)
 
 
     tasks = list(open_tasks.keys())
@@ -147,7 +148,7 @@ def get_fresh_jobs(args, gamedb, cachedb):
                 del open_tasks[task]
 
     current_tasks = len(open_tasks)
-    new_tasks = args.maxtasks - current_tasks
+    new_tasks = int(config['CTF']['maxtasks']) - current_tasks
     logging.info("Currently running %d tasks, starting up to %d fresh ones",
                  current_tasks, new_tasks)
 
@@ -162,7 +163,7 @@ def get_fresh_jobs(args, gamedb, cachedb):
                                     AND sc.service_id = %s
                                   ORDER BY RANDOM()
                                   LIMIT %s""",
-                               (args.service, new_tasks))
+                               (config['CTF']['serviceid'], new_tasks))
                 jobs = cursor.fetchall()
                 cursor.executemany("""UPDATE scoring_flag
                                       SET placement_start = now()
@@ -181,29 +182,30 @@ def get_fresh_jobs(args, gamedb, cachedb):
 
 def main():
     logging.basicConfig()
+
     parser = argparse.ArgumentParser(description="CTF checker runner")
-    parser.add_argument('checker', type=str,
-                        help="module:classname of checker")
-    parser.add_argument('--service', type=int, required=True)
-    parser.add_argument('--maxtasks', type=int, required=True)
-    parser.add_argument('--refresh', type=float, required=True,
-                        help="Duration to sleep before rechecking for new tasks")
-    parser.add_argument('--gamedb', type=str,
-                        default="dbname=faustctf user=submission")
-    parser.add_argument('--cachedb', type=str,
-                        default="dbname=faustctf user=submission")
+    parser.add_argument('--config', type=str, required=True)
     parser.add_argument('-v', '--loglevel', default='WARNING', type=str,
                         choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
                         help='Loglevel')
 
     args = parser.parse_args()
 
+    config = configparser.ConfigParser()
+    config.read(args.config)
+
     numeric_level = getattr(logging, args.loglevel.upper())
     logging.getLogger().setLevel(numeric_level)
 
     logging.debug("connecting to database")
-    cachedb = psycopg2.connect(args.cachedb)
-    gamedb = psycopg2.connect(args.cachedb)
+    cachedb = psycopg2.connect(database=config['checkerdatabase']['database'],
+                               host=config['checkerdatabase']['host'],
+                               user=config['checkerdatabase']['user'],
+                               password=config['checkerdatabase']['password'])
+    gamedb = psycopg2.connect(database=config['gamedatabase']['database'],
+                              host=config['gamedatabase']['host'],
+                              user=config['gamedatabase']['user'],
+                              password=config['gamedatabase']['password'])
 
     with gamedb:
         with gamedb.cursor() as cursor:
@@ -213,7 +215,7 @@ def main():
             conteststart, flagvalidity, tickduration = cursor.fetchone()
 
     loop = asyncio.get_event_loop()
-    loop.call_soon(get_fresh_jobs, args, gamedb, cachedb)
+    loop.call_soon(get_fresh_jobs, gamedb, cachedb, config)
     loop.run_forever()
 
 if __name__ == '__main__':
