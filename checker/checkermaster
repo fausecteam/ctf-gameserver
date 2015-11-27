@@ -216,6 +216,12 @@ def main():
 
     loop = asyncio.get_event_loop()
     loop.call_soon(get_fresh_jobs, gamedb, cachedb, config)
+    try:
+        import systemd
+        systemd.daemon.notify("READY=1")
+    except ImportError:
+        pass
+
     loop.run_forever()
 
 if __name__ == '__main__':
