@@ -184,7 +184,6 @@ def main():
     parser = argparse.ArgumentParser(description="CTF checker runner")
     parser.add_argument('checker', type=str,
                         help="module:classname of checker")
-    parser.add_argument('--verbose', action="store_true")
     parser.add_argument('--service', type=int, required=True)
     parser.add_argument('--maxtasks', type=int, required=True)
     parser.add_argument('--refresh', type=float, required=True,

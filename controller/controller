@@ -14,7 +14,6 @@ def update_database(db):
 def main()
     logging.basicConfig()
     parser = argparse.ArgumentParser(description="CTF checker runner")
-    parser.add_argument('--verbose', action="store_true")
     parser.add_argument('--db', type=str,
                         default="dbname=faustctf user=submission")
     parser.add_argument('-v', '--loglevel', default='WARNING', type=str,
