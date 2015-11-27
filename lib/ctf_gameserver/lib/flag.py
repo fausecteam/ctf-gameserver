@@ -3,7 +3,7 @@
 
 import time
 import struct
-import Keccak
+from .Keccak import Keccak
 import base64
 import codecs
 import binascii
@@ -20,7 +20,7 @@ VALID = 900
 
 SECRET = b'\x1d\x14H\xb4y\xc6\x93\x8d\x0e\xae'
 
-keccak = Keccak.Keccak(100)
+keccak = Keccak(100)
 # timestamp + team + service + payload
 datalength = 4 + 1 + 1 + PAYLOADLEN
 
