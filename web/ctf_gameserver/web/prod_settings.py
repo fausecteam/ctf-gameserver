@@ -64,6 +64,24 @@ FIRST_DAY_OF_WEEK = 1
 
 # You should not have to edit anything below this line
 
+# Set up logging to syslog
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'syslog': {
+            'class': 'logging.handlers.SysLogHandler',
+            'address': '/dev/log'
+        }
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['syslog'],
+            'level': os.getenv('WARNING')
+        }
+    }
+}
+
 DEBUG = False
 
 if HTTPS:
