@@ -1,0 +1,8 @@
+[Unit]
+Description=FAUST-CTF: run game tick
+
+[Service]
+Type=oneshot
+ExecStart=controller
+User=nobody
+Group=nogroup
