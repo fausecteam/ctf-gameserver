@@ -8,6 +8,7 @@ import asyncio.subprocess
 import psycopg2
 import base64
 import datetime
+import codecs
 
 import flag
 from checker import string_to_result
