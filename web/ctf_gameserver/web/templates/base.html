@@ -23,7 +23,7 @@
 
         <title itemprop="name">{% block title %}{% endblock %} | {{ COMPETITION_NAME }}</title>
 
-        <meta name="description" content="
+        <meta name="description" itemprop="description" property="og:description" content="
             FAUST CTF is an online attack-defense CTF competition run by FAUST, the CTF team of
             Friedrich-Alexander University Erlangen-Nürnberg
         " />
@@ -35,6 +35,7 @@
 
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="{{ COMPETITION_NAME }}" />
+        <meta property="og:image" content="https://www.faustctf.net{% static 'faustctf.png' %}" />
     </head>
 
 
@@ -51,7 +52,7 @@
 
                     <a class="navbar-brand" href="{{ HOME_URL }}">
                         <!--- PNG scales much better than SVG in browsers -->
-                        <img src="{% static 'faustctf.png' %}" alt="FAUST CTF" />
+                        <img itemprop="image" src="{% static 'faustctf.png' %}" alt="FAUST CTF" />
                     </a>
                 </div>
 
