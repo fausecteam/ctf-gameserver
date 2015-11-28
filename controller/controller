@@ -1,0 +1,32 @@
+#!/usr/bin/python3
+
+import argparse
+
+def update_database(db):
+    with db:
+        with db.cursor() as cursor:
+            cursor.execute("UPDATE scoring_gamecontrol SET current_tick = current_tick + 1")
+            cursor.execute("""INSERT INTO scoring_flag
+                                 (service_id, protecting_team_id, tick)
+                              SELECT svc.id, user_id, current_tick
+                              FROM scoring_service svc, registration_team, scoring_gamecontrol""")
+
+def main()
+    logging.basicConfig()
+    parser = argparse.ArgumentParser(description="CTF checker runner")
+    parser.add_argument('--db', type=str,
+                        default="dbname=faustctf user=submission")
+    parser.add_argument('-v', '--loglevel', default='WARNING', type=str,
+                        choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+                        help='Loglevel')
+
+    args = parser.parse_args()
+
+    numeric_level = getattr(logging, args.loglevel.upper())
+    logging.getLogger().setLevel(numeric_level)
+
+    db = psycopg2.connect(args.cachedb)
+    update_database(db)
+
+if __name__ == '__main__':
+    main()

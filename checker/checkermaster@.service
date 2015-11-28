@@ -1,0 +1,8 @@
+[Unit]
+Description=CTF Checker Runner
+
+[Service]
+Type=notify
+ExecStart=checkermaster --config /etc/faustctf/%i
+User=nobody
+Group=nogroup
