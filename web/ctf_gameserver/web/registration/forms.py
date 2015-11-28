@@ -35,7 +35,7 @@ class UserForm(forms.ModelForm):
         }
         help_texts = {
             'username': None,
-            'email': _('Your authorative contact address. It will be used sensitive requests, such as '
+            'email': _('Your authorative contact address. It will be used for sensitive requests, such as '
                        'password resets or prize pay-outs.')
         }
 
