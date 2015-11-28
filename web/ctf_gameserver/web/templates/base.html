@@ -3,7 +3,8 @@
 
 <!DOCTYPE html>
 
-<html lang="{{ LANGUAGE_CODE }}">
+<html lang="{{ LANGUAGE_CODE }}" itemscope="itemscope" itemtype="http://schema.org/WebPage"
+ prefix="og: http://ogp.me/ns#">
     <head>
         <meta charset="utf-8" />
 
@@ -18,7 +19,10 @@
         <script src="{% static 'ext/jquery.min.js' %}" defer="defer"></script>
         <script src="{% static 'ext/bootstrap/js/bootstrap.min.js' %}" defer="defer"></script>
 
-        <title>{% block title %}{% endblock %} | {{ COMPETITION_NAME }}</title>
+        <title itemprop="name">{% block title %}{% endblock %} | {{ COMPETITION_NAME }}</title>
+
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="{{ COMPETITION_NAME }}" />
     </head>
 
 
