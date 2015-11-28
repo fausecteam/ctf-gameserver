@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="page-header">
+    <h1>{% block title %}{% trans 'Registered teams' %}{% endblock %}</h1>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th class="image-column"><!-- Image --></th>
+                <th>Name</th>
+                <th>Affiliation</th>
+                <th>Country</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for team in teams %}
+            <tr>
+                <td>
+                    {% if team.image %}
+                    <a href="{{ team.image.url }}">
+                        <img class="team-image" src="{{ team.image.get_thumbnail_url }}"
+                         alt="{{ team.user.username }}" />
+                    </a>
+                    {% endif %}
+                </td>
+                <td>{{ team.user.username }}</td>
+                <td>{% if team.affiliation %}{{ team.affiliation }}{% endif %}</td>
+                <td>{{ team.country }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
