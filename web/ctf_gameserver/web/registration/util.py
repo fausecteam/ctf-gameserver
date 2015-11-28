@@ -52,4 +52,8 @@ def get_country_names():
         csv_reader = csv.reader(filter(lambda row: not row.startswith('#'), csv_file), delimiter=';',
                                 skipinitialspace=True)
 
-        return sorted((get_name(row) for row in csv_reader), key=locale.strxfrm)
+        countries = [get_name(row) for row in csv_reader]
+        # Some teams have members in multiple countries
+        countries.append('International')
+
+    return sorted(countries, key=locale.strxfrm)
