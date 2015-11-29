@@ -7,6 +7,14 @@
     margin-bottom: 60px;
 }
 
+.image-column {
+    width: 80px;
+}
+
+.team-image {
+    width: 50px;
+}
+
 .clearable-input-image {
     vertical-align: top;
 }

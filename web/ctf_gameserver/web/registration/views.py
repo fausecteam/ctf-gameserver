@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.views.generic import ListView
 from django.shortcuts import render, redirect
 from django.conf import settings
 from django.utils.translation import ugettext as _
@@ -12,6 +13,13 @@ from .models import Team
 from .util import email_token_generator
 
 User = get_user_model()    # pylint: disable=invalid-name
+
+
+class TeamList(ListView):
+
+    queryset = Team.objects.order_by('user__username')
+    context_object_name = 'teams'
+    template_name = 'team_list.html'
 
 
 @registration_open_required

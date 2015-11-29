@@ -70,6 +70,11 @@ urlpatterns = [
         name='password_reset_complete'
     ),
 
+    url(r'^competition/teams/$',
+        registration_views.TeamList.as_view(),
+        name='team_list'
+    ),
+
     url(r'^admin/', include(admin_site.urls)),
 
     # Multiple seperate URL patterns have to be used to work around
