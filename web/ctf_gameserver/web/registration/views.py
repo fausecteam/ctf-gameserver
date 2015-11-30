@@ -17,7 +17,7 @@ User = get_user_model()    # pylint: disable=invalid-name
 
 class TeamList(ListView):
 
-    queryset = Team.objects.order_by('user__username')
+    queryset = Team.active_objects.order_by('user__username')
     context_object_name = 'teams'
     template_name = 'team_list.html'
 
