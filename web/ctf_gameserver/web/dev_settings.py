@@ -10,6 +10,14 @@ from .base_settings import *
 
 COMPETITION_NAME = 'Development CTF'
 
+CSP_POLICIES = {
+    # The debug error page uses inline JavaScript and CSS
+    'script-src': ["'self'", "'unsafe-inline'"],
+    'style-src': ["'self'", "'unsafe-inline'"],
+    'object-src': ["'self'"],
+    'connect-src': ["'self'"]
+}
+
 
 DATABASES = {
     'default': {

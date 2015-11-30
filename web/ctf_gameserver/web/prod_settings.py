@@ -11,6 +11,17 @@ from .base_settings import *
 # The human-readable title of your CTF
 COMPETITION_NAME = ''
 
+# Content Security Policy header in the format `directive: [values]`, see e.g
+# http://www.html5rocks.com/en/tutorials/security/content-security-policy/ for an explanation
+# The initially selected directives should cover most sensitive cases, but still allow YouTube embeds,
+# webfonts etc.
+CSP_POLICIES = {
+    'script-src': ["'self'"],
+    'style-src': ["'self'"],
+    'object-src': ["'self'"],
+    'connect-src': ["'self'"]
+}
+
 # Set to True if your site is available exclusively through HTTPS and not via plaintext HTTP
 HTTPS = False
 
