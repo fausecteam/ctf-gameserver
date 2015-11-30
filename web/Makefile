@@ -1,17 +1,20 @@
 SOURCE_DIR ?= ctf_gameserver/web
 EXT_DIR ?= $(SOURCE_DIR)/static/ext
 
-.PHONY: all db lint
+.PHONY: dev prod ext prod-db lint
 .INTERMEDIATE: bootstrap.zip
 
-all: db $(EXT_DIR)/jquery.min.js $(EXT_DIR)/bootstrap $(SOURCE_DIR)/registration/countrynames.txt
+dev: $(SOURCE_DIR)/dev-db.sqlite3 ext
+prod: prod-db ext
+ext: $(EXT_DIR)/jquery.min.js $(EXT_DIR)/bootstrap $(SOURCE_DIR)/registration/countrynames.txt
 
 
-# Cannot use `$(SOURCE_DIR)/dev-db.sqlite3` as target name since the database might be different from the
-# SQLite file
-db:
-	./manage.py migrate auth
-	./manage.py migrate
+$(SOURCE_DIR)/dev-db.sqlite3:
+	./dev_manage.py migrate
+
+prod-db:
+	./prod_manage.py migrate auth
+	./prod_manage.py migrate
 
 $(EXT_DIR)/jquery.min.js:
 	mkdir -p $(EXT_DIR)
