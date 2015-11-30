@@ -6,6 +6,7 @@ from django.utils.translation import ugettext as _
 from django.contrib import messages
 from django.contrib.auth import logout, get_user_model, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 
 from ctf_gameserver.web.scoring.decorators import registration_open_required
 from . import forms
@@ -160,3 +161,34 @@ def confirm_email(request):
         return render(request, '400.html', status=400)
 
     return redirect(settings.HOME_URL)
+
+
+@staff_member_required
+def mail_teams(request):
+    """
+    View which allows the generation of 'mailto' links to write emails to the formal or informal addresses of
+    all teams.
+    Addresses are split into batches because most mail servers limit the number of recipients per single
+    message.
+    """
+
+    form = forms.MailTeamsForm(request.GET)
+
+    if not form.is_valid():
+        return render(request, '400.html', status=400)
+
+    if form.cleaned_data['addrs'] == 'formal':
+        addresses = [values['user__email'] for values in
+                     Team.active_objects.values('user__email').distinct()]
+    else:
+        addresses = [values['informal_email'] for values in
+                     Team.active_objects.values('informal_email').distinct()]
+
+    batch_size = form.cleaned_data['batch']
+    batches = []
+
+    for i in range(0, len(addresses), batch_size):
+        # Comma-seperated recipients for 'mailto' are against the spec, but should work in practice
+        batches.append(','.join(addresses[i:i+batch_size]))
+
+    return render(request, 'mail_teams.html', {'form': form, 'batches': batches})

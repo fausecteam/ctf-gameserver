@@ -7,6 +7,23 @@
     margin-bottom: 60px;
 }
 
+.bg-block {
+    padding: 15px;
+}
+
+.form-inline .form-group {
+    margin-right: 10px;
+}
+
+.form-inline .help-block {
+    /* Help texts don't really have much space in inline forms */
+    display: none;
+}
+
+.clearable-input-image {
+    vertical-align: top;
+}
+
 .image-column {
     width: 80px;
 }
@@ -15,6 +32,6 @@
     width: 50px;
 }
 
-.clearable-input-image {
-    vertical-align: top;
+#mail-teams-content {
+    margin-top: 40px;
 }

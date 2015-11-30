@@ -190,3 +190,39 @@ class DeleteForm(forms.Form):
             raise forms.ValidationError(_('Please enter the correct password!'))
 
         return self.cleaned_data['password']
+
+
+class MailTeamsForm(forms.Form):
+    """
+    Form to control the parameters of the 'mail_teams' view.
+    """
+
+    # Use short property names because they will end up in (visible) GET parameters
+    addrs = forms.ChoiceField(
+        choices = [('formal', 'Formal'), ('informal', 'Informal')],
+        label = _('Address type'),
+        widget = forms.RadioSelect,
+        required = False,
+        initial = 'formal',
+
+    )
+    batch = forms.IntegerField(
+        min_value = 1,
+        label = _('Number of recipients per batch'),
+        required = False,
+        initial = 50,
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Use default values if parameters are not specified
+        # This cannot be done in clean_() methods as the set values wouldn't show up in the rendered form
+        # that way
+        if 'addrs' not in self.data:
+            # Make the QueryDict mutable
+            self.data = self.data.copy()
+            self.data['addrs'] = self.fields['addrs'].initial
+        if 'batch' not in self.data:
+            self.data = self.data.copy()
+            self.data['batch'] = self.fields['batch'].initial
