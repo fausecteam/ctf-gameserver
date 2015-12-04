@@ -75,6 +75,10 @@ urlpatterns = [
         name='team_list'
     ),
 
+    url(r'^mail-teams/$',
+        registration_views.mail_teams,
+        name='mail_teams'
+    ),
     url(r'^admin/', include(admin_site.urls)),
 
     # Multiple seperate URL patterns have to be used to work around

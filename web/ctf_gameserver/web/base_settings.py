@@ -40,7 +40,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware'
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'ctf_gameserver.web.middleware.CSPMiddlware'
 )
 
 TEMPLATES = [{
@@ -96,5 +97,7 @@ SHORT_DATE_FORMAT = 'Y-m-d'
 DATETIME_FORMAT = DATE_FORMAT + ' ' + TIME_FORMAT
 SHORT_DATETIME_FORMAT = SHORT_DATE_FORMAT + ' ' + TIME_FORMAT
 
-CSRF_COOKIE_HTTPONLY = True
 PASSWORD_RESET_TIMEOUT_DAYS = 1
+CSRF_COOKIE_HTTPONLY = True
+X_FRAME_OPTIONS = 'DENY'
+SECURE_BROWSER_XSS_FILTER = True
