@@ -24,6 +24,10 @@
     vertical-align: top;
 }
 
+.flatpage-content img {
+    max-width: 100%;
+}
+
 .image-column {
     width: 80px;
 }
