@@ -29,7 +29,6 @@ class AbstractChecker(metaclass=ABCMeta):
         """Returns the current tick"""
         return self._tick
 
-    @abstractmethod
     def check_service(self):
         """ Check if the service is running as expected"""
         pass
