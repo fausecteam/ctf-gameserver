@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 from checker.abstract import AbstractChecker
-import flag
+from ctf_gameserver.lib import flag
 
 import os
 import os.path
