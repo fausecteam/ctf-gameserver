@@ -10,8 +10,8 @@ import base64
 import datetime
 import codecs
 
-import flag
-from checker import string_to_result
+import from ctf_gameserver.lib import flag
+from from ctf_gameserver.checker import string_to_result
 
 MAXRUNTIME = datetime.timedelta(minutes = 1)
 conteststart = None
