@@ -11,7 +11,7 @@ import datetime
 import codecs
 
 from ctf_gameserver.lib import flag
-from from ctf_gameserver.checker import string_to_result
+from ctf_gameserver.checker import string_to_result
 
 MAXRUNTIME = datetime.timedelta(minutes = 1)
 conteststart = None
