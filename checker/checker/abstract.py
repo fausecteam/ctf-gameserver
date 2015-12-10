@@ -31,7 +31,7 @@ class AbstractChecker(metaclass=ABCMeta):
 
     def check_service(self):
         """ Check if the service is running as expected"""
-        pass
+        return 0
 
     @abstractmethod
     def check_flag(self, tick):
