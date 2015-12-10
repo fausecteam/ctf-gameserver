@@ -49,8 +49,18 @@ class AbstractChecker(metaclass=ABCMeta):
         pass
 
     @abstractmethod
+    def store_yaml(self, ident, yaml):
+        "yaml needs to be a object that can be dumped by yaml.dump"
+        pass
+
+    @abstractmethod
     def store_blob(self, ident, blob):
         "store binary blob on persistent storage"
+        pass
+
+    @abstractmethod
+    def retrieve_yaml(self, ident):
+        "returns object as deserialized by yaml.load"
         pass
 
     @abstractmethod
@@ -66,11 +76,6 @@ class AbstractChecker(metaclass=ABCMeta):
     def run(self):
         logging.debug("Placing flag")
         result = self.place_flag()
-        if result != 0:
-            return result
-
-        logging.debug("Check service availability")
-        result = self.check_service()
         if result != 0:
             return result
 
