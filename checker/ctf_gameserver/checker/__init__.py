@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
-from checker.local import LocalChecker as BaseChecker
-#from checker.contest import ContestChecker as BaseChecker
+from .local import LocalChecker as BaseChecker
+#from .contest import ContestChecker as BaseChecker
 
 OK = 0
 TIMEOUT = 1

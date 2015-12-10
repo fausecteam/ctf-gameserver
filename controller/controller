@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 
 import argparse
+import logging
+import psycopg2
 
 def update_database(db):
     with db:
@@ -11,7 +13,7 @@ def update_database(db):
                               SELECT svc.id, user_id, current_tick
                               FROM scoring_service svc, registration_team, scoring_gamecontrol""")
 
-def main()
+def main():
     logging.basicConfig()
     parser = argparse.ArgumentParser(description="CTF checker runner")
     parser.add_argument('--db', type=str,
