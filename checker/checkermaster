@@ -130,15 +130,16 @@ def get_fresh_jobs(gamedb, cachedb, config):
         service, team, tick, starttime = open_tasks[task]
         if task.done():
             try:
-                result = string_to_result(task.result())
-                with gamedb:
-                    with gamedb.cursor() as cursor:
-                        cursor.execute("""INSERT INTO scoring_statuscheck
-                                             (service_id, team_id, tick, status, timestamp)
-                                          VALUES
-                                             (%s, %s, %s, %s, now())""",
-                                       (service, team, tick, result))
-                        del open_tasks[task]
+                if task.result() is not None:
+                    result = string_to_result(task.result())
+                    with gamedb:
+                        with gamedb.cursor() as cursor:
+                            cursor.execute("""INSERT INTO scoring_statuscheck
+                                                 (service_id, team_id, tick, status, timestamp)
+                                              VALUES
+                                                 (%s, %s, %s, %s, now())""",
+                                            (service, team, tick, result))
+                del open_tasks[task]
             except Exception as e:
                 print(repr(e))
         elif starttime + MAXRUNTIME < datetime.datetime.now():
