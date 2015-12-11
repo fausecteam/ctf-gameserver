@@ -60,4 +60,4 @@ some principles:
 
 Licensing
 ---------
-The whole gameserver is released under the MIT license. Contributions are welcome!
+The whole gameserver is released under the MIT (expat) license. Contributions are welcome!
