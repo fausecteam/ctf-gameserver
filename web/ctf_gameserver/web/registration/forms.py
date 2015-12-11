@@ -21,6 +21,9 @@ class UserForm(forms.ModelForm):
     work with user models other than django.contrib.auth.models.User out-of-the-box.
     """
 
+    # Don't automatically create the form field from the model field, as the model field's `max_length`
+    # actually applies to the hashed passwords
+    password = forms.CharField(widget=forms.PasswordInput)
     password_repetition = forms.CharField(widget=forms.PasswordInput)
 
     class Meta:
