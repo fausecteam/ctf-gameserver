@@ -19,6 +19,7 @@ class AbstractChecker(metaclass=ABCMeta):
     """
     def __init__(self, tick, team, service, ip):
         self._team = team
+        self._ip = ip
         self._tick = tick
         self._service = service
         self._tickduration = 300
