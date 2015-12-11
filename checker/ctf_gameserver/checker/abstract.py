@@ -79,6 +79,11 @@ class AbstractChecker(metaclass=ABCMeta):
         if result != 0:
             return result
 
+        logging.debug("General Service Checks")
+        result = self.check_service()
+        if result != 0:
+            return result
+
         oldesttick = max(self._tick - self._lookback, -1)
         for tick in range(self._tick, oldesttick, -1):
             logging.debug("Checking for flag of tick %d", tick)
