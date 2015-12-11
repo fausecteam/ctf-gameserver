@@ -219,7 +219,7 @@ def main():
     loop = asyncio.get_event_loop()
     loop.call_soon(get_fresh_jobs, gamedb, cachedb, config)
     try:
-        import systemd
+        import systemd.daemon
         systemd.daemon.notify("READY=1")
     except ImportError:
         pass
