@@ -3,6 +3,7 @@
 from abc import ABCMeta, abstractmethod
 
 import logging
+import json
 
 class AbstractChecker(metaclass=ABCMeta):
     """Base class for custom checker scripts
@@ -49,20 +50,19 @@ class AbstractChecker(metaclass=ABCMeta):
         To be reimplemented by users"""
         pass
 
-    @abstractmethod
     def store_yaml(self, ident, yaml):
-        "yaml needs to be a object that can be dumped by yaml.dump"
-        pass
+        return self.store_blob(ident, json.dumps(yaml).encode('utf-8'))
 
     @abstractmethod
     def store_blob(self, ident, blob):
         "store binary blob on persistent storage"
         pass
 
-    @abstractmethod
     def retrieve_yaml(self, ident):
-        "returns object as deserialized by yaml.load"
-        pass
+        try:
+            return json.loads(self.retrieve_blob(ident).decode('utf-8'))
+        except ValueError:
+            return None
 
     @abstractmethod
     def retrieve_blob(self, ident):
