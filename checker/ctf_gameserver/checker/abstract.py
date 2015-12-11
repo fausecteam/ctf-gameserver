@@ -19,6 +19,7 @@ class AbstractChecker(metaclass=ABCMeta):
     """
     def __init__(self, tick, team, service, ip):
         self._team = team
+        self._ip = ip
         self._tick = tick
         self._service = service
         self._tickduration = 300
@@ -29,10 +30,9 @@ class AbstractChecker(metaclass=ABCMeta):
         """Returns the current tick"""
         return self._tick
 
-    @abstractmethod
     def check_service(self):
         """ Check if the service is running as expected"""
-        pass
+        return 0
 
     @abstractmethod
     def check_flag(self, tick):
@@ -50,8 +50,18 @@ class AbstractChecker(metaclass=ABCMeta):
         pass
 
     @abstractmethod
+    def store_yaml(self, ident, yaml):
+        "yaml needs to be a object that can be dumped by yaml.dump"
+        pass
+
+    @abstractmethod
     def store_blob(self, ident, blob):
         "store binary blob on persistent storage"
+        pass
+
+    @abstractmethod
+    def retrieve_yaml(self, ident):
+        "returns object as deserialized by yaml.load"
         pass
 
     @abstractmethod
@@ -70,7 +80,7 @@ class AbstractChecker(metaclass=ABCMeta):
         if result != 0:
             return result
 
-        logging.debug("Check service availability")
+        logging.debug("General Service Checks")
         result = self.check_service()
         if result != 0:
             return result

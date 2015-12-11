@@ -8,7 +8,7 @@ import logging
 
 import psycopg2
 
-import flag
+from ctf_gameserver.lib import flag
 
 class FlagHandler(asynchat.async_chat):
     def __init__(self, sock, addr, dbconnection):

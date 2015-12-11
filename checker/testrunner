@@ -13,7 +13,6 @@
 import time
 from subprocess import Popen, PIPE
 import argparse
-import flag
 import codecs
 import sys
 import importlib
