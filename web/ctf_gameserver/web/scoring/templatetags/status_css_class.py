@@ -6,7 +6,7 @@ register = template.Library()    # pylint: disable=invalid-name
 CLASS_MAPPING = {
     _('up'): 'success',
     _('down'): 'danger',
-    _('faulty'): 'warning',
+    _('faulty'): 'danger',
     _('flag not found'): 'warning'
 }
 

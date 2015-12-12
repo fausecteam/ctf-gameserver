@@ -8,13 +8,15 @@
     <h1>{% block title %}{% trans 'Scoreboard' %}{% endblock %}</h1>
 </div>
 
-<div class="table-responsive">
+<div class="clearfix">
     <p class="text-muted pull-right">
         {% blocktrans %}
         Tick: {{ tick }}
         {% endblocktrans %}
     </p>
+</div>
 
+<div class="table-responsive">
     <table class="table">
         <thead>
             <tr>
@@ -24,8 +26,14 @@
                 {% for service in services %}
                 <th>{{ service.name }}</th>
                 {% endfor %}
-                <th class="border-left">{% trans 'Total offense' %}</th>
-                <th>{% trans 'Total defense' %}</th>
+                <th class="border-left">
+                    <span class="glyphicon glyphicon-fire"></span>
+                    {% trans 'Total offense' %}
+                </th>
+                <th>
+                    <span class="glyphicon glyphicon-tower"></span>
+                    {% trans 'Total defense' %}
+                </th>
                 <th class="border-left">{% trans 'Total' %}</th>
             </tr>
         </thead>
@@ -52,22 +60,23 @@
                 {% for service in services %}
                 {% with status=statuses|dict_access:team|dict_access:service %}
                 <td class="{{ status|status_css_class }}">
-                    {{ points.offense.0|dict_access:service }} <br/>
+                    <span class="glyphicon glyphicon-fire"></span>
+                    {{ points.offense.0|dict_access:service|floatformat:2 }} <br/>
+                    <span class="glyphicon glyphicon-tower"></span>
+                    {{ points.defense.0|dict_access:service|floatformat:2 }} <br/>
 
                     {% if status %}
                     <span class="text-{{ status|status_css_class }}">{{ status }}</span> <br/>
                     {% else %}
-                    <span class="text-muted">{% trans 'not checked' %}</span> <br/>
+                    <span class="text-muted">{% trans 'not checked' %}</span>
                     {% endif %}
-
-                    {{ points.defense.0|dict_access:service }}
                 </td>
                 {% endwith %}
                 {% endfor %}
 
-                <td class="border-left">{{ points.offense.1 }}</td>
-                <td>{{ points.defense.1 }}</td>
-                <td class="border-left"><strong>{{ points.total }}</strong></td>
+                <td class="border-left">{{ points.offense.1|floatformat:2 }}</td>
+                <td>{{ points.defense.1|floatformat:2 }}</td>
+                <td class="border-left"><strong>{{ points.total|floatformat:2 }}</strong></td>
             </tr>
             {% endfor %}
         </tbody>
