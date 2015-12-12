@@ -4,6 +4,7 @@ from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 
 from .registration import views as registration_views
+from .scoring import views as scoring_views
 from .flatpages import views as flatpages_views
 from .admin import admin_site
 from .forms import TeamAuthenticationForm, FormalPasswordResetForm
@@ -73,6 +74,10 @@ urlpatterns = [
     url(r'^competition/teams/$',
         registration_views.TeamList.as_view(),
         name='team_list'
+    ),
+    url(r'^competition/scoreboard/$',
+        scoring_views.scoreboard,
+        name='scoreboard'
     ),
 
     url(r'^mail-teams/$',

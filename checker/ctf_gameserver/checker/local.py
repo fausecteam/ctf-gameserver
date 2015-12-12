@@ -1,10 +1,12 @@
 #!/usr/bin/python3
 
-from checker.abstract import AbstractChecker
-import flag
+from .abstract import AbstractChecker
+from ctf_gameserver.lib import flag
 
 import os
 import os.path
+
+import yaml
 
 class LocalChecker(AbstractChecker):
     def __init__(self, tick, team, service, ip):

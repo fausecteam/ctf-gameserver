@@ -24,6 +24,18 @@
     vertical-align: top;
 }
 
+.flatpage-content img {
+    max-width: 100%;
+}
+
+th.border-left, td.border-left {
+    border-left: 2px solid #DDDDDD;
+}
+
+th.border-right, td.border-right {
+    border-right: 2px solid #DDDDDD;
+}
+
 .image-column {
     width: 80px;
 }

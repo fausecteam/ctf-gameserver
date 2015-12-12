@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 
 import argparse
+import logging
+import psycopg2
 
 def update_database(db):
     with db:
@@ -11,11 +13,10 @@ def update_database(db):
                               SELECT svc.id, user_id, current_tick
                               FROM scoring_service svc, registration_team, scoring_gamecontrol""")
 
-def main()
+def main():
     logging.basicConfig()
     parser = argparse.ArgumentParser(description="CTF checker runner")
-    parser.add_argument('--db', type=str,
-                        default="dbname=faustctf user=submission")
+    parser.add_argument('--db', type=str, required=True)
     parser.add_argument('-v', '--loglevel', default='WARNING', type=str,
                         choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
                         help='Loglevel')
@@ -25,7 +26,7 @@ def main()
     numeric_level = getattr(logging, args.loglevel.upper())
     logging.getLogger().setLevel(numeric_level)
 
-    db = psycopg2.connect(args.cachedb)
+    db = psycopg2.connect(args.db)
     update_database(db)
 
 if __name__ == '__main__':

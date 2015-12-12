@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from checker.abstract import AbstractChecker
+from .abstract import AbstractChecker
 
 import base64
 import sys

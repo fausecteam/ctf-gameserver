@@ -13,12 +13,19 @@ def competition_name(request):
     return {'COMPETITION_NAME': settings.COMPETITION_NAME}
 
 
-def registration_open(request):
+def competition_status(request):
     """
-    Context processor which adds information on whether registration is currently open to the context.
+    Context processor which adds information about the competition's status (whether it is running or over
+    and whether registration is open) to the context.
     """
 
-    return {'registration_open': scoring_models.GameControl.objects.get().registration_open}
+    game_control = scoring_models.GameControl.objects.get()
+
+    return {
+        'competition_running': game_control.competition_running(),
+        'competition_over': game_control.competition_over(),
+        'registration_open': game_control.registration_open
+    }
 
 
 def flatpage_nav(request):
