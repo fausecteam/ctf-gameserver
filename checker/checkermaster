@@ -76,44 +76,48 @@ def run_checker(service, team, tick, checker, loglevel, dbconnection):
                                                         stderr=asyncio.subprocess.PIPE,
                                                         stdin=asyncio.subprocess.PIPE)
 
-    logging.debug(repr(process))
+    logger.debug(repr(process))
     while True:
-        line = yield from process.stdout.readline()
-        if process.returncode is not None:
-            print(repr(process.returncode))
+        try:
+            line = yield from process.stdout.readline()
+            if process.returncode is not None:
+                logger.warn(repr(process.returncode))
 
-        if line == b'':
-            err = yield from process.stderr.read()
-            print(err.decode("utf-8"))
-            return
+            if line == b'':
+                err = yield from process.stderr.read()
+                logger.warn(err.decode("utf-8"))
+                return
 
-        logger.debug(repr(line))
-        line = line.decode('us-ascii').split()
+            logger.debug(repr(line))
+            line = line.decode('us-ascii').split()
 
-        if "FLAG" == line[0]:
-            newflag = do_flag(line, service, team)
-            process.stdin.write(newflag.encode('us-ascii'))
-            process.stdin.write(b"\n")
-
-        elif "STORE" == line[0]:
-            try:
-                do_store(line, dbconnection, service, team)
-                process.stdin.write(b"OK\n")
-            except Exception as e:
-                process.stdin.write(b"FAIL\n")
-                logger.warn("Database store failed with %s", repr(e))
-
-        elif "RETRIEVE" == line[0]:
-            try:
-                data = do_retrieve(line, dbconnection, service, team)
-                process.stdin.write(data + b"\n")
-
-            except Exception as e:
+            if "FLAG" == line[0]:
+                newflag = do_flag(line, service, team)
+                process.stdin.write(newflag.encode('us-ascii'))
                 process.stdin.write(b"\n")
-                logger.warn("Database get failed with %s", repr(e))
 
-        elif line[0] in ["OK", "TIMEOUT", "NOTWORKING", "NOTFOUND"]:
-            result = line[0]
+            elif "STORE" == line[0]:
+                try:
+                    do_store(line, dbconnection, service, team)
+                    process.stdin.write(b"OK\n")
+                except Exception as e:
+                    process.stdin.write(b"FAIL\n")
+                    logger.warn("Database store failed with %s", repr(e))
+
+            elif "RETRIEVE" == line[0]:
+                try:
+                    data = do_retrieve(line, dbconnection, service, team)
+                    process.stdin.write(data + b"\n")
+
+                except Exception as e:
+                    process.stdin.write(b"\n")
+                    logger.warn("Database get failed with %s", repr(e))
+
+            elif line[0] in ["OK", "TIMEOUT", "NOTWORKING", "NOTFOUND"]:
+                result = line[0]
+                break
+        except ValueError as e:
+            logger.warn(repr(e))
             break
 
     yield from process.wait()
@@ -131,7 +135,9 @@ def get_fresh_jobs(gamedb, cachedb, config):
         service, team, tick, starttime = open_tasks[task]
         if task.done():
             try:
-                if task.result() is not None:
+                if task.result() is None:
+                    logging.warn("Checkerscript failed for Team %d Tick %d", team, tick)
+                else:
                     result = string_to_result(task.result())
                     with gamedb:
                         with gamedb.cursor() as cursor:
@@ -142,7 +148,7 @@ def get_fresh_jobs(gamedb, cachedb, config):
                                             (service, team, tick, result))
                 del open_tasks[task]
             except Exception as e:
-                print(repr(e))
+                logging.warn(repr(e))
         elif starttime + MAXRUNTIME < datetime.datetime.now():
             logging.warn("aborting job(service=%d, team=%d, tick=%d) due to timeout",
                          service, team, tick)
@@ -181,7 +187,7 @@ def get_fresh_jobs(gamedb, cachedb, config):
         logging.info("started %d (of %d possible) new jobs", len(jobs), new_tasks)
 
     except Exception as e:
-        print(repr(e))
+        logging.warn(repr(e))
 
 
 def main():
