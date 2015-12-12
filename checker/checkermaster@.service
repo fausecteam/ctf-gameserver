@@ -3,7 +3,7 @@ Description=CTF Checker Runner
 
 [Service]
 Type=notify
-ExecStart=/usr/bin/checkermaster --config /etc/faustctf/%i.conf --loglevel INFO
+ExecStart=/usr/bin/checkermaster --config /etc/faustctf/%i.conf --loglevel DEBUG
 Environment=PYTHONPATH=/etc/faustctf/checker
 User=nobody
 Group=nogroup
