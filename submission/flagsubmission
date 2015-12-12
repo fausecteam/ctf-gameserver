@@ -11,7 +11,7 @@ import psycopg2
 from ctf_gameserver.lib import flag
 
 class FlagHandler(asynchat.async_chat):
-    def __init__(self, sock, addr, dbconnection):
+    def __init__(self, sock, addr, dbconnection, conteststart, flagvalidity, tickduration):
         asynchat.async_chat.__init__(self, sock=sock)
         ip, _ = addr
         self.team = ip.split('.')[2]
@@ -23,7 +23,14 @@ class FlagHandler(asynchat.async_chat):
         self.buffer = b''
         self._logger.info("Accepted connection from Team %s", self.team)
         self._banner()
+        self._conteststart = conteststart
+        self._flagvalidity = flagvalidity
+        self._tickduration = tickduration
 
+
+    def _get_tick(self, timestamp):
+        tick = ((timestamp - self._conteststart.timestamp()) / self._tickduration) - self._flagvalidity
+        return int(tick + 0.2)
 
     def _handle_flag(self):
         if self.buffer == b'':
@@ -58,19 +65,27 @@ class FlagHandler(asynchat.async_chat):
 
 
     def _store_capture(self, team, service, timestamp):
-        if not self._cursor:
-            self._cursor = self._dbconnection.cursor()
-
-        self._cursor.execute("""INSERT INTO scoring_capture
-                                       (flag_id, capturing_team_id, timestamp)
+        with self._dbconnection:
+            with self._dbconnection.cursor() as cursor:
+                tick = self._get_tick(timestamp)
+                print("""INSERT INTO scoring_capture
+                                           (flag_id, capturing_team_id, timestamp)
+                                          VALUES (
+                                             (SELECT id FROM scoring_flag
+                                              WHERE service_id = %s
+                                                AND protecting_team_id = %s
+                                                AND tick = %s),
+                                             %s,
+                                             now())""" %  (service, team, tick, self.team))
+                cursor.execute("""INSERT INTO scoring_capture
+                                    (flag_id, capturing_team_id, timestamp, count)
                                   VALUES (
-                                     (SELECT id FROM scoring_flag
-                                      WHERE service_id = %s
-                                        AND protecting_team_id = %s
-                                        AND protection_time = timestamp)
-                                     %s
-                                     now())""", (service, team, self.team))
-        self._cursor.commit()
+                                             (SELECT id FROM scoring_flag
+                                              WHERE service_id = %s
+                                                AND protecting_team_id = %s
+                                                AND tick = %s),
+                                             %s,
+                                             now(), 1)""", (service, team, tick, self.team))
 
     def _banner(self):
         self.push(u"FAUSTCTF Flagserver\n".encode('utf-8'))
@@ -89,18 +104,18 @@ class FlagHandler(asynchat.async_chat):
 
 
 class FlagServer(asyncore.dispatcher):
-    def __init__(self, host, port, dbconnection):
+    def __init__(self, host, port, *args):
         asyncore.dispatcher.__init__(self)
         self.create_socket(family=socket.AF_INET)
         self.set_reuse_addr()
         self.bind((host, port))
         self.listen(5)
+        self._otherargs = args
         self._logger = logging.getLogger("server")
-        self._dbconnection = dbconnection
 
     def handle_accepted(self, sock, addr):
         self._logger.info('Incoming connection from %s', repr(addr))
-        handler = FlagHandler(sock, addr, self._dbconnection)
+        handler = FlagHandler(sock, addr, *self._otherargs)
 
 def main():
     logging.basicConfig(format='%(asctime)s %(levelname)s(%(name)s): %(message)s',
@@ -123,8 +138,15 @@ def main():
     logging.debug("connecting to database")
     dbconnection = psycopg2.connect(args.db)
 
+    with dbconnection:
+        with dbconnection.cursor() as cursor:
+            global conteststart, flagvalidity, tickduration
+            cursor.execute("""SELECT start, valid_ticks, tick_duration
+                              FROM scoring_gamecontrol""")
+            conteststart, flagvalidity, tickduration = cursor.fetchone()
+
     logging.debug("Starting asyncore")
-    server = FlagServer(args.listen, args.port, dbconnection)
+    server = FlagServer(args.listen, args.port, dbconnection, conteststart, flagvalidity, tickduration)
     try:
         import systemd.daemon
         systemd.daemon.notify("READY=1")
