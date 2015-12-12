@@ -13,6 +13,9 @@ class Service(models.Model):
 
     name = models.CharField(max_length=30, unique=True)
 
+    def __str__(self):
+        return self.name
+
 
 class Flag(models.Model):
     """
@@ -30,6 +33,9 @@ class Flag(models.Model):
     class Meta:
         unique_together = ('service', 'protecting_team', 'tick')
 
+    def __str__(self):
+        return 'Flag {:d}'.format(self.id)
+
 
 class Capture(models.Model):
     """
@@ -42,6 +48,9 @@ class Capture(models.Model):
 
     class Meta:
         unique_together = ('flag', 'capturing_team')
+
+    def __str__(self):
+        return 'Capture {:d}'.format(self.id)
 
 
 class StatusCheck(models.Model):
@@ -67,6 +76,9 @@ class StatusCheck(models.Model):
 
     class Meta:
         unique_together = ('service', 'team', 'tick')
+
+    def __str__(self):
+        return 'Status check {:d}'.format(self.id)
 
 
 class GameControl(models.Model):
