@@ -56,7 +56,7 @@ TEMPLATES = [{
             'django.template.context_processors.static',
             'django.template.context_processors.media',
             'ctf_gameserver.web.context_processors.competition_name',
-            'ctf_gameserver.web.context_processors.registration_open',
+            'ctf_gameserver.web.context_processors.competition_status',
             'ctf_gameserver.web.context_processors.flatpage_nav'
         ]
     }

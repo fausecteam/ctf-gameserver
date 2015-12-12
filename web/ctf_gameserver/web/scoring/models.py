@@ -134,3 +134,12 @@ class GameControl(models.Model):
             return False
 
         return self.start < timezone.now() < self.end
+
+    def competition_over(self):
+        """
+        Indicates whether the competition is already over.
+        """
+        if self.start is None or self.end is None:
+            return False
+
+        return self.end < timezone.now()

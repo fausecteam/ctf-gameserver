@@ -1,0 +1,26 @@
+from django import template
+from django.utils.translation import ugettext_lazy as _
+
+register = template.Library()    # pylint: disable=invalid-name
+
+CLASS_MAPPING = {
+    _('up'): 'success',
+    _('down'): 'danger',
+    _('faulty'): 'warning',
+    _('flag not found'): 'warning'
+}
+
+
+@register.filter
+def status_css_class(status):
+    """
+    Template filter to get the appropriate Bootstrap CSS class for (the string representation of) a status
+    from StatusCheck.STATUSES. Primarily designed for table cells, but the classes should work with other
+    objects as well.
+    """
+
+    # Use gray background for missing checks
+    if not status:
+        return 'active'
+
+    return CLASS_MAPPING.get(status, '')
