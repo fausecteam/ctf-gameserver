@@ -14,27 +14,11 @@ class LocalChecker(AbstractChecker):
         self._starttime = 0
         self._backend = '/tmp'
 
-    def store_yaml(self, ident, yamldata):
-        filename = os.path.join(self._backend, "%s.yaml" % ident)
-        try:
-            with open(filename, "w") as handle:
-                return yaml.dump(yamldata, handle)
-        except FileNotFoundError:
-            return None
-
     def store_blob(self, ident, blob):
         filename = os.path.join(self._backend, "%s.blob" % ident)
         try:
             with open(filename, "wb") as handle:
                 return handle.write(blob)
-        except FileNotFoundError:
-            return None
-
-    def retrieve_yaml(self, ident):
-        filename = os.path.join(self._backend, "%s.yaml" % ident)
-        try:
-            with open(filename, "r") as handle:
-                return yaml.load(handle)
         except FileNotFoundError:
             return None
 
