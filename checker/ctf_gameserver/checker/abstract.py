@@ -27,6 +27,7 @@ class AbstractChecker(metaclass=ABCMeta):
         self._service = service
         self._tickduration = 300
         self._lookback = 5
+        self._logger = logging.getLogger("service%02d-team%03d-tick%03d" % (service, team, tick))
 
     @property
     def tick(self):
@@ -78,25 +79,27 @@ class AbstractChecker(metaclass=ABCMeta):
 
     def run(self):
         try:
-            logging.debug("Placing flag")
+            self._logger.debug("Placing flag")
             result = self.place_flag()
             if result != 0:
                 return result
 
-            logging.debug("General Service Checks")
+            self._logger.debug("General Service Checks")
             result = self.check_service()
             if result != 0:
                 return result
 
             oldesttick = max(self._tick - self._lookback, -1)
             for tick in range(self._tick, oldesttick, -1):
-                logging.debug("Checking for flag of tick %d", tick)
+                self._logger.debug("Checking for flag of tick %d", tick)
                 result = self.check_flag(tick)
                 if result != 0:
                     return result
 
             return 0
         except socket.timeout:
+            self._logger.info("Timeout catched by BaseLogger")
             return 1
         except requests.exceptions.Timeout:
+            self._logger.info("Timeout catched by BaseLogger")
             return 1
