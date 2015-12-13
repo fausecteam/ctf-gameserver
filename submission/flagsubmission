@@ -48,9 +48,11 @@ class FlagHandler(asynchat.async_chat):
 
         if datetime.datetime.now() < self._conteststart:
             self._reply(b"Contest didn't even start yet!\n")
+            return
 
         if datetime.datetime.now() > self._contestend:
             self._reply(b"Contest already over!\n")
+            return
 
         try:
             curflag = self.buffer.decode('us-ascii')
