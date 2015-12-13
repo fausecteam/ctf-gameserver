@@ -14,11 +14,11 @@ from ctf_gameserver.lib import flag
 class FlagHandler(asynchat.async_chat):
     def __init__(self, sock, addr, dbconnection, conteststart, contestend, flagvalidity, tickduration):
         asynchat.async_chat.__init__(self, sock=sock)
-        ip, _ = addr
+        ip, port = addr
         self.team = int(ip.split('.')[2])
         self._addr = addr
         self.set_terminator(b"\n")
-        self._logger = logging.getLogger(str(addr[0]))
+        self._logger = logging.getLogger("%13s %5d" % (ip, port))
         self._cursor = None
         self._dbconnection = dbconnection
         self.buffer = b''
@@ -29,6 +29,9 @@ class FlagHandler(asynchat.async_chat):
         self._flagvalidity = flagvalidity
         self._tickduration = tickduration
 
+    def _reply(self, message):
+        self._logger.debug("-> %s" % message.decode('utf-8'))
+        self.push(message)
 
     def _get_tick(self, timestamp):
         tick = ((timestamp - self._conteststart.timestamp()) / self._tickduration) - self._flagvalidity
@@ -36,7 +39,7 @@ class FlagHandler(asynchat.async_chat):
 
     def _handle_flag(self):
         if self.buffer == b'':
-            self.push(b"418 I'm a teapot!\n")
+            self._reply(b"418 I'm a teapot!\n")
             return
 
         if datetime.datetime.now() < self._conteststart:
@@ -48,36 +51,37 @@ class FlagHandler(asynchat.async_chat):
         try:
             curflag = self.buffer.decode('us-ascii')
         except UnicodeDecodeError as e:
-            self.push(u"Flags should be of the Format [-_a-zA-Z0-9]+\n"
+            self._reply(u"Flags should be of the Format [-_a-zA-Z0-9]+\n"
                       .encode('utf-8'))
             return
 
         try:
             team, service, _, timestamp = flag.verify(curflag)
         except flag.InvalidFlagFormat:
-            self.push(b"Flag not recognized\n")
+            self._reply(b"Flag not recognized\n")
             return
         except flag.InvalidFlagMAC:
-            self.push(b"Not such Flag\n")
+            self._reply(b"Not such Flag\n")
             return
         except flag.FlagExpired as e:
-            self.push((u"Flag expired since %.1f seconds\n" % e.args).encode('utf-8'))
+            self._reply((u"Flag expired since %.1f seconds\n" % e.args).encode('utf-8'))
             return
 
+        print("teamcheck", repr(team), repr(self.team))
         if team == self.team:
-            self.push(b"Can't submit a flag for your own team\n")
+            self._reply(b"Can't submit a flag for your own team\n")
             return
 
         try:
             count = self._store_capture(team, service, timestamp):
             if count > 1:
-                self.push(u"Flags should only be submitted once, subtracting penalty!\n".encode('utf-8'))
+                self._reply((u"Flags should only be submitted once (this is %d for your team) subtracting penalty!\n" % count).encode('utf-8'))
             else:
-                self.push(u"Thank you for your submission!\n".encode('utf-8'))
+                self._reply(u"Thank you for your submission!\n".encode('utf-8'))
         except psycopg2.DatabaseError as e:
             self._logger.warn("%s: %s", e.diag.secerity, e.diag.message_primary)
             self._logger.info(e.diag.internal_query)
-            self.push(u"Something went wrong with your submission!\n".encode('utf-8'))
+            self._reply(u"Something went wrong with your submission!\n".encode('utf-8'))
 
 
     def _store_capture(self, team, service, timestamp):
@@ -120,7 +124,7 @@ class FlagHandler(asynchat.async_chat):
 
 
     def found_terminator(self):
-        self._logger.debug(repr(self.buffer))
+        self._logger.debug("<- '%s'", self.buffer.decode('utf-8'))
         self._handle_flag()
         self.buffer = b''
 
