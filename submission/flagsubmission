@@ -46,11 +46,12 @@ class FlagHandler(asynchat.async_chat):
             self._reply(b"So this, then, was the kernel of the brute!")
             return
 
-        if datetime.datetime.now() < self._conteststart:
+        now = datetime.datetime.now(tz=datetime.timezone.utc)
+        if now < self._conteststart:
             self._reply(b"Contest didn't even start yet!")
             return
 
-        if datetime.datetime.now() > self._contestend:
+        if now > self._contestend:
             self._reply(b"Contest already over!")
             return
 
