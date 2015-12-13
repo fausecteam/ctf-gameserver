@@ -14,7 +14,7 @@ class FlagHandler(asynchat.async_chat):
     def __init__(self, sock, addr, dbconnection, conteststart, flagvalidity, tickduration):
         asynchat.async_chat.__init__(self, sock=sock)
         ip, _ = addr
-        self.team = ip.split('.')[2]
+        self.team = int(ip.split('.')[2])
         self._addr = addr
         self.set_terminator(b"\n")
         self._logger = logging.getLogger(str(addr[0]))
