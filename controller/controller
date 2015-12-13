@@ -3,6 +3,7 @@
 import argparse
 import logging
 import psycopg2
+import datetime
 
 def update_database(db):
     with db:
@@ -17,7 +18,7 @@ def main():
     logging.basicConfig()
     parser = argparse.ArgumentParser(description="CTF checker runner")
     parser.add_argument('--db', type=str, required=True)
-    parser.add_argument('-v', '--loglevel', default='WARNING', type=str,
+    parser.add_argument('-v', '--loglevel', default='INFO', type=str,
                         choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
                         help='Loglevel')
 
@@ -27,6 +28,20 @@ def main():
     logging.getLogger().setLevel(numeric_level)
 
     db = psycopg2.connect(args.db)
+
+    with db:
+        with db.cursor() as cursor:
+            cursor.execute('SELECT start, "end" FROM scoring_gamecontrol')
+            start, end = cursor.fetchone()
+
+    now = datetime.datetime.now(tz=datetime.timezone.utc)
+    if now > start:
+        logging.info("Contest not running yet")
+        return
+    elif now > end:
+        logging.info("contest already over")
+        return
+
     update_database(db)
 
 if __name__ == '__main__':
