@@ -4,6 +4,8 @@ from abc import ABCMeta, abstractmethod
 
 import logging
 import json
+import socket
+import requests
 
 class AbstractChecker(metaclass=ABCMeta):
     """Base class for custom checker scripts
@@ -75,21 +77,26 @@ class AbstractChecker(metaclass=ABCMeta):
         pass
 
     def run(self):
-        logging.debug("Placing flag")
-        result = self.place_flag()
-        if result != 0:
-            return result
-
-        logging.debug("General Service Checks")
-        result = self.check_service()
-        if result != 0:
-            return result
-
-        oldesttick = max(self._tick - self._lookback, -1)
-        for tick in range(self._tick, oldesttick, -1):
-            logging.debug("Checking for flag of tick %d", tick)
-            result = self.check_flag(tick)
+        try:
+            logging.debug("Placing flag")
+            result = self.place_flag()
             if result != 0:
                 return result
 
-        return 0
+            logging.debug("General Service Checks")
+            result = self.check_service()
+            if result != 0:
+                return result
+
+            oldesttick = max(self._tick - self._lookback, -1)
+            for tick in range(self._tick, oldesttick, -1):
+                logging.debug("Checking for flag of tick %d", tick)
+                result = self.check_flag(tick)
+                if result != 0:
+                    return result
+
+            return 0
+        except socket.timeout:
+            return 1
+        except requests.exceptions.Timeout:
+            return 1
