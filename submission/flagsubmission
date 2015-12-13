@@ -60,32 +60,47 @@ class FlagHandler(asynchat.async_chat):
             self.push(b"Can't submit a flag for your own team\n")
             return
 
-        self._store_capture(team, service, timestamp)
-        self.push(u"Thank you for your submission!\n".encode('utf-8'))
+        try:
+            count = self._store_capture(team, service, timestamp):
+            if count > 1:
+                self.push(u"Flags should only be submitted once, subtracting penalty!\n".encode('utf-8'))
+            else:
+                self.push(u"Thank you for your submission!\n".encode('utf-8'))
+        except psycopg2.DatabaseError as e:
+            self._logger.warn("%s: %s", e.diag.secerity, e.diag.message_primary)
+            self._logger.info(e.diag.internal_query)
+            self.push(u"Something went wrong with your submission!\n".encode('utf-8'))
 
 
     def _store_capture(self, team, service, timestamp):
         with self._dbconnection:
             with self._dbconnection.cursor() as cursor:
                 tick = self._get_tick(timestamp)
-                print("""INSERT INTO scoring_capture
-                                           (flag_id, capturing_team_id, timestamp)
-                                          VALUES (
-                                             (SELECT id FROM scoring_flag
-                                              WHERE service_id = %s
-                                                AND protecting_team_id = %s
-                                                AND tick = %s),
-                                             %s,
-                                             now())""" %  (service, team, tick, self.team))
-                cursor.execute("""INSERT INTO scoring_capture
-                                    (flag_id, capturing_team_id, timestamp, count)
-                                  VALUES (
-                                             (SELECT id FROM scoring_flag
-                                              WHERE service_id = %s
-                                                AND protecting_team_id = %s
-                                                AND tick = %s),
-                                             %s,
-                                             now(), 1)""", (service, team, tick, self.team))
+                cursor.execute("""SELECT id FROM scoring_flag
+                                  WHERE service_id = %s
+                                    AND protecting_team_id = %s
+                                    AND tick = %s""",
+                               (service, team, tick))
+                flag_id = cursor.fetchone()
+
+                cursor.execute("""SELECT max(count) FROM scoring_capture
+                                  WHERE flag_id = %s
+                                    AND capturing_team_id = %s""",
+                               (flag_id, self.team))
+                count = cursor.fetchone()
+
+                if count is None:
+                    count = 1
+                else:
+                    count = count[0] + 1
+
+                cursor.execute("""INSERT INTO scoring_captures
+                                      (flag_id, capturing_team_id, timestamp, count)
+                                  VALUES
+                                      (%s, %s, now(), %s)""",
+                               (flag_id, self.team, count))
+                return count
+
 
     def _banner(self):
         self.push(u"FAUSTCTF Flagserver\n".encode('utf-8'))
