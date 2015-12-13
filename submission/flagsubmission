@@ -42,6 +42,10 @@ class FlagHandler(asynchat.async_chat):
             self._reply(b"418 I'm a teapot!\n")
             return
 
+        if self.buffer == b'666':
+            self._reply(b"So this, then, was the kernel of the brute!\n")
+            return
+
         if datetime.datetime.now() < self._conteststart:
             self._reply(b"Contest didn't even start yet!\n")
 
