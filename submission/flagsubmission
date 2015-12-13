@@ -174,8 +174,8 @@ def main():
     with dbconnection:
         with dbconnection.cursor() as cursor:
             global conteststart, flagvalidity, tickduration
-            cursor.execute("""SELECT start, end, valid_ticks, tick_duration
-                              FROM scoring_gamecontrol""")
+            cursor.execute('''SELECT start, "end", valid_ticks, tick_duration
+                              FROM scoring_gamecontrol''')
             conteststart, contestend, flagvalidity, tickduration = cursor.fetchone()
 
     logging.debug("Starting asyncore")
