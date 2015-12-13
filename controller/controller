@@ -35,7 +35,7 @@ def main():
             start, end = cursor.fetchone()
 
     now = datetime.datetime.now(tz=datetime.timezone.utc)
-    if now > start:
+    if now < start:
         logging.info("Contest not running yet")
         return
     elif now > end:
