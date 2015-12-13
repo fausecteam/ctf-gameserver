@@ -31,7 +31,7 @@ class FlagHandler(asynchat.async_chat):
 
     def _reply(self, message):
         self._logger.debug("-> %s" % message.decode('utf-8'))
-        self.push(message)
+        self.push(message + "\n")
 
     def _get_tick(self, timestamp):
         tick = ((timestamp - self._conteststart.timestamp()) / self._tickduration) - self._flagvalidity
@@ -39,55 +39,55 @@ class FlagHandler(asynchat.async_chat):
 
     def _handle_flag(self):
         if self.buffer == b'':
-            self._reply(b"418 I'm a teapot!\n")
+            self._reply(b"418 I'm a teapot!")
             return
 
         if self.buffer == b'666':
-            self._reply(b"So this, then, was the kernel of the brute!\n")
+            self._reply(b"So this, then, was the kernel of the brute!")
             return
 
         if datetime.datetime.now() < self._conteststart:
-            self._reply(b"Contest didn't even start yet!\n")
+            self._reply(b"Contest didn't even start yet!")
             return
 
         if datetime.datetime.now() > self._contestend:
-            self._reply(b"Contest already over!\n")
+            self._reply(b"Contest already over!")
             return
 
         try:
             curflag = self.buffer.decode('us-ascii')
         except UnicodeDecodeError as e:
-            self._reply(u"Flags should be of the Format [-_a-zA-Z0-9]+\n"
+            self._reply(u"Flags should be of the Format [-_a-zA-Z0-9]+"
                       .encode('utf-8'))
             return
 
         try:
             team, service, _, timestamp = flag.verify(curflag)
         except flag.InvalidFlagFormat:
-            self._reply(b"Flag not recognized\n")
+            self._reply(b"Flag not recognized")
             return
         except flag.InvalidFlagMAC:
-            self._reply(b"Not such Flag\n")
+            self._reply(b"Not such Flag")
             return
         except flag.FlagExpired as e:
-            self._reply((u"Flag expired since %.1f seconds\n" % e.args).encode('utf-8'))
+            self._reply((u"Flag expired since %.1f seconds" % e.args).encode('utf-8'))
             return
 
         print("teamcheck", repr(team), repr(self.team))
         if team == self.team:
-            self._reply(b"Can't submit a flag for your own team\n")
+            self._reply(b"Can't submit a flag for your own team")
             return
 
         try:
             count = self._store_capture(team, service, timestamp):
             if count > 1:
-                self._reply((u"Flags should only be submitted once (this is %d for your team) subtracting penalty!\n" % count).encode('utf-8'))
+                self._reply((u"Flags should only be submitted once (this is %d for your team) subtracting penalty!" % count).encode('utf-8'))
             else:
-                self._reply(u"Thank you for your submission!\n".encode('utf-8'))
+                self._reply(u"Thank you for your submission!".encode('utf-8'))
         except psycopg2.DatabaseError as e:
             self._logger.warn("%s: %s", e.diag.secerity, e.diag.message_primary)
             self._logger.info(e.diag.internal_query)
-            self._reply(u"Something went wrong with your submission!\n".encode('utf-8'))
+            self._reply(u"Something went wrong with your submission!".encode('utf-8'))
 
 
     def _store_capture(self, team, service, timestamp):
