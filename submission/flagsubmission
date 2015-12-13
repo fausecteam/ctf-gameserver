@@ -5,13 +5,14 @@ import asynchat
 import socket
 import argparse
 import logging
+import datetime
 
 import psycopg2
 
 from ctf_gameserver.lib import flag
 
 class FlagHandler(asynchat.async_chat):
-    def __init__(self, sock, addr, dbconnection, conteststart, flagvalidity, tickduration):
+    def __init__(self, sock, addr, dbconnection, conteststart, contestend, flagvalidity, tickduration):
         asynchat.async_chat.__init__(self, sock=sock)
         ip, _ = addr
         self.team = int(ip.split('.')[2])
@@ -24,6 +25,7 @@ class FlagHandler(asynchat.async_chat):
         self._logger.info("Accepted connection from Team %s", self.team)
         self._banner()
         self._conteststart = conteststart
+        self._contestend = contestend
         self._flagvalidity = flagvalidity
         self._tickduration = tickduration
 
@@ -36,6 +38,12 @@ class FlagHandler(asynchat.async_chat):
         if self.buffer == b'':
             self.push(b"418 I'm a teapot!\n")
             return
+
+        if datetime.datetime.now() < self._conteststart:
+            self._reply(b"Contest didn't even start yet!\n")
+
+        if datetime.datetime.now() > self._contestend:
+            self._reply(b"Contest already over!\n")
 
         try:
             curflag = self.buffer.decode('us-ascii')
@@ -156,12 +164,12 @@ def main():
     with dbconnection:
         with dbconnection.cursor() as cursor:
             global conteststart, flagvalidity, tickduration
-            cursor.execute("""SELECT start, valid_ticks, tick_duration
+            cursor.execute("""SELECT start, end, valid_ticks, tick_duration
                               FROM scoring_gamecontrol""")
-            conteststart, flagvalidity, tickduration = cursor.fetchone()
+            conteststart, contestend, flagvalidity, tickduration = cursor.fetchone()
 
     logging.debug("Starting asyncore")
-    server = FlagServer(args.listen, args.port, dbconnection, conteststart, flagvalidity, tickduration)
+    server = FlagServer(args.listen, args.port, dbconnection, conteststart, contestend, flagvalidity, tickduration)
     try:
         import systemd.daemon
         systemd.daemon.notify("READY=1")
