@@ -12,6 +12,7 @@
             <tr>
                 <th class="image-column"><!-- Image --></th>
                 <th>{% trans 'Name' %}</th>
+                <th>ID</th>
                 <th>{% trans 'Affiliation' %}</th>
                 <th>{% trans 'Country' %}</th>
             </tr>
@@ -29,6 +30,7 @@
                     {% endif %}
                 </td>
                 <td>{{ team.user.username }}</td>
+                <td>{{ team.pk }}</td>
                 <td>{% if team.affiliation %}{{ team.affiliation }}{% endif %}</td>
                 <td>{{ team.country }}</td>
             </tr>
