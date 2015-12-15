@@ -31,14 +31,22 @@ class Team(models.Model):
     image = ThumbnailImageField(upload_to=_gen_image_name, blank=True)
     affiliation = models.CharField(max_length=100, blank=True)
     country = models.CharField(max_length=100)
+    # NOP teams don't get included in the scoring
+    nop_team = models.BooleanField(default=False)
 
     class ActiveObjectsManager(models.Manager):
         def get_queryset(self):
             return super().get_queryset().filter(user__is_active=True)
 
+    class ActiveNotNopObjectsManager(ActiveObjectsManager):
+        def get_queryset(self):
+            return super().get_queryset().filter(nop_team=False)
+
     objects = models.Manager()
     # QuerySet that only returns Teams whose associated user object is not marked as inactive
     active_objects = ActiveObjectsManager()
+    # QuerySet that only returns active Teams that are not marked as NOP team
+    active_not_nop_objects = ActiveNotNopObjectsManager()
 
     def __str__(self):
         return self.user.username

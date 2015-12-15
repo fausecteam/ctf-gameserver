@@ -27,7 +27,7 @@ def score(last_tick):
 
     team_scores = {}
 
-    for team in Team.active_objects.all():
+    for team in Team.active_not_nop_objects.all():
         team_scores[team] = {
             'offense': [defaultdict(lambda: 0.0), 0.0],
             'defense': [defaultdict(lambda: 0.0), 0.0],
@@ -53,14 +53,14 @@ def score(last_tick):
     global_offense_points = 0
     number_of_services = models.Service.objects.count()
 
-    for team in Team.active_objects.all():
+    for team in Team.active_not_nop_objects.all():
         for service, team_points in service_offense_points.items():
             team_scores[team]['offense'][0][service] = team_points[team]
             team_scores[team]['offense'][1] += team_points[team]
             team_scores[team]['total'] += team_points[team]
             global_offense_points += team_points[team]
 
-    for team in Team.active_objects.all():
+    for team in Team.active_not_nop_objects.all():
         for service, team_shares in service_defense_shares.items():
             defense_score = team_shares[team] * global_offense_points / number_of_services
             team_scores[team]['defense'][0][service] = defense_score

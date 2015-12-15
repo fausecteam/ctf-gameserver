@@ -166,6 +166,22 @@ class TeamForm(forms.ModelForm):
         return team
 
 
+class AdminTeamForm(forms.ModelForm):
+    """
+    Form for Team objects to be used in TeamAdmin.
+    """
+
+    class Meta:
+        fields = '__all__'
+        labels = {
+            'nop_team': _('NOP team')
+        }
+        help_texts = {
+            'nop_team': _("NOP teams are meant for demo purposes (to provide a reference image) and don't "
+                          "get included in the scoring.")
+        }
+
+
 class DeleteForm(forms.Form):
     """
     Simple form with one password field for confirmation when deleting a Team.
