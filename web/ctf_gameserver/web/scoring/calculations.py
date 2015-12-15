@@ -14,11 +14,11 @@ BASE_POINTS = 100
 def score(last_tick):
     """
     Returns the score up to the current time (for the offense points) resp. the specified tick (for the
-    defense points) as an OrderedDict in this format:
+    SLA points) as an OrderedDict in this format:
 
         {team: {
             'offense': [{service: offense_points}, total_offense_points],
-            'defense': [{service: defense_points}, total_defense_points],
+            'sla': [{service: sla_points}, total_sla_points],
             'total': total_points
         }}
 
@@ -30,7 +30,7 @@ def score(last_tick):
     for team in Team.active_not_nop_objects.all():
         team_scores[team] = {
             'offense': [defaultdict(lambda: 0.0), 0.0],
-            'defense': [defaultdict(lambda: 0.0), 0.0],
+            'sla': [defaultdict(lambda: 0.0), 0.0],
             'total': 0.0
         }
 
@@ -42,12 +42,12 @@ def score(last_tick):
 
     # Offense points per service (nested per team)
     service_offense_points = {}
-    # Defense points per service (nested per team)
-    service_defense_shares = {}
+    # SLA points per service (nested per team)
+    service_sla_shares = {}
 
     for service in models.Service.objects.all():
         service_offense_points[service] = _capture_points(service)
-        service_defense_shares[service] = _up_shares(service, last_tick)
+        service_sla_shares[service] = _uptime_shares(service, last_tick)
 
     # Total offense points of all teams and services
     global_offense_points = 0
@@ -61,11 +61,11 @@ def score(last_tick):
             global_offense_points += team_points[team]
 
     for team in Team.active_not_nop_objects.all():
-        for service, team_shares in service_defense_shares.items():
-            defense_score = team_shares[team] * global_offense_points / number_of_services
-            team_scores[team]['defense'][0][service] = defense_score
-            team_scores[team]['defense'][1] += defense_score
-            team_scores[team]['total'] += defense_score
+        for service, team_shares in service_sla_shares.items():
+            sla_score = team_shares[team] * global_offense_points / number_of_services
+            team_scores[team]['sla'][0][service] = sla_score
+            team_scores[team]['sla'][1] += sla_score
+            team_scores[team]['total'] += sla_score
 
     return OrderedDict(sorted(team_scores.items(), key=lambda t: t[1]['total'], reverse=True))
 
@@ -105,7 +105,7 @@ def _capture_points(service):
     return team_points
 
 
-def _up_shares(service, last_tick):
+def _uptime_shares(service, last_tick):
     """
     Returns the share (i.e. percentage) of one team in all ticks for which the specified service has been
     checked as 'up'. The result is a mapping from teams to their respective shares.

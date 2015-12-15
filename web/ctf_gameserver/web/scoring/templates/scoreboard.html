@@ -27,12 +27,12 @@
                 <th>{{ service.name }}</th>
                 {% endfor %}
                 <th class="border-left">
-                    <span class="glyphicon glyphicon-fire"></span>
+                    <span class="glyphicon glyphicon-fire"></span> <span class="sr-only">Offense</span>
                     {% trans 'Total offense' %}
                 </th>
                 <th>
-                    <span class="glyphicon glyphicon-tower"></span>
-                    {% trans 'Total defense' %}
+                    <span class="glyphicon glyphicon-dashboard"></span> <span class="sr-only">SLA</span>
+                    {% trans 'Total SLA' %}
                 </th>
                 <th class="border-left">{% trans 'Total' %}</th>
             </tr>
@@ -60,10 +60,10 @@
                 {% for service in services %}
                 {% with status=statuses|dict_access:team|dict_access:service %}
                 <td class="{{ status|status_css_class }}">
-                    <span class="glyphicon glyphicon-fire"></span>
+                    <span class="glyphicon glyphicon-fire"></span> <span class="sr-only">Offense</span>
                     {{ points.offense.0|dict_access:service|floatformat:2 }} <br/>
-                    <span class="glyphicon glyphicon-tower"></span>
-                    {{ points.defense.0|dict_access:service|floatformat:2 }} <br/>
+                    <span class="glyphicon glyphicon-dashboard"></span> <span class="sr-only">SLA</span>
+                    {{ points.sla.0|dict_access:service|floatformat:2 }} <br/>
 
                     {% if status %}
                     <span class="text-{{ status|status_css_class }}">{{ status }}</span> <br/>
@@ -75,7 +75,7 @@
                 {% endfor %}
 
                 <td class="border-left">{{ points.offense.1|floatformat:2 }}</td>
-                <td>{{ points.defense.1|floatformat:2 }}</td>
+                <td>{{ points.sla.1|floatformat:2 }}</td>
                 <td class="border-left"><strong>{{ points.total|floatformat:2 }}</strong></td>
             </tr>
             {% endfor %}
