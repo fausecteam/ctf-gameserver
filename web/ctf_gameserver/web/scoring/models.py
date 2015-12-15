@@ -19,7 +19,7 @@ class Service(models.Model):
 
 class Flag(models.Model):
     """
-    Database representation of a flag. The actual flag string needn't be stored, as it can easily be
+    Database representation of a flag. The actual flag string needn't be stored, as its relevant parts can be
     reconstructed from this information.
     """
 
