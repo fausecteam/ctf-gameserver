@@ -7,7 +7,8 @@ CLASS_MAPPING = {
     _('up'): 'success',
     _('down'): 'danger',
     _('faulty'): 'danger',
-    _('flag not found'): 'warning'
+    _('flag not found'): 'warning',
+    _('recovering'): 'info'
 }
 
 

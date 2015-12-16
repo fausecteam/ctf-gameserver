@@ -65,7 +65,8 @@ class StatusCheck(models.Model):
         _('up'): 0,
         _('down'): 1,
         _('faulty'): 2,
-        _('flag not found'): 3
+        _('flag not found'): 3,
+        _('recovering'): 4
     }
 
     service = models.ForeignKey(Service)
