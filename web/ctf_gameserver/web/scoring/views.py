@@ -12,7 +12,6 @@ def scoreboard(request):
     if game_control.competition_over():
         last_tick = game_control.current_tick
     else:
-        # REVISIT when assumptions about tick values are fixed
         last_tick = game_control.current_tick - 1
 
     services = models.Service.objects.all()

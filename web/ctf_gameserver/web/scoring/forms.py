@@ -16,7 +16,7 @@ class GameControlAdminForm(forms.ModelForm):
 
     class Meta:
         model = models.GameControl
-        fields = '__all__'
+        exclude = ('current_tick',)
         help_texts = {
             'valid_ticks': _('Number of ticks a flag is valid for')
         }

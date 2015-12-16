@@ -96,7 +96,7 @@ class GameControl(models.Model):
     tick_duration = models.PositiveSmallIntegerField(default=180)
     # Number of ticks a flag is valid for including the one it was generated in
     valid_ticks = models.PositiveSmallIntegerField(default=5)
-    current_tick = models.PositiveSmallIntegerField(default=0, editable=False)
+    current_tick = models.SmallIntegerField(default=-1)
     registration_open = models.BooleanField(default=True)
 
     class Meta:

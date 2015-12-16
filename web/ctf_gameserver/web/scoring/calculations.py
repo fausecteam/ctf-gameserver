@@ -36,8 +36,7 @@ def score(last_tick):
 
     game_control = models.GameControl.objects.get()
 
-    # REVISIT when assumptions about tick values are fixed
-    if not (game_control.competition_running() or game_control.competition_over()) or last_tick < 1:
+    if not (game_control.competition_running() or game_control.competition_over()) or last_tick < 0:
         return team_scores
 
     # Offense points per service (nested per team)
@@ -90,9 +89,8 @@ def _capture_points(service):
     for capture in captures:
         reference_tick = capture.flag.tick - game_control.valid_ticks
 
-        # REVISIT when assumptions about tick values are fixed
-        if reference_tick < 1:
-            reference_tick = 1
+        if reference_tick < 0:
+            reference_tick = 0
 
         # This is prone to non-repeatable reads after the generation of captures_per_tick
         try:
