@@ -7,6 +7,8 @@ import json
 import socket
 import requests
 
+from . import OK, TIMEOUT, RECOVERING, NOTFOUND
+
 class AbstractChecker(metaclass=ABCMeta):
     """Base class for custom checker scripts
 
@@ -81,25 +83,29 @@ class AbstractChecker(metaclass=ABCMeta):
         try:
             self.logger.debug("Placing flag")
             result = self.place_flag()
-            if result != 0:
+            if result != OK:
                 return result
 
             self.logger.debug("General Service Checks")
             result = self.check_service()
-            if result != 0:
+            if result != OK:
                 return result
 
             oldesttick = max(self._tick - self._lookback, -1)
             for tick in range(self._tick, oldesttick, -1):
                 self.logger.debug("Checking for flag of tick %d", tick)
                 result = self.check_flag(tick)
-                if result != 0:
-                    return result
+                if result != OK:
+                    if tick != self._tick and result == NOTFOUND:
+                        return RECOVERING
+                    else:
+                        return result
 
-            return 0
+            return OK
+
         except socket.timeout:
             self.logger.info("Timeout catched by BaseLogger")
-            return 1
+            return TIMEOUT
         except requests.exceptions.Timeout:
             self.logger.info("Timeout catched by BaseLogger")
-            return 1
+            return TIMEOUT
