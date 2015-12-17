@@ -44,6 +44,7 @@ class Capture(models.Model):
 
     flag = models.ForeignKey(Flag)
     capturing_team = models.ForeignKey(Team)
+    tick = models.PositiveSmallIntegerField()
     timestamp = models.DateTimeField(auto_now_add=True)
 
     class Meta:
