@@ -3,6 +3,6 @@ Description=FAUST-CTF: run game tick
 
 [Service]
 Type=oneshot
-ExecStart=controller
+ExecStart=/usr/bin/controller
 User=nobody
 Group=nogroup

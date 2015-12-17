@@ -1,5 +1,6 @@
 from collections import defaultdict, OrderedDict
 
+from django.core.cache import cache
 from django.db.models import Count
 from django.utils.translation import ugettext as _
 
@@ -11,63 +12,91 @@ from . import models
 BASE_POINTS = 100
 
 
+def _zero():
+    """
+    Helper function which just returns zero as float.
+    It is designed as 'default_factory' argument for defaultdicts to be cached, as they cannot be pickled
+    when using anonymous functions.
+    """
+
+    return 0.0
+
+
+def _empty_dict():
+    """
+    Helper function which just returns an empty dictionary.
+    It is designed as 'default_factory' argument for defaultdicts to be cached, as they cannot be pickled
+    when using anonymous functions.
+    """
+
+    return {}
+
+
 def score(last_tick):
     """
     Returns the score up to the current time (for the offense points) resp. the specified tick (for the
-    defense points) as an OrderedDict in this format:
+    SLA points) as an OrderedDict in this format:
 
         {team: {
             'offense': [{service: offense_points}, total_offense_points],
-            'defense': [{service: defense_points}, total_defense_points],
+            'sla': [{service: sla_points}, total_sla_points],
             'total': total_points
         }}
 
     The result is sorted by the total points.
     """
 
+    cache_key = 'score_tick-{:d}'.format(last_tick)
+    cached_scores = cache.get(cache_key)
+
+    if cached_scores is not None:
+        return cached_scores
+
     team_scores = {}
 
-    for team in Team.active_objects.all():
+    for team in Team.active_not_nop_objects.all():
         team_scores[team] = {
-            'offense': [defaultdict(lambda: 0.0), 0.0],
-            'defense': [defaultdict(lambda: 0.0), 0.0],
+            'offense': [defaultdict(_zero), 0.0],
+            'sla': [defaultdict(_zero), 0.0],
             'total': 0.0
         }
 
     game_control = models.GameControl.objects.get()
 
-    # REVISIT when assumptions about tick values are fixed
-    if not (game_control.competition_running() or game_control.competition_over()) or last_tick < 1:
+    if not (game_control.competition_running() or game_control.competition_over()) or last_tick < 0:
         return team_scores
 
     # Offense points per service (nested per team)
     service_offense_points = {}
-    # Defense points per service (nested per team)
-    service_defense_shares = {}
+    # SLA points per service (nested per team)
+    service_sla_shares = {}
 
     for service in models.Service.objects.all():
         service_offense_points[service] = _capture_points(service)
-        service_defense_shares[service] = _up_shares(service, last_tick)
+        service_sla_shares[service] = _uptime_shares(service, last_tick)
 
     # Total offense points of all teams and services
     global_offense_points = 0
     number_of_services = models.Service.objects.count()
 
-    for team in Team.active_objects.all():
+    for team in Team.active_not_nop_objects.all():
         for service, team_points in service_offense_points.items():
             team_scores[team]['offense'][0][service] = team_points[team]
             team_scores[team]['offense'][1] += team_points[team]
             team_scores[team]['total'] += team_points[team]
             global_offense_points += team_points[team]
 
-    for team in Team.active_objects.all():
-        for service, team_shares in service_defense_shares.items():
-            defense_score = team_shares[team] * global_offense_points / number_of_services
-            team_scores[team]['defense'][0][service] = defense_score
-            team_scores[team]['defense'][1] += defense_score
-            team_scores[team]['total'] += defense_score
+    for team in Team.active_not_nop_objects.all():
+        for service, team_shares in service_sla_shares.items():
+            sla_score = team_shares[team] * global_offense_points / number_of_services
+            team_scores[team]['sla'][0][service] = sla_score
+            team_scores[team]['sla'][1] += sla_score
+            team_scores[team]['total'] += sla_score
 
-    return OrderedDict(sorted(team_scores.items(), key=lambda t: t[1]['total'], reverse=True))
+    sorted_team_scores = OrderedDict(sorted(team_scores.items(), key=lambda t: t[1]['total'], reverse=True))
+    cache.set(cache_key, sorted_team_scores)
+
+    return sorted_team_scores
 
 
 def _capture_points(service):
@@ -84,15 +113,14 @@ def _capture_points(service):
     tick_capture_counts = {c['flag__tick']: c['value'] for c in tick_capture_counts_list}
 
     # Points scored by capturing flags from this service per team
-    team_points = defaultdict(lambda: 0.0)
+    team_points = defaultdict(_zero)
     game_control = models.GameControl.objects.get()
 
     for capture in captures:
         reference_tick = capture.flag.tick - game_control.valid_ticks
 
-        # REVISIT when assumptions about tick values are fixed
-        if reference_tick < 1:
-            reference_tick = 1
+        if reference_tick < 0:
+            reference_tick = 0
 
         # This is prone to non-repeatable reads after the generation of captures_per_tick
         try:
@@ -105,7 +133,7 @@ def _capture_points(service):
     return team_points
 
 
-def _up_shares(service, last_tick):
+def _uptime_shares(service, last_tick):
     """
     Returns the share (i.e. percentage) of one team in all ticks for which the specified service has been
     checked as 'up'. The result is a mapping from teams to their respective shares.
@@ -120,7 +148,7 @@ def _up_shares(service, last_tick):
     team_counts = status_checks.order_by().values('team').annotate(value=Count('team'))
 
     # Share in the total 'up' checks per team
-    team_shares = defaultdict(lambda: 0.0)
+    team_shares = defaultdict(_zero)
 
     for count in team_counts:
         team = Team.objects.get(pk=count['team'])
@@ -129,17 +157,34 @@ def _up_shares(service, last_tick):
     return team_shares
 
 
-def team_statuses(tick):
+def team_statuses(from_tick, to_tick):
     """
-    Returns the status of all teams and all services in the specified tick. The result is a mapping from
-    teams to a mapping from services to the respective status string.
+    Returns the statuses of all teams and all services in the specified range of ticks. The result is an
+    OrderedDict sorted by the team's names in this format:
+
+        {'team': {
+            'tick': {
+                'service': status
+            }
+        }}
     """
 
-    team_statuses = {}
-    status_checks = models.StatusCheck.objects.filter(tick=tick)
+    cache_key = 'team-statuses'
+    cached_statuses = cache.get(cache_key)
+
+    if cached_statuses is not None:
+        return cached_statuses
+
+    statuses = {}
+    status_checks = models.StatusCheck.objects.filter(tick__gte=from_tick, tick__lte=to_tick)
 
     for team in Team.active_objects.all():
-        team_status_checks = status_checks.filter(team=team)
-        team_statuses[team] = {check.service: check.get_status_display() for check in team_status_checks}
+        statuses[team] = defaultdict(_empty_dict)
 
-    return team_statuses
+        for check in status_checks.filter(team=team):
+            statuses[team][check.tick][check.service] = check.get_status_display()
+
+    sorted_statuses = OrderedDict(sorted(statuses.items(), key=lambda s: s[0].user.username))
+    cache.set(cache_key, sorted_statuses, 10)
+
+    return sorted_statuses

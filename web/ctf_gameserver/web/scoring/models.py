@@ -19,7 +19,7 @@ class Service(models.Model):
 
 class Flag(models.Model):
     """
-    Database representation of a flag. The actual flag string needn't be stored, as it can easily be
+    Database representation of a flag. The actual flag string needn't be stored, as its relevant parts can be
     reconstructed from this information.
     """
 
@@ -68,7 +68,8 @@ class StatusCheck(models.Model):
         _('up'): 0,
         _('down'): 1,
         _('faulty'): 2,
-        _('flag not found'): 3
+        _('flag not found'): 3,
+        _('recovering'): 4
     }
 
     service = models.ForeignKey(Service)
@@ -96,9 +97,9 @@ class GameControl(models.Model):
     paused = models.BooleanField(default=False)
     # Tick duration in seconds
     tick_duration = models.PositiveSmallIntegerField(default=180)
-    # Number of ticks a flag is valid for
+    # Number of ticks a flag is valid for including the one it was generated in
     valid_ticks = models.PositiveSmallIntegerField(default=5)
-    current_tick = models.PositiveSmallIntegerField(default=0, editable=False)
+    current_tick = models.SmallIntegerField(default=-1)
     registration_open = models.BooleanField(default=True)
 
     class Meta:

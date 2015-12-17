@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
 
 from .models import Team
+from .forms import AdminTeamForm
 
 
 class InlineTeamAdmin(admin.StackedInline):
@@ -10,6 +11,7 @@ class InlineTeamAdmin(admin.StackedInline):
     """
 
     model = Team
+    form = AdminTeamForm
 
     # Abuse the plural title as headline, since more than one team will never be edited using this inline
     verbose_name_plural = _('Associated team')

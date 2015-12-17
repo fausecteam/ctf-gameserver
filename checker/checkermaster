@@ -9,6 +9,7 @@ import psycopg2
 import base64
 import datetime
 import codecs
+import signal
 
 from ctf_gameserver.lib import flag
 from ctf_gameserver.checker import string_to_result
@@ -18,6 +19,13 @@ conteststart = None
 flagvalidity = None
 tickduration = None
 open_tasks = dict()
+stopping = False
+
+def handle_stop(signum, frame):
+    global stopping
+    stopping = True
+    logging.warn("Received signal, stopping the checkermaster gracefully")
+
 
 def do_store(line, dbconnection, service, team):
     with dbconnection:
@@ -126,9 +134,9 @@ def run_checker(service, team, tick, checker, loglevel, dbconnection):
 
 
 def get_fresh_jobs(gamedb, cachedb, config):
+    notify("WATCHDOG=1")
     loop = asyncio.get_event_loop()
     loop.call_later(int(config['CTF']['refresh']), get_fresh_jobs, gamedb, cachedb, config)
-
 
     tasks = list(open_tasks.keys())
     for task in tasks:
@@ -146,6 +154,12 @@ def get_fresh_jobs(gamedb, cachedb, config):
                                               VALUES
                                                  (%s, %s, %s, %s, now())""",
                                             (service, team, tick, result))
+                            cursor.execute("""UPDATE scoring_flag
+                                              SET placement_end = now()
+                                              WHERE service_id = %s
+                                                AND protecting_team_id = %s
+                                                AND tick = %s""",
+                                           service, team, tick)
                 del open_tasks[task]
             except Exception as e:
                 logging.warn(repr(e))
@@ -156,7 +170,19 @@ def get_fresh_jobs(gamedb, cachedb, config):
                 del open_tasks[task]
 
     current_tasks = len(open_tasks)
+
+    if stopping:
+        if current_tasks == 0:
+            sys.exit(0)
+        else:
+            return
+
     new_tasks = int(config['CTF']['maxtasks']) - current_tasks
+    if new_tasks < int(config['CTF']['minstart']):
+        new_tasks = int(config['CTF']['minstart'])
+    elif new_tasks > int(config['CTF']['maxstart']):
+        new_tasks = int(config['CTF']['maxstart'])
+
     logging.info("Currently running %d tasks, starting up to %d fresh ones",
                  current_tasks, new_tasks)
 
@@ -224,15 +250,22 @@ def main():
                               FROM scoring_gamecontrol""")
             conteststart, flagvalidity, tickduration = cursor.fetchone()
 
+    signal.signal(signal.SIGUSR1, handle_stop)
+
     loop = asyncio.get_event_loop()
     loop.call_soon(get_fresh_jobs, gamedb, cachedb, config)
-    try:
-        import systemd.daemon
-        systemd.daemon.notify("READY=1")
-    except ImportError:
-        pass
+
+    notify("READY=1")
 
     loop.run_forever()
+
+try:
+    import systemd.daemon
+    notify = systemd.daemon.notify
+except ImportError:
+    def notify(arg):
+        pass
+
 
 if __name__ == '__main__':
     main()

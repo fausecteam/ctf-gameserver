@@ -4,6 +4,8 @@ from abc import ABCMeta, abstractmethod
 
 import logging
 import json
+import socket
+import requests
 
 class AbstractChecker(metaclass=ABCMeta):
     """Base class for custom checker scripts
@@ -25,6 +27,7 @@ class AbstractChecker(metaclass=ABCMeta):
         self._service = service
         self._tickduration = 300
         self._lookback = 5
+        self.logger = logging.getLogger("service%02d-team%03d-tick%03d" % (service, team, tick))
 
     @property
     def tick(self):
@@ -75,21 +78,32 @@ class AbstractChecker(metaclass=ABCMeta):
         pass
 
     def run(self):
-        logging.debug("Placing flag")
-        result = self.place_flag()
-        if result != 0:
-            return result
-
-        logging.debug("General Service Checks")
-        result = self.check_service()
-        if result != 0:
-            return result
-
-        oldesttick = max(self._tick - self._lookback, -1)
-        for tick in range(self._tick, oldesttick, -1):
-            logging.debug("Checking for flag of tick %d", tick)
-            result = self.check_flag(tick)
-            if result != 0:
+        try:
+            self.logger.debug("Placing flag")
+            result = self.place_flag()
+            if result != OK:
                 return result
 
-        return 0
+            self.logger.debug("General Service Checks")
+            result = self.check_service()
+            if result != OK:
+                return result
+
+            oldesttick = max(self._tick - self._lookback, -1)
+            for tick in range(self._tick, oldesttick, -1):
+                self.logger.debug("Checking for flag of tick %d", tick)
+                result = self.check_flag(tick)
+                if result != OK:
+                    if tick != self._tick and result == NOTFOUND:
+                        return RECOVERING
+                    else:
+                        return result
+
+            return OK
+
+        except socket.timeout:
+            self.logger.info("Timeout catched by BaseLogger")
+            return TIMEOUT
+        except requests.exceptions.Timeout:
+            self.logger.info("Timeout catched by BaseLogger")
+            return TIMEOUT

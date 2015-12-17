@@ -81,6 +81,9 @@
                                 <li><a href="{% url 'team_list' %}">{% trans 'Registered teams' %}</a></li>
                                 {% if competition_running or competition_over %}
                                 <li><a href="{% url 'scoreboard' %}">{% trans 'Scoreboard' %}</a></li>
+                                <li><a href="{% url 'service_status' %}">
+                                    {% trans 'Service status' %}
+                                </a></li>
                                 {% endif %}
                             </ul>
                         </li>

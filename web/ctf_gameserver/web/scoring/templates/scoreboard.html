@@ -8,13 +8,19 @@
     <h1>{% block title %}{% trans 'Scoreboard' %}{% endblock %}</h1>
 </div>
 
-<div class="table-responsive">
+<div class="clearfix">
+    <div class="pull-left">
+        {% include 'competition_nav.html' with active='scoreboard' %}
+    </div>
+
     <p class="text-muted pull-right">
         {% blocktrans %}
         Tick: {{ tick }}
         {% endblocktrans %}
     </p>
+</div>
 
+<div class="table-responsive">
     <table class="table">
         <thead>
             <tr>
@@ -24,15 +30,21 @@
                 {% for service in services %}
                 <th>{{ service.name }}</th>
                 {% endfor %}
-                <th class="border-left">{% trans 'Total offense' %}</th>
-                <th>{% trans 'Total defense' %}</th>
+                <th class="border-left">
+                    <span class="glyphicon glyphicon-fire"></span> <span class="sr-only">Offense</span>
+                    {% trans 'Total offense' %}
+                </th>
+                <th>
+                    <span class="glyphicon glyphicon-dashboard"></span> <span class="sr-only">SLA</span>
+                    {% trans 'Total SLA' %}
+                </th>
                 <th class="border-left">{% trans 'Total' %}</th>
             </tr>
         </thead>
 
         <tbody>
             {% for team, points in score.items %}
-            <tr>
+            <tr id="team-{{ team.user.pk }}-row">
                 <td><strong>{{ forloop.counter }}.</strong></td>
 
                 <td>
@@ -50,24 +62,27 @@
                 </td>
 
                 {% for service in services %}
-                {% with status=statuses|dict_access:team|dict_access:service %}
+                {% with status=statuses|dict_access:team|dict_access:tick|dict_access:service %}
                 <td class="{{ status|status_css_class }}">
-                    {{ points.offense.0|dict_access:service }} <br/>
+                    <span class="glyphicon glyphicon-fire"></span> <span class="sr-only">Offense</span>
+                    {{ points.offense.0|dict_access:service|floatformat:2 }} <br/>
+                    <span class="glyphicon glyphicon-dashboard"></span> <span class="sr-only">SLA</span>
+                    {{ points.sla.0|dict_access:service|floatformat:2 }} <br/>
 
+                    <a href="{% url 'service_status' %}#team-{{ team.user.id }}-row">
                     {% if status %}
-                    <span class="text-{{ status|status_css_class }}">{{ status }}</span> <br/>
+                    <span class="text-{{ status|status_css_class }}">{{ status }}</span>
                     {% else %}
-                    <span class="text-muted">{% trans 'not checked' %}</span> <br/>
+                    <span class="text-muted">{% trans 'not checked' %}</span>
                     {% endif %}
-
-                    {{ points.defense.0|dict_access:service }}
+                    </a>
                 </td>
                 {% endwith %}
                 {% endfor %}
 
-                <td class="border-left">{{ points.offense.1 }}</td>
-                <td>{{ points.defense.1 }}</td>
-                <td class="border-left"><strong>{{ points.total }}</strong></td>
+                <td class="border-left">{{ points.offense.1|floatformat:2 }}</td>
+                <td>{{ points.sla.1|floatformat:2 }}</td>
+                <td class="border-left"><strong>{{ points.total|floatformat:2 }}</strong></td>
             </tr>
             {% endfor %}
         </tbody>

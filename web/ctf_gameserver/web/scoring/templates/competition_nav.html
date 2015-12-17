@@ -1,0 +1,21 @@
+{% load i18n %}
+
+{% comment %}
+Horizontal 'nav-pill' navigation for pages from the "competition" category of the main navigation.
+It should be used with the `include` template tag. The active page can be highlighted by supplying its view's
+name as 'active' argument using `include with`.
+{% endcomment %}
+
+{% if competition_running or competition_over %}
+<ul class="nav nav-pills">
+    <li class="{% if active == 'team_list' %}active{% endif %}">
+        <a href="{% url 'team_list' %}">{% trans 'Registered teams' %}</a>
+    </li>
+    <li class="{% if active == 'scoreboard' %}active{% endif %}">
+        <a href="{% url 'scoreboard' %}">{% trans 'Scoreboard' %}</a>
+    </li>
+    <li class="{% if active == 'service_status' %}active{% endif %}">
+        <a href="{% url 'service_status' %}">{% trans 'Service status' %}</a>
+    </li>
+</ul>
+{% endif %}

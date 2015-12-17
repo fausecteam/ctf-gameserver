@@ -4,8 +4,10 @@ import logging
 import argparse
 import importlib
 import sys
+import socket
 
 def run(args):
+    socket.setdefaulttimeout(10)
     logging.debug("Importing checker")
     checkermod, checkerclass = args.checker.split(":")
     checkermod = importlib.import_module(checkermod)
