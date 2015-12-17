@@ -68,6 +68,9 @@ DEFAULT_FROM_EMAIL = 'orga@faustctf.net'
 # ("/uploads" by default)
 MEDIA_ROOT = '/var/www/gameserver_uploads'
 
+# The backend used to store user sessions
+SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
+
 # A long, random string, which you are supposed to keep secret
 SECRET_KEY = ''
 
