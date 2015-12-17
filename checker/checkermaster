@@ -134,6 +134,7 @@ def run_checker(service, team, tick, checker, loglevel, dbconnection):
 
 
 def get_fresh_jobs(gamedb, cachedb, config):
+    notify("WATCHDOG=1")
     loop = asyncio.get_event_loop()
     loop.call_later(int(config['CTF']['refresh']), get_fresh_jobs, gamedb, cachedb, config)
 
