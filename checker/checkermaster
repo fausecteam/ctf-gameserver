@@ -172,6 +172,11 @@ def get_fresh_jobs(gamedb, cachedb, config):
             return
 
     new_tasks = int(config['CTF']['maxtasks']) - current_tasks
+    if new_tasks < config['CTF']['minstart']:
+        new_tasks = config['CTF']['minstart']
+    elif new_tasks > config['CTF']['maxstart']:
+        new_tasks = config['CTF']['maxstart']
+
     logging.info("Currently running %d tasks, starting up to %d fresh ones",
                  current_tasks, new_tasks)
 
