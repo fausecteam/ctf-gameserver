@@ -7,8 +7,6 @@ import json
 import socket
 import requests
 
-from . import OK, TIMEOUT, RECOVERING, NOTFOUND
-
 class AbstractChecker(metaclass=ABCMeta):
     """Base class for custom checker scripts
 
