@@ -1,5 +1,6 @@
 from collections import defaultdict, OrderedDict
 
+from django.core.cache import cache
 from django.db.models import Count
 from django.utils.translation import ugettext as _
 
@@ -9,6 +10,26 @@ from . import models
 # Base value for the (offense) points per service and tick, all other scores are calculated as a function of
 # this
 BASE_POINTS = 100
+
+
+def _zero():
+    """
+    Helper function which just returns zero as float.
+    It is designed as 'default_factory' argument for defaultdicts to be cached, as they cannot be pickled
+    when using anonymous functions.
+    """
+
+    return 0.0
+
+
+def _empty_dict():
+    """
+    Helper function which just returns an empty dictionary.
+    It is designed as 'default_factory' argument for defaultdicts to be cached, as they cannot be pickled
+    when using anonymous functions.
+    """
+
+    return {}
 
 
 def score(last_tick):
@@ -25,12 +46,18 @@ def score(last_tick):
     The result is sorted by the total points.
     """
 
+    cache_key = 'score_tick-{:d}'.format(last_tick)
+    cached_scores = cache.get(cache_key)
+
+    if cached_scores is not None:
+        return cached_scores
+
     team_scores = {}
 
     for team in Team.active_not_nop_objects.all():
         team_scores[team] = {
-            'offense': [defaultdict(lambda: 0.0), 0.0],
-            'sla': [defaultdict(lambda: 0.0), 0.0],
+            'offense': [defaultdict(_zero), 0.0],
+            'sla': [defaultdict(_zero), 0.0],
             'total': 0.0
         }
 
@@ -66,7 +93,10 @@ def score(last_tick):
             team_scores[team]['sla'][1] += sla_score
             team_scores[team]['total'] += sla_score
 
-    return OrderedDict(sorted(team_scores.items(), key=lambda t: t[1]['total'], reverse=True))
+    sorted_team_scores = OrderedDict(sorted(team_scores.items(), key=lambda t: t[1]['total'], reverse=True))
+    cache.set(cache_key, sorted_team_scores)
+
+    return sorted_team_scores
 
 
 def _capture_points(service):
@@ -83,7 +113,7 @@ def _capture_points(service):
     tick_capture_counts = {c['flag__tick']: c['value'] for c in tick_capture_counts_list}
 
     # Points scored by capturing flags from this service per team
-    team_points = defaultdict(lambda: 0.0)
+    team_points = defaultdict(_zero)
     game_control = models.GameControl.objects.get()
 
     for capture in captures:
@@ -118,7 +148,7 @@ def _uptime_shares(service, last_tick):
     team_counts = status_checks.order_by().values('team').annotate(value=Count('team'))
 
     # Share in the total 'up' checks per team
-    team_shares = defaultdict(lambda: 0.0)
+    team_shares = defaultdict(_zero)
 
     for count in team_counts:
         team = Team.objects.get(pk=count['team'])
@@ -139,13 +169,22 @@ def team_statuses(from_tick, to_tick):
         }}
     """
 
+    cache_key = 'team-statuses'
+    cached_statuses = cache.get(cache_key)
+
+    if cached_statuses is not None:
+        return cached_statuses
+
     statuses = {}
     status_checks = models.StatusCheck.objects.filter(tick__gte=from_tick, tick__lte=to_tick)
 
     for team in Team.active_objects.all():
-        statuses[team] = defaultdict(lambda: {})
+        statuses[team] = defaultdict(_empty_dict)
 
         for check in status_checks.filter(team=team):
             statuses[team][check.tick][check.service] = check.get_status_display()
 
-    return OrderedDict(sorted(statuses.items(), key=lambda s: s[0].user.username))
+    sorted_statuses = OrderedDict(sorted(statuses.items(), key=lambda s: s[0].user.username))
+    cache.set(cache_key, sorted_statuses, 10)
+
+    return sorted_statuses

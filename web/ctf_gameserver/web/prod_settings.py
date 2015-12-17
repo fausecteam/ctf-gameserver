@@ -40,6 +40,16 @@ DATABASES = {
     }
 }
 
+# Your cache configuration
+# See https://docs.djangoproject.com/en/1.8/topics/cache/#setting-up-the-cache
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.PyLibMCCache',
+        'LOCATION': '',
+        'TIMEOUT': 60
+    }
+}
+
 # Settings for the SMTP server that will be used to send email messages
 # See https://docs.djangoproject.com/en/1.8/ref/settings/#email-host and other options
 EMAIL_HOST = ''
