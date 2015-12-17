@@ -154,6 +154,12 @@ def get_fresh_jobs(gamedb, cachedb, config):
                                               VALUES
                                                  (%s, %s, %s, %s, now())""",
                                             (service, team, tick, result))
+                            cursor.execute("""UPDATE scoring_flag
+                                              SET placement_end = now()
+                                              WHERE service_id = %s
+                                                AND protecting_team_id = %s
+                                                AND tick = %s""",
+                                           service, team, tick)
                 del open_tasks[task]
             except Exception as e:
                 logging.warn(repr(e))
