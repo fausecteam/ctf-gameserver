@@ -37,6 +37,8 @@ DEFAULT_FROM_EMAIL = 'ctf-gameserver.web@localhost'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
 
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+
 SECRET_KEY = 'OnlySuitableForDevelopment'
 
 TIME_ZONE = 'UTC'
