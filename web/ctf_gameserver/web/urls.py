@@ -79,6 +79,10 @@ urlpatterns = [
         scoring_views.scoreboard,
         name='scoreboard'
     ),
+    url(r'^competition/status/$',
+        scoring_views.service_status,
+        name='service_status'
+    ),
 
     url(r'^mail-teams/$',
         registration_views.mail_teams,

@@ -127,17 +127,25 @@ def _uptime_shares(service, last_tick):
     return team_shares
 
 
-def team_statuses(tick):
+def team_statuses(from_tick, to_tick):
     """
-    Returns the status of all teams and all services in the specified tick. The result is a mapping from
-    teams to a mapping from services to the respective status string.
+    Returns the statuses of all teams and all services in the specified range of ticks. The result is an
+    OrderedDict sorted by the team's names in this format:
+
+        {'team': {
+            'tick': {
+                'service': status
+            }
+        }}
     """
 
-    team_statuses = {}
-    status_checks = models.StatusCheck.objects.filter(tick=tick)
+    statuses = {}
+    status_checks = models.StatusCheck.objects.filter(tick__gte=from_tick, tick__lte=to_tick)
 
     for team in Team.active_objects.all():
-        team_status_checks = status_checks.filter(team=team)
-        team_statuses[team] = {check.service: check.get_status_display() for check in team_status_checks}
+        statuses[team] = defaultdict(lambda: {})
 
-    return team_statuses
+        for check in status_checks.filter(team=team):
+            statuses[team][check.tick][check.service] = check.get_status_display()
+
+    return OrderedDict(sorted(statuses.items(), key=lambda s: s[0].user.username))

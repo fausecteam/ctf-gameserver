@@ -6,6 +6,8 @@
     <h1>{% block title %}{% trans 'Registered teams' %}{% endblock %}</h1>
 </div>
 
+{% include 'competition_nav.html' with active='team_list' %}
+
 <div class="table-responsive">
     <table class="table table-striped">
         <thead>

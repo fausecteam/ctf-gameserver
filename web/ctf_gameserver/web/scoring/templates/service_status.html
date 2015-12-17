@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load dict_access %}
+{% load status_css_class %}
+
+{% block content %}
+<div class="page-header">
+    <h1>{% block title %}{% trans 'Service status' %}{% endblock %}</h1>
+</div>
+
+{% include 'competition_nav.html' with active='service_status' %}
+
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th class="image-column"><!-- Image --></th>
+                <th class="border-right">{% trans 'Team' %}</th>
+                {% for tick in ticks %}
+                <th>Tick {{ tick }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for team, tick_statuses in statuses.items %}
+            <tr id="team-{{ team.user.pk }}-row" class="{% if team.nop_team %}active{% endif %}">
+                <td>
+                    {% if team.image %}
+                    <a href="{{ team.image.url }}">
+                        <img class="team-image" src="{{ team.image.get_thumbnail_url }}"
+                         alt="{{ team.user.username }}" />
+                    </a>
+                    {% endif %}
+                </td>
+
+                <td class="border-right">
+                    <strong>{{ team.user.username }}</strong> <br/>
+                    ID: {{ team.pk }}
+                </td>
+
+                {% for tick in ticks %}
+                <td>
+                    {% for service in services %}
+                    {{ service.name }}:
+
+                    {% with status=tick_statuses|dict_access:tick|dict_access:service %}
+                    {% if status %}
+                    <span class="text-{{ status|status_css_class }}">{{ status }}</span> <br/>
+                    {% else %}
+                    <span class="text-muted">{% trans 'not checked' %}</span> <br/>
+                    {% endif %}
+                    {% endwith %}
+
+                    {% endfor %}
+                </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

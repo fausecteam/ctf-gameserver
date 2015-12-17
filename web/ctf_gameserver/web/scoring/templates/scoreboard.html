@@ -9,6 +9,10 @@
 </div>
 
 <div class="clearfix">
+    <div class="pull-left">
+        {% include 'competition_nav.html' with active='scoreboard' %}
+    </div>
+
     <p class="text-muted pull-right">
         {% blocktrans %}
         Tick: {{ tick }}
@@ -40,7 +44,7 @@
 
         <tbody>
             {% for team, points in score.items %}
-            <tr>
+            <tr id="team-{{ team.user.pk }}-row">
                 <td><strong>{{ forloop.counter }}.</strong></td>
 
                 <td>
@@ -58,18 +62,20 @@
                 </td>
 
                 {% for service in services %}
-                {% with status=statuses|dict_access:team|dict_access:service %}
+                {% with status=statuses|dict_access:team|dict_access:tick|dict_access:service %}
                 <td class="{{ status|status_css_class }}">
                     <span class="glyphicon glyphicon-fire"></span> <span class="sr-only">Offense</span>
                     {{ points.offense.0|dict_access:service|floatformat:2 }} <br/>
                     <span class="glyphicon glyphicon-dashboard"></span> <span class="sr-only">SLA</span>
                     {{ points.sla.0|dict_access:service|floatformat:2 }} <br/>
 
+                    <a href="{% url 'service_status' %}#team-{{ team.user.id }}-row">
                     {% if status %}
-                    <span class="text-{{ status|status_css_class }}">{{ status }}</span> <br/>
+                    <span class="text-{{ status|status_css_class }}">{{ status }}</span>
                     {% else %}
                     <span class="text-muted">{% trans 'not checked' %}</span>
                     {% endif %}
+                    </a>
                 </td>
                 {% endwith %}
                 {% endfor %}
