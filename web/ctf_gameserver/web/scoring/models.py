@@ -32,6 +32,10 @@ class Flag(models.Model):
 
     class Meta:
         unique_together = ('service', 'protecting_team', 'tick')
+        index_together = (
+            ('service', 'tick'),
+            ('service', 'protecting_team', 'tick')
+        )
 
     def __str__(self):
         return 'Flag {:d}'.format(self.id)
@@ -44,6 +48,7 @@ class Capture(models.Model):
 
     flag = models.ForeignKey(Flag)
     capturing_team = models.ForeignKey(Team)
+    tick = models.PositiveSmallIntegerField()
     # Number of times the flag has been attempted to submit after the intial capture, to punish repeated
     # submission
     count = models.PositiveSmallIntegerField()
@@ -51,6 +56,7 @@ class Capture(models.Model):
 
     class Meta:
         unique_together = ('flag', 'capturing_team')
+        index_together = ('flag', 'capturing_team')
 
     def __str__(self):
         return 'Capture {:d}'.format(self.id)
@@ -74,12 +80,16 @@ class StatusCheck(models.Model):
 
     service = models.ForeignKey(Service)
     team = models.ForeignKey(Team)
-    tick = models.PositiveSmallIntegerField()
+    tick = models.PositiveSmallIntegerField(db_index=True)
     status = models.PositiveSmallIntegerField(choices=[(i, t) for t, i in STATUSES.items()])
     timestamp = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ('service', 'team', 'tick')
+        index_together = (
+            ('service', 'tick', 'status'),
+            ('service', 'team', 'status')
+        )
 
     def __str__(self):
         return 'Status check {:d}'.format(self.id)

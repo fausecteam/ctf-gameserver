@@ -32,7 +32,7 @@ class Team(models.Model):
     affiliation = models.CharField(max_length=100, blank=True)
     country = models.CharField(max_length=100)
     # NOP teams don't get included in the scoring
-    nop_team = models.BooleanField(default=False)
+    nop_team = models.BooleanField(default=False, db_index=True)
 
     class ActiveObjectsManager(models.Manager):
         def get_queryset(self):
