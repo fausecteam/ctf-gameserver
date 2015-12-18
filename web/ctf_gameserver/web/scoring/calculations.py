@@ -54,6 +54,11 @@ def score(to_tick):
     cache_key = 'score_tick-{:d}'.format(to_tick)
     cached_scores = cache.get(cache_key)
 
+    # Emergency cheating
+    if cached_scores is None:
+        cache_key = 'score_tick-{:d}'.format(to_tick-1)
+        cached_scores = cache.get(cache_key)
+
     if cached_scores is not None:
         return cached_scores
 
@@ -213,6 +218,15 @@ def team_statuses(from_tick, to_tick):
 
     cache_key = 'team-statuses_{:d}-{:d}'.format(from_tick, to_tick)
     cached_statuses = cache.get(cache_key)
+
+    # Emergency cheating
+    if from_tick == to_tick:
+        if cached_statuses is None:
+            cache_key = 'team-statuses_{:d}-{:d}'.format(from_tick-1, to_tick-1)
+            cached_statuses = cache.get(cache_key)
+    else:
+        while cached_statuses is None:
+            cached_statuses = cache.get(cache_key)
 
     if cached_statuses is not None:
         return cached_statuses
