@@ -17,7 +17,7 @@ COMPETITION_NAME = 'FAUST CTF'
 # webfonts etc.
 CSP_POLICIES = {
     'script-src': ["'self'"],
-    'style-src': ["'self'"],
+    'style-src': ["'self'", "'unsafe-inline'"],    # 'unsafe-inline' required for MathJax
     'object-src': ["'self'"],
     'connect-src': ["'self'"]
 }

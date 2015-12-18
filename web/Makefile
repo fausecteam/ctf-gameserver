@@ -2,11 +2,11 @@ SOURCE_DIR ?= ctf_gameserver/web
 EXT_DIR ?= $(SOURCE_DIR)/static/ext
 
 .PHONY: dev prod ext prod-db lint
-.INTERMEDIATE: bootstrap.zip
+.INTERMEDIATE: bootstrap.zip mathjax.zip
 
 dev: $(SOURCE_DIR)/dev-db.sqlite3 ext
 prod: prod-db ext
-ext: $(EXT_DIR)/jquery.min.js $(EXT_DIR)/bootstrap $(SOURCE_DIR)/registration/countrynames.txt
+ext: $(EXT_DIR)/jquery.min.js $(EXT_DIR)/bootstrap $(SOURCE_DIR)/registration/countrynames.txt $(EXT_DIR)/mathjax
 
 
 $(SOURCE_DIR)/dev-db.sqlite3:
@@ -29,6 +29,14 @@ $(EXT_DIR)/bootstrap: bootstrap.zip
 	mkdir -p $(EXT_DIR)
 	unzip -n $< -d $(EXT_DIR)
 	mv -v $(EXT_DIR)/bootstrap-3.3.5-dist $(EXT_DIR)/bootstrap
+
+mathjax.zip:
+	curl -L https://github.com/mathjax/MathJax/archive/v2.5-latest.zip -o $@
+
+$(EXT_DIR)/mathjax: mathjax.zip
+	mkdir -p $(EXT_DIR)
+	unzip -n $< -d $(EXT_DIR)
+	mv -v $(EXT_DIR)/MathJax-2.5-latest $(EXT_DIR)/mathjax
 
 $(SOURCE_DIR)/registration/countrynames.txt:
 	curl http://www.opengeocode.org/download/countrynames.txt -o $@

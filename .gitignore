@@ -10,4 +10,5 @@ __pycache__/
 /web/ctf_gameserver/web/dev-db.sqlite3
 /web/ctf_gameserver/web/uploads/
 /web/ctf_gameserver/web/static/ext/jquery.min.js
+/web/ctf_gameserver/web/static/ext/mathjax
 /web/ctf_gameserver/web/registration/countrynames.txt
