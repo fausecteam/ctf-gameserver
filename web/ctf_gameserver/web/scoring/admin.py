@@ -55,7 +55,7 @@ class CaptureAdmin(admin.ModelAdmin):
     list_display = ('id', 'capturing_team', 'protecting_team', 'service', 'tick')
     list_filter = (ServiceFilter,)
     search_fields = ('capturing_team__user__username', 'flag__protecting_team__user__username',
-                     'service__name')
+                     'flag__service__name')
     ordering = ('timestamp',)
 
 
