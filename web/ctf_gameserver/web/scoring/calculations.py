@@ -101,10 +101,15 @@ def score(to_tick):
 
     for team in models.Team.active_not_nop_objects.all():
         for service, score in service_scores.items():
-            for key in ('offense', 'defense', 'sla'):
+            for key in ('offense', 'defense'):
                 team_scores[team][key][0][service] = score[key][team]
                 team_scores[team][key][1] += score[key][team]
                 team_scores[team]['total'] += score[key][team]
+
+            corrected_sla = score['sla'][team] * 0.3
+            team_scores[team]['sla'][0][service] = corrected_sla
+            team_scores[team]['sla'][1] += corrected_sla
+            team_scores[team]['total'] += corrected_sla
 
     sorted_team_scores = OrderedDict(sorted(team_scores.items(), key=lambda t: t[1]['total'], reverse=True))
     cache.set(cache_key, sorted_team_scores)
