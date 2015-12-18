@@ -115,12 +115,12 @@ def _offense_scores(service, tick):
 
     try:
         flag_value = float(Team.active_not_nop_objects.count()) / \
-                     models.Capture.objects.filter(flag__service=service, tick=tick).count()
+                     models.Capture.objects.filter(flag__service=service, tick=tick, count=1).count()
     except ZeroDivisionError:
         flag_value = None
 
     # Explicitly remove possible default ordering which could mess up the aggregation results
-    flag_capture_counts_list = models.Capture.objects.filter(tick=tick).order_by().values('flag') \
+    flag_capture_counts_list = models.Capture.objects.filter(tick=tick, count=1).order_by().values('flag') \
                                                      .annotate(value=Count('flag'))
     flag_capture_counts = {c['flag']: c['value'] for c in flag_capture_counts_list}
 
@@ -128,7 +128,7 @@ def _offense_scores(service, tick):
 
     for team in Team.active_not_nop_objects.all():
         team_flags = models.Capture.objects.filter(flag__service=service, capturing_team=team,
-                                                   tick=tick).values_list('flag', flat=True)
+                                                   tick=tick, count=1).values_list('flag', flat=True)
 
         for flag in team_flags:
             team_scores[team] += flag_value / flag_capture_counts[flag]
@@ -163,7 +163,7 @@ def _defense_scores(service, tick):
 
     for team in Team.active_not_nop_objects.all():
         capture_count = models.Capture.objects.filter(flag__service=service, flag__protecting_team=team,
-                                                      flag__tick__gte=from_tick, tick__lte=tick).count()
+                                                      flag__tick__gte=from_tick, tick__lte=tick, count=1).count()
         # For each tick, at most `valid_ticks` flags can be counted as submitted
         team_scores[team] = defense_rating(ceil(capture_count / float(valid_ticks)))
 
