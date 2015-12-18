@@ -32,6 +32,10 @@ class Flag(models.Model):
 
     class Meta:
         unique_together = ('service', 'protecting_team', 'tick')
+        index_together = (
+            ('service', 'tick'),
+            ('service', 'protecting_team', 'tick')
+        )
 
     def __str__(self):
         return 'Flag {:d}'.format(self.id)
@@ -72,12 +76,16 @@ class StatusCheck(models.Model):
 
     service = models.ForeignKey(Service)
     team = models.ForeignKey(Team)
-    tick = models.PositiveSmallIntegerField()
+    tick = models.PositiveSmallIntegerField(db_index=True)
     status = models.PositiveSmallIntegerField(choices=[(i, t) for t, i in STATUSES.items()])
     timestamp = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ('service', 'team', 'tick')
+        index_together = (
+            ('service', 'tick', 'status'),
+            ('service', 'team', 'status')
+        )
 
     def __str__(self):
         return 'Status check {:d}'.format(self.id)

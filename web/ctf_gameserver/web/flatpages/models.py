@@ -42,6 +42,7 @@ class Flatpage(models.Model):
             ('category', 'title'),
             ('category', 'slug')
         )
+        index_together = ('category', 'slug')
         ordering = ('category', 'ordering', 'title')
 
     class ObjectsWithoutCategoryManager(models.Manager):
