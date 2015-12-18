@@ -49,13 +49,12 @@ class Capture(models.Model):
     flag = models.ForeignKey(Flag)
     capturing_team = models.ForeignKey(Team)
     tick = models.PositiveSmallIntegerField()
-    # Number of times the flag has been attempted to submit after the intial capture, to punish repeated
-    # submission
-    count = models.PositiveSmallIntegerField()
+    # Additional submission attempts are stored with a higher count to punish repeated submission
+    count = models.PositiveSmallIntegerField(db_index=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('flag', 'capturing_team')
+        unique_together = ('flag', 'capturing_team', 'count')
         index_together = ('flag', 'capturing_team')
 
     def __str__(self):
