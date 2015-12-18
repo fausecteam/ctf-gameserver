@@ -119,6 +119,8 @@ def _offense_scores(service, tick):
     except ZeroDivisionError:
         flag_value = None
 
+    captures = models.Capture.objects.filter(flag__service=service, tick=tick)
+
     # Explicitly remove possible default ordering which could mess up the aggregation results
     flag_capture_counts_list = models.Capture.objects.filter(tick=tick).order_by().values('flag') \
                                                      .annotate(value=Count('flag'))
@@ -126,12 +128,9 @@ def _offense_scores(service, tick):
 
     team_scores = defaultdict(_zero)
 
-    for team in Team.active_not_nop_objects.all():
-        team_flags = models.Capture.objects.filter(flag__service=service, capturing_team=team,
-                                                   tick=tick).values_list('flag', flat=True)
 
-        for flag in team_flags:
-            team_scores[team] += flag_value / flag_capture_counts[flag]
+    for capture in captures:
+        team_scores[capture.capturing_team] += flag_value / flag_capture_counts[capture.flag.id]
 
     return team_scores
 
@@ -161,9 +160,15 @@ def _defense_scores(service, tick):
 
     team_scores = {}
 
+    team_capture_counts_list = models.Capture.objects.filter(flag__service=service, flag__tick__gte=from_tick,
+                               tick__lte=tick).order_by().values('flag__protecting_team').annotate(value=Count('flag__protecting_team'))
+    team_capture_counts = {c['flag__protecting_team']: c['value'] for c in team_capture_counts_list}
+
     for team in Team.active_not_nop_objects.all():
-        capture_count = models.Capture.objects.filter(flag__service=service, flag__protecting_team=team,
-                                                      flag__tick__gte=from_tick, tick__lte=tick).count()
+        try:
+            capture_count = team_capture_counts[team.pk]
+        except KeyError:
+            capture_count = 0
         # For each tick, at most `valid_ticks` flags can be counted as submitted
         team_scores[team] = defense_rating(ceil(capture_count / float(valid_ticks)))
 
@@ -177,8 +182,8 @@ def _sla_scores(service, tick, offense_scores):
     TODO
     """
 
-    up = models.StatusCheck.STATUSES[_('up')]
-    status_checks = models.StatusCheck.objects.filter(service=service, tick__lte=tick, status=up)
+    up = [models.StatusCheck.STATUSES[_('up')], models.StatusCheck.STATUSES[_('recovering')]]
+    status_checks = models.StatusCheck.objects.filter(service=service, tick__lte=tick, status__in=up)
 
     # Number of status checks with result 'up' per team
     team_counts = status_checks.order_by().values('team').annotate(value=Count('team'))
@@ -206,7 +211,7 @@ def team_statuses(from_tick, to_tick):
         }}
     """
 
-    cache_key = 'team-statuses'
+    cache_key = 'team-statuses_{:d}-{:d}'.format(from_tick, to_tick)
     cached_statuses = cache.get(cache_key)
 
     if cached_statuses is not None:
