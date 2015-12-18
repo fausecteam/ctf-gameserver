@@ -10,19 +10,19 @@ def scoreboard(request):
     game_control = models.GameControl.objects.get()
 
     if game_control.competition_over():
-        last_tick = game_control.current_tick
+        to_tick = game_control.current_tick
     else:
-        last_tick = game_control.current_tick - 1
+        to_tick = game_control.current_tick - 1
 
     services = models.Service.objects.all()
-    score = calculations.score(last_tick)
-    statuses = calculations.team_statuses(last_tick, last_tick)
+    score = calculations.score(to_tick)
+    statuses = calculations.team_statuses(to_tick, to_tick)
 
     return render(request, 'scoreboard.html', {
         'score': score,
         'services': services,
         'statuses': statuses,
-        'tick': last_tick
+        'tick': to_tick
     })
 
 
