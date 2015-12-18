@@ -69,11 +69,11 @@
                 {% with status=statuses|dict_access:team|dict_access:tick|dict_access:service %}
                 <td class="{{ status|status_css_class }}">
                     <span class="glyphicon glyphicon-fire"></span> <span class="sr-only">Offense</span>
-                    {{ points.offense.0|dict_access:service|floatformat:2 }} <br/>
+                    {{ points.offense.0|dict_access:service|floatformat:0 }} <br/>
                     <span class="glyphicon glyphicon-tower"></span> <span class="sr-only">Defense</span>
-                    {{ points.defense.0|dict_access:service|floatformat:2 }} <br/>
+                    {{ points.defense.0|dict_access:service|floatformat:0 }} <br/>
                     <span class="glyphicon glyphicon-dashboard"></span> <span class="sr-only">SLA</span>
-                    {{ points.sla.0|dict_access:service|floatformat:2 }} <br/>
+                    {{ points.sla.0|dict_access:service|floatformat:0 }} <br/>
 
                     <a href="{% url 'service_status' %}#team-{{ team.user.id }}-row">
                     {% if status %}
@@ -86,10 +86,10 @@
                 {% endwith %}
                 {% endfor %}
 
-                <td class="border-left">{{ points.offense.1|floatformat:2 }}</td>
-                <td>{{ points.defense.1|floatformat:2 }}</td>
-                <td>{{ points.sla.1|floatformat:2 }}</td>
-                <td class="border-left"><strong>{{ points.total|floatformat:2 }}</strong></td>
+                <td class="border-left">{{ points.offense.1|floatformat:0 }}</td>
+                <td>{{ points.defense.1|floatformat:0 }}</td>
+                <td>{{ points.sla.1|floatformat:0 }}</td>
+                <td class="border-left"><strong>{{ points.total|floatformat:0 }}</strong></td>
             </tr>
             {% endfor %}
         </tbody>
