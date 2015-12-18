@@ -53,6 +53,7 @@ class Capture(models.Model):
 
     class Meta:
         unique_together = ('flag', 'capturing_team')
+        index_together = ('flag', 'capturing_team')
 
     def __str__(self):
         return 'Capture {:d}'.format(self.id)
