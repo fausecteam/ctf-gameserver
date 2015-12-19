@@ -28,13 +28,6 @@ def _empty_dict():
 
     return {}
 
-def _zero_defaultdict():
-    """
-    TODO
-    """
-
-    return defaultdict(_zero)
-
 
 def score(to_tick):
     """
@@ -177,9 +170,9 @@ def _defense_scores(service, tick):
 
 def _sla_scores(service, tick, offense_scores):
     """
-    Returns the share (i.e. percentage) of one team in all ticks for which the specified service has been
-    checked as 'up'. The result is a mapping from teams to their respective shares.
-    TODO
+    Returns the SLA score for the specified service in the specified tick. This is the number of ticks
+    for which the specified service has been checked as 'up' relative to the team with the most 'up' checks;
+    points are assigned so that the best SLA score matches the best of the given offense scores.
     """
 
     up = [models.StatusCheck.STATUSES[_('up')], models.StatusCheck.STATUSES[_('recovering')]]
