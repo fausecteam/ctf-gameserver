@@ -1,7 +1,7 @@
 #!/usr/bin/make -f
 
 %:
-	dh $@ --with python3,sphinxdoc --buildsystem=pybuild
+	dh $@ --with python3,sphinxdoc,systemd --buildsystem=pybuild
 
 override_dh_auto_build:
 	$(MAKE) -C doc html

@@ -1,1 +1,3 @@
 usr/bin/controller
+lib/systemd/system/controller.service
+lib/systemd/system/controller.timer

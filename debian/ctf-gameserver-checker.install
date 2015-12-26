@@ -1,3 +1,4 @@
 usr/bin/checkermaster
 usr/bin/checkerslave
 usr/bin/testrunner
+lib/systemd/system/checkermaster@.service
