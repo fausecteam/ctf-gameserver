@@ -90,3 +90,6 @@ Licensing
 
 The whole gameserver is released under the ISC license. Contributions
 are welcome!
+
+.. include:: ../../LICENSE.txt
+   :literal:
