@@ -25,7 +25,8 @@ keccak = Keccak(100)
 datalength = 4 + 1 + 1 + PAYLOADLEN
 
 def generate(team, service, payload=None, timestamp=None):
-    # jedesmal tatsächlich frische Werte für Defaultargumente
+    """ Generates a new flag
+    """
     if timestamp == None:
         timestamp = time.time() + VALID
 
@@ -60,6 +61,11 @@ class FlagExpired(FlagVerificationError):
     pass
 
 def verify(flag):
+    """ Returns the data encoded within the flag:
+        (team, service, payload, timestamp)
+
+        May raise an appriproate exception if decoding fails
+    """
     if not flag.startswith(PREFIX+"_"):
         raise InvalidFlagFormat("Flag is not in the expected format")
 
