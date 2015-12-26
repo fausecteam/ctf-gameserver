@@ -78,6 +78,13 @@ incorporation of some principles:
   could we easily do realistic load-testing. That's why the components
   are loosely coupled and can be run on different machines.
 
+Packaged Version
+----------------
+
+For Debian/Ubuntu users a packaged version is available. For the
+submission, checker and controller components, individual packages are
+provided (named ``ctf-gameserver-$something``).
+
 Licensing
 ---------
 
