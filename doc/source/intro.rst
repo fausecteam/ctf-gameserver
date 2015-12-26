@@ -1,5 +1,5 @@
-CTF Gameserver
-==============
+Introduction
+============
 
 This is a gameserver for `attack-defense (IT security)
 CTFs <https://ctftime.org/ctf-wtf/>`_. It was originally written for
@@ -81,5 +81,5 @@ incorporation of some principles:
 Licensing
 ---------
 
-The whole gameserver is released under the MIT (expat)
-license. Contributions are welcome!
+The whole gameserver is released under the ISC license. Contributions
+are welcome!

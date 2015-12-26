@@ -31,5 +31,5 @@ setup(name='CTF Gameserver',
                )],
       namespace_packages=['ctf_gameserver'],
       package_dir = {'': 'src'},
-      license='MIT',
+      license='ISC',
 )
