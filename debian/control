@@ -6,45 +6,59 @@ Uploaders: Christoph Egger <christoph@debian.org>
 Build-Depends: debhelper (>= 8~),
  python3-all,
  python3 (>= 3.3.0-2),
- python3-setuptools
+ python3-setuptools,
+ python3-sphinx
 Standards-Version: 3.9.4
 Homepage: http://framework.faustctf.net/
 
 Package: python3-ctf-gameserver
 Architecture: all
+Suggests: ctf-gameserver-doc
 Depends: ${shlibs:Depends},
  ${misc:Depends},
  ${python3:Depends}
 Provides: ${python:Provides}
-Description: library support for running a Attack-Defence CTF
+Description: ctf-gameserver - support libraries
+ asdf1234
+
+Package: ctf-gameserver-doc
+Architecture: all
+Depends: ${shlibs:Depends},
+ ${misc:Depends},
+ ${python3:Depends}
+Provides: ${python:Provides}
+Description: ctf-gameserver - documentation
  asdf1234
 
 Package: ctf-gameserver-submission
 Architecture: all
+Suggests: ctf-gameserver-doc
 Depends:
  ${misc:Depends},
  ${python3:Depends},
  python3-ctf-gameserver,
  python3-psycopg2
-Description: flag submission
+Description: ctf-gameserver - flag submission
  asdf1234
 
 Package: ctf-gameserver-checker
 Architecture: all
+Suggests: ctf-gameserver-doc
 Depends:
  ${misc:Depends},
  ${python3:Depends},
  python3-ctf-gameserver,
  python3-psycopg2
-Description: service checker
+Description: ctf-gameserver - servicechecker
  asdf1234
 
 Package: ctf-gameserver-controller
 Architecture: all
+Suggests: ctf-gameserver-doc
 Depends:
  ${misc:Depends},
  ${python3:Depends},
  python3-ctf-gameserver,
  python3-psycopg2
-Description: service checker
+Description: ctf-gameserver - game controller
  asdf1234
