@@ -115,10 +115,13 @@ class FlagHandler(asynchat.async_chat):
                 else:
                     count = count[0] + 1
 
-                cursor.execute("""INSERT INTO scoring_captures
-                                      (flag_id, capturing_team_id, timestamp, count)
+                cursor.execute("""INSERT INTO scoring_capture
+                                      (flag_id, capturing_team_id, timestamp,
+                                       count, tick)
                                   VALUES
-                                      (%s, %s, now(), %s)""",
+                                      (%s, %s, now(), %s,
+                                       (SELECT current_tick
+                                        FROM scoring_gamecontrol))""",
                                (flag_id, self.team, count))
                 return count
 
