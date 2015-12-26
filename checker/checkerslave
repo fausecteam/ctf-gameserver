@@ -25,6 +25,8 @@ def run(args):
         print("NOTWORKING")
     elif 3 == result:
         print("NOTFOUND")
+    elif 4 == result:
+        print("RECOVERING")
     sys.stdout.flush()
 
 

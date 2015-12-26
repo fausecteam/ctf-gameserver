@@ -121,7 +121,7 @@ def run_checker(service, team, tick, checker, loglevel, dbconnection):
                     process.stdin.write(b"\n")
                     logger.warn("Database get failed with %s", repr(e))
 
-            elif line[0] in ["OK", "TIMEOUT", "NOTWORKING", "NOTFOUND"]:
+            elif line[0] in ["OK", "TIMEOUT", "NOTWORKING", "NOTFOUND", "RECOVERING"]:
                 result = line[0]
                 break
         except ValueError as e:
