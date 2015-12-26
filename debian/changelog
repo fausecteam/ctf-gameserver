@@ -1,5 +1,5 @@
-ctf-gameserver (0.0-1) UNRELEASED; urgency=medium
+ctf-gameserver (0.1~pre-1) UNRELEASED; urgency=medium
 
-  * Initial release. (Closes: #XXXXXX)
+  * Initial release. (Closes: #809036)
 
  -- Christoph Egger <christoph@debian.org>  Wed, 11 Nov 2015 12:53:52 +0100
