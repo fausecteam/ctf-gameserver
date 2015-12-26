@@ -25,6 +25,10 @@ Flag Module
 
 .. autofunction:: ctf_gameserver.lib.flag.generate
 .. autofunction:: ctf_gameserver.lib.flag.verify
+.. autoexception:: ctf_gameserver.lib.flag.FlagVerificationError
+.. autoexception:: ctf_gameserver.lib.flag.InvalidFlagFormat
+.. autoexception:: ctf_gameserver.lib.flag.InvalidFlagMAC
+.. autoexception:: ctf_gameserver.lib.flag.FlagExpired
 
 Bitstructure of the Data Part
 =============================

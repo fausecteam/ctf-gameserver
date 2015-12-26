@@ -25,7 +25,15 @@ keccak = Keccak(100)
 datalength = 4 + 1 + 1 + PAYLOADLEN
 
 def generate(team, service, payload=None, timestamp=None):
-    """ Generates a new flag
+    """Generates a new flag
+
+    Arguments:
+     - team: Team that should protect this flag
+     - service: Service this flag belogns to
+     - payload: data to secure in the flag, defaults to
+       crc32(timestamp, team, service), zero padded
+     - timestamp: timestamp when to expire validity of the
+       flags. Defaults to 15 minutes in the future
     """
     if timestamp == None:
         timestamp = time.time() + VALID
@@ -49,15 +57,19 @@ def generate(team, service, payload=None, timestamp=None):
     return "%s_%s" % (PREFIX, base64.b64encode(protecteddata + mac).decode('latin-1'))
 
 class FlagVerificationError(Exception):
+    "Baseclass for all Flag Exceptions"
     pass
 
 class InvalidFlagFormat(FlagVerificationError):
+    "Flag does not match the regex or does not b64decode properly"
     pass
 
 class InvalidFlagMAC(FlagVerificationError):
+    "MAC does not match with configured secret"
     pass
 
 class FlagExpired(FlagVerificationError):
+    "Flag is already expired"
     pass
 
 def verify(flag):
