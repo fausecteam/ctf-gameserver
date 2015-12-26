@@ -19,7 +19,15 @@ Depends: ${shlibs:Depends},
  ${python3:Depends}
 Provides: ${python:Provides}
 Description: ctf-gameserver - support libraries
- asdf1234
+ Attack-defence Capture the Flag (CTF) is a special kind of
+ information security competitions. Every team has own network(or only
+ one host) with vulnarable services. Your team has time for patching
+ your services and developing exploits. Organizers connects
+ participants of competition. ctf-gameserver is an implementation of
+ the infrastructure needed to organize sucha competition.
+ .
+ This package contains all python modules backing up the service as
+ well as the web code that can be served via wsgi
 
 Package: ctf-gameserver-doc
 Architecture: all
@@ -28,7 +36,14 @@ Depends: ${shlibs:Depends},
  ${python3:Depends}
 Provides: ${python:Provides}
 Description: ctf-gameserver - documentation
- asdf1234
+ Attack-defence Capture the Flag (CTF) is a special kind of
+ information security competitions. Every team has own network(or only
+ one host) with vulnarable services. Your team has time for patching
+ your services and developing exploits. Organizers connects
+ participants of competition. ctf-gameserver is an implementation of
+ the infrastructure needed to organize sucha competition.
+ .
+ This package contains a deamon to submit flags for scoring
 
 Package: ctf-gameserver-submission
 Architecture: all
@@ -39,7 +54,14 @@ Depends:
  python3-ctf-gameserver,
  python3-psycopg2
 Description: ctf-gameserver - flag submission
- asdf1234
+ Attack-defence Capture the Flag (CTF) is a special kind of
+ information security competitions. Every team has own network(or only
+ one host) with vulnarable services. Your team has time for patching
+ your services and developing exploits. Organizers connects
+ participants of competition. ctf-gameserver is an implementation of
+ the infrastructure needed to organize sucha competition.
+ .
+ This package contains documentation for the modules and geneal setup
 
 Package: ctf-gameserver-checker
 Architecture: all
@@ -50,7 +72,15 @@ Depends:
  python3-ctf-gameserver,
  python3-psycopg2
 Description: ctf-gameserver - servicechecker
- asdf1234
+ Attack-defence Capture the Flag (CTF) is a special kind of
+ information security competitions. Every team has own network(or only
+ one host) with vulnarable services. Your team has time for patching
+ your services and developing exploits. Organizers connects
+ participants of competition. ctf-gameserver is an implementation of
+ the infrastructure needed to organize sucha competition.
+ .
+ This package contains a deamon for checking srevice availability on
+ the participant's host(s)
 
 Package: ctf-gameserver-controller
 Architecture: all
@@ -61,4 +91,13 @@ Depends:
  python3-ctf-gameserver,
  python3-psycopg2
 Description: ctf-gameserver - game controller
- asdf1234
+ Attack-defence Capture the Flag (CTF) is a special kind of
+ information security competitions. Every team has own network(or only
+ one host) with vulnarable services. Your team has time for patching
+ your services and developing exploits. Organizers connects
+ participants of competition. ctf-gameserver is an implementation of
+ the infrastructure needed to organize sucha competition.
+ .
+ This package contains a regular job advancing the game and performing
+ regular maintenance.
+
