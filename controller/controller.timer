@@ -1,0 +1,9 @@
+[Unit]
+Description=FAUST-CTF: Regularly start game ticks
+
+[Timer]
+OnCalendar=*-*-* *:00/03:00
+AccuracySec=5s
+
+[Install]
+WantedBy=timers.target

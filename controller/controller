@@ -1,0 +1,48 @@
+#!/usr/bin/python3
+
+import argparse
+import logging
+import psycopg2
+import datetime
+
+def update_database(db):
+    with db:
+        with db.cursor() as cursor:
+            cursor.execute("UPDATE scoring_gamecontrol SET current_tick = current_tick + 1")
+            cursor.execute("""INSERT INTO scoring_flag
+                                 (service_id, protecting_team_id, tick)
+                              SELECT svc.id, user_id, current_tick
+                              FROM scoring_service svc, registration_team, scoring_gamecontrol""")
+
+def main():
+    logging.basicConfig()
+    parser = argparse.ArgumentParser(description="CTF checker runner")
+    parser.add_argument('--db', type=str, required=True)
+    parser.add_argument('-v', '--loglevel', default='INFO', type=str,
+                        choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+                        help='Loglevel')
+
+    args = parser.parse_args()
+
+    numeric_level = getattr(logging, args.loglevel.upper())
+    logging.getLogger().setLevel(numeric_level)
+
+    db = psycopg2.connect(args.db)
+
+    with db:
+        with db.cursor() as cursor:
+            cursor.execute('SELECT start, "end" FROM scoring_gamecontrol')
+            start, end = cursor.fetchone()
+
+    now = datetime.datetime.now(tz=datetime.timezone.utc)
+    if now < start:
+        logging.info("Contest not running yet")
+        return
+    elif now > end:
+        logging.info("contest already over")
+        return
+
+    update_database(db)
+
+if __name__ == '__main__':
+    main()
