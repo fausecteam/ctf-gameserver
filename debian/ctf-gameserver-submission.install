@@ -1,1 +1,2 @@
-usr/bin/flagsubmission
+usr/bin/ctf-submission
+lib/systemd/system/ctf-submission@.service

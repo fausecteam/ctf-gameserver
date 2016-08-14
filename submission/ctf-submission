@@ -12,7 +12,8 @@ import psycopg2
 from ctf_gameserver.lib import flag
 
 class FlagHandler(asynchat.async_chat):
-    def __init__(self, sock, addr, dbconnection, conteststart, contestend, flagvalidity, tickduration):
+    def __init__(self, sock, addr, dbconnection,
+                 conteststart, contestend, flagvalidity, tickduration):
         asynchat.async_chat.__init__(self, sock=sock)
         ip, port = addr
         self.team = int(ip.split('.')[2])
@@ -31,10 +32,11 @@ class FlagHandler(asynchat.async_chat):
 
     def _reply(self, message):
         self._logger.debug("-> %s" % message.decode('utf-8'))
-        self.push(message + "\n")
+        self.push(message + b"\n")
 
     def _get_tick(self, timestamp):
-        tick = ((timestamp - self._conteststart.timestamp()) / self._tickduration) - self._flagvalidity
+        tick = ((timestamp - self._conteststart.timestamp()) / self._tickduration) \
+               - self._flagvalidity
         return int(tick + 0.2)
 
     def _handle_flag(self):
@@ -80,13 +82,13 @@ class FlagHandler(asynchat.async_chat):
             return
 
         try:
-            count = self._store_capture(team, service, timestamp):
+            count = self._store_capture(team, service, timestamp)
             if count > 1:
                 self._reply((u"Flags should only be submitted once (this is %d for your team) subtracting penalty!" % count).encode('utf-8'))
             else:
                 self._reply(u"Thank you for your submission!".encode('utf-8'))
         except psycopg2.DatabaseError as e:
-            self._logger.warn("%s: %s", e.diag.secerity, e.diag.message_primary)
+            self._logger.warn("%s: %s", e.diag.severity, e.diag.message_primary)
             self._logger.info(e.diag.internal_query)
             self._reply(u"Something went wrong with your submission!".encode('utf-8'))
 
@@ -100,7 +102,7 @@ class FlagHandler(asynchat.async_chat):
                                     AND protecting_team_id = %s
                                     AND tick = %s""",
                                (service, team, tick))
-                flag_id = cursor.fetchone()
+                flag_id = cursor.fetchone()[0]
 
                 cursor.execute("""SELECT max(count) FROM scoring_capture
                                   WHERE flag_id = %s
@@ -113,10 +115,13 @@ class FlagHandler(asynchat.async_chat):
                 else:
                     count = count[0] + 1
 
-                cursor.execute("""INSERT INTO scoring_captures
-                                      (flag_id, capturing_team_id, timestamp, count)
+                cursor.execute("""INSERT INTO scoring_capture
+                                      (flag_id, capturing_team_id, timestamp,
+                                       count, tick)
                                   VALUES
-                                      (%s, %s, now(), %s)""",
+                                      (%s, %s, now(), %s,
+                                       (SELECT current_tick
+                                        FROM scoring_gamecontrol))""",
                                (flag_id, self.team, count))
                 return count
 
@@ -131,7 +136,7 @@ class FlagHandler(asynchat.async_chat):
 
 
     def found_terminator(self):
-        self._logger.debug("<- '%s'", self.buffer.decode('utf-8'))
+        self._logger.debug("<- %s", self.buffer.decode('utf-8'))
         self._handle_flag()
         self.buffer = b''
 

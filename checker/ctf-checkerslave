@@ -7,7 +7,7 @@ import sys
 import socket
 
 def run(args):
-    socket.setdefaulttimeout(10)
+    socket.setdefaulttimeout(20)
     logging.debug("Importing checker")
     checkermod, checkerclass = args.checker.split(":")
     checkermod = importlib.import_module(checkermod)
@@ -25,6 +25,8 @@ def run(args):
         print("NOTWORKING")
     elif 3 == result:
         print("NOTFOUND")
+    elif 4 == result:
+        print("RECOVERING")
     sys.stdout.flush()
 
 

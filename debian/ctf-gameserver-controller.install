@@ -1,1 +1,3 @@
-usr/bin/controller
+usr/bin/ctf-controller
+lib/systemd/system/ctf-controller.service
+lib/systemd/system/ctf-controller.timer

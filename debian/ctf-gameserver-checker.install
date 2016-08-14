@@ -1,3 +1,4 @@
-usr/bin/checkermaster
-usr/bin/checkerslave
-usr/bin/testrunner
+usr/bin/ctf-checkermaster
+usr/bin/ctf-checkerslave
+usr/bin/ctf-testrunner
+lib/systemd/system/ctf-checkermaster@.service

@@ -1,50 +1,100 @@
 Source: ctf-gameserver
 Section: python
 Priority: optional
-Maintainer: Debian Python Modules Team <python-modules-team@lists.alioth.debian.org>
-Uploaders: Christoph Egger <christoph@debian.org>
-Build-Depends: debhelper (>= 8~),
+Maintainer: Christoph Egger <christoph@debian.org>
+Build-Depends: debhelper (>= 9~),
  python3-all,
  python3 (>= 3.3.0-2),
- python3-setuptools
-Standards-Version: 3.9.4
+ python3-setuptools,
+ python3-sphinx,
+ dh-systemd
+Standards-Version: 3.9.6
 Homepage: http://framework.faustctf.net/
 
 Package: python3-ctf-gameserver
 Architecture: all
-Depends: ${shlibs:Depends},
+Suggests: ctf-gameserver-doc
+Depends:
  ${misc:Depends},
  ${python3:Depends}
-Provides: ${python:Provides}
-Description: library support for running a Attack-Defence CTF
- asdf1234
+Description: ctf-gameserver - support libraries
+ Attack-defence Capture the Flag (CTF) is a special kind of
+ information security competitions. Every team has own network(or only
+ one host) with vulnarable services. Your team has time for patching
+ your services and developing exploits. Organizers connects
+ participants of competition. ctf-gameserver is an implementation of
+ the infrastructure needed to organize sucha competition.
+ .
+ This package contains all Python modules backing up the service as
+ well as the web code that can be served via wsgi
+
+Package: ctf-gameserver-doc
+Section: doc
+Architecture: all
+Depends:
+ ${misc:Depends},
+ ${sphinxdoc:Depends}
+Description: ctf-gameserver - documentation
+ Attack-defence Capture the Flag (CTF) is a special kind of
+ information security competitions. Every team has own network(or only
+ one host) with vulnarable services. Your team has time for patching
+ your services and developing exploits. Organizers connects
+ participants of competition. ctf-gameserver is an implementation of
+ the infrastructure needed to organize sucha competition.
+ .
+ This package contains a daemon to submit flags for scoring
 
 Package: ctf-gameserver-submission
 Architecture: all
+Suggests: ctf-gameserver-doc
 Depends:
  ${misc:Depends},
  ${python3:Depends},
  python3-ctf-gameserver,
  python3-psycopg2
-Description: flag submission
- asdf1234
+Description: ctf-gameserver - flag submission
+ Attack-defence Capture the Flag (CTF) is a special kind of
+ information security competitions. Every team has own network(or only
+ one host) with vulnarable services. Your team has time for patching
+ your services and developing exploits. Organizers connects
+ participants of competition. ctf-gameserver is an implementation of
+ the infrastructure needed to organize sucha competition.
+ .
+ This package contains documentation for the modules and geneal setup
 
 Package: ctf-gameserver-checker
 Architecture: all
+Suggests: ctf-gameserver-doc
 Depends:
  ${misc:Depends},
  ${python3:Depends},
  python3-ctf-gameserver,
  python3-psycopg2
-Description: service checker
- asdf1234
+Description: ctf-gameserver - servicechecker
+ Attack-defence Capture the Flag (CTF) is a special kind of
+ information security competitions. Every team has own network(or only
+ one host) with vulnarable services. Your team has time for patching
+ your services and developing exploits. Organizers connects
+ participants of competition. ctf-gameserver is an implementation of
+ the infrastructure needed to organize sucha competition.
+ .
+ This package contains a daemon for checking srevice availability on
+ the participant's host(s)
 
 Package: ctf-gameserver-controller
 Architecture: all
+Suggests: ctf-gameserver-doc
 Depends:
  ${misc:Depends},
- ${python3:Depends},
- python3-ctf-gameserver,
- python3-psycopg2
-Description: service checker
- asdf1234
+ ${python3:Depends}
+Description: ctf-gameserver - game controller
+ Attack-defence Capture the Flag (CTF) is a special kind of
+ information security competitions. Every team has own network(or only
+ one host) with vulnarable services. Your team has time for patching
+ your services and developing exploits. Organizers connects
+ participants of competition. ctf-gameserver is an implementation of
+ the infrastructure needed to organize sucha competition.
+ .
+ This package contains a regular job advancing the game and performing
+ regular maintenance.
+

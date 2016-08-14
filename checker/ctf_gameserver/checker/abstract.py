@@ -7,6 +7,8 @@ import json
 import socket
 import requests
 
+from .constants import *
+
 class AbstractChecker(metaclass=ABCMeta):
     """Base class for custom checker scripts
 

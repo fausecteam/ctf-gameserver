@@ -1,0 +1,4 @@
+include doc/Makefile
+include doc/source/*
+include */*.service
+include */*.timer
