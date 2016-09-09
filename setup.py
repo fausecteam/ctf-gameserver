@@ -33,6 +33,10 @@ setup(name='CTF Gameserver',
                          'doc/source/*.rst',
                         ]
                     },
+      install_requires=[
+          'psycopg2',
+          'django',
+      ],
       namespace_packages=['ctf_gameserver'],
       package_dir = {'': 'src'},
       license='ISC',
