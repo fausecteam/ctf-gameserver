@@ -3,7 +3,7 @@ Description=CTF Checker Runner
 
 [Service]
 Type=notify
-ExecStart=/usr/bin/checkermaster --config /etc/ctf-gameserver/%i.conf --loglevel DEBUG
+ExecStart=/usr/bin/ctf-checkermaster --config /etc/ctf-gameserver/%i.conf --loglevel DEBUG
 ExecStop=/bin/kill -usr1 $MAINPID
 WatchdogSec=20
 Restart=on-failure

@@ -41,8 +41,8 @@ def main():
     elif now > end:
         logging.info("contest already over")
         return
-
-    update_database(db)
+    else:
+        update_database(db)
 
 if __name__ == '__main__':
     main()

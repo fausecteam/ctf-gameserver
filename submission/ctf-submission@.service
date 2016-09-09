@@ -3,6 +3,6 @@ Description=CTF Flag-Submission Service
 
 [Service]
 Type=notify
-ExecStart=flagsubmission -p %i
+ExecStart=/usr/bin/ctf-submission -p %i
 User=nobody
 Group=nogroup
