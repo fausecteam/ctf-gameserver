@@ -17,6 +17,7 @@ Contents:
    flags
    checker
    controller
+   setup
 
 Indices and tables
 ==================
