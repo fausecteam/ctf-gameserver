@@ -12,6 +12,7 @@ machine on that network. ctf-gameserver has been checked out and built
 
    createuser -P faustctf
    createdb -O faustctf faustctf
+   createdb -O faustctf checkercache
 
 Website
 -------
@@ -25,8 +26,8 @@ and ``TIME_ZONE``.
 
 .. code-block:: bash
 
-   prod_manage.py migrate auth
-   prod_manage.py migrate
+   ./prod_manage.py migrate auth
+   ./prod_manage.py migrate
 
 .. note::
 
