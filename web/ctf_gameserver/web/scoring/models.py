@@ -29,6 +29,8 @@ class Flag(models.Model):
     # NULL means the flag has been generated, but not yet placed
     placement_start = models.DateTimeField(null=True, blank=True, default=None)
     placement_end = models.DateTimeField(null=True, blank=True, default=None)
+    # Bonus points for capturing this flag
+    bonus = models.FloatField(null=True, blank=True, default=None)
 
     class Meta:
         unique_together = ('service', 'protecting_team', 'tick')
@@ -90,6 +92,23 @@ class StatusCheck(models.Model):
 
     def __str__(self):
         return 'Status check {:d}'.format(self.id)
+
+
+class ScoreBoard(models.Model):
+    """
+    Scoreboard as calculated by external, asyncron helper. May be a
+    (materialized) view or a real table and should just be handled
+    read-only from within the website.
+    """
+    team = models.OneToOneField(Team, editable=False, primary_key=True)
+    attack = models.IntegerField(editable=False)
+    bonus = models.IntegerField(editable=False)
+    defense = models.FloatField(editable=False)
+    sla = models.FloatField(editable=False)
+    total = models.FloatField(editable=False)
+
+    def __str__(self):
+        return 'Score for team {:d}'.format(self.team)
 
 
 class GameControl(models.Model):
