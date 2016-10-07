@@ -263,6 +263,7 @@ try:
     import systemd.daemon
     notify = systemd.daemon.notify
 except ImportError:
+    logging.warn("Missing systemd module")
     def notify(arg):
         pass
 

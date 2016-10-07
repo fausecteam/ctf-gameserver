@@ -190,7 +190,8 @@ def main():
         import systemd.daemon
         systemd.daemon.notify("READY=1")
     except ImportError:
-        pass
+        logging.warn("Missing systemd module")
+
     asyncore.loop()
 
 if __name__ == '__main__':
