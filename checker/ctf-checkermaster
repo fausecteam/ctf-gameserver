@@ -73,7 +73,7 @@ def run_checker(service, team, tick, checker, loglevel, dbconnection):
     logger = logging.getLogger("service%02d-team%03d-tick%03d" % (service, team, tick))
     logger.info("running checker")
     result = None
-    process = yield from asyncio.create_subprocess_exec("checkerslave",
+    process = yield from asyncio.create_subprocess_exec("ctf-checkerslave",
                                                         "--service", str(service),
                                                         "--team", str(team),
                                                         "--tick", str(tick),
