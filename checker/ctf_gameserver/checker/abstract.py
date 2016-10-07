@@ -6,6 +6,7 @@ import logging
 import json
 import socket
 import requests
+import urllib3
 
 from .constants import *
 
@@ -107,5 +108,9 @@ class AbstractChecker(metaclass=ABCMeta):
             self.logger.info("Timeout catched by BaseLogger")
             return TIMEOUT
         except requests.exceptions.Timeout:
+            self.logger.info("Timeout catched by BaseLogger")
+            return TIMEOUT
+        except urllib3.exceptions.ProtocolError:
+            # no route tohost/network
             self.logger.info("Timeout catched by BaseLogger")
             return TIMEOUT
