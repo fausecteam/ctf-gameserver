@@ -1,5 +1,8 @@
 [Unit]
 Description=CTF Checker Runner
+Description=CTF Flag-Submission Service
+Wants=postgresql.service
+After=postgresql.service
 
 [Service]
 Type=notify

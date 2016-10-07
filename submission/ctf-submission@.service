@@ -1,8 +1,13 @@
 [Unit]
 Description=CTF Flag-Submission Service
+Wants=postgresql.service
+After=postgresql.service
 
 [Service]
 Type=notify
 ExecStart=/usr/bin/ctf-submission -p %i
 User=nobody
 Group=nogroup
+
+[Install]
+WantedBy=multi-user.target

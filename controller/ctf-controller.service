@@ -1,5 +1,7 @@
 [Unit]
 Description=FAUST-CTF: run game tick
+Wants=postgresql.service
+After=postgresql.service
 
 [Service]
 Type=oneshot
