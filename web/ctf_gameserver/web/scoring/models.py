@@ -101,8 +101,8 @@ class ScoreBoard(models.Model):
     read-only from within the website.
     """
     team = models.OneToOneField(Team, editable=False, primary_key=True)
-    attack = models.IntegerField(editable=False)
-    bonus = models.IntegerField(editable=False)
+    attack = models.FloatField(editable=False)
+    bonus = models.FloatField(editable=False)
     defense = models.FloatField(editable=False)
     sla = models.FloatField(editable=False)
     total = models.FloatField(editable=False)
