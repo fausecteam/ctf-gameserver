@@ -1,2 +1,2 @@
-usr/bin/ctf-submission
 lib/systemd/system/ctf-submission@.service
+usr/bin/ctf-submission
