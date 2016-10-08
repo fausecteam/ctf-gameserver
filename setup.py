@@ -39,12 +39,10 @@ setup(name='CTF Gameserver',
               'controller/ctf-scoring.service',
               'controller/ctf-controller.timer',
           ]
-       )
+          )
       ],
       package_data={
-          "": ['doc/Makefile',
-               'doc/source/*.rst',
-           ]
+          "ctf_gameserver.web": ['*/templates/*.html', 'templates/*.html']
       },
       namespace_packages=['ctf_gameserver'],
       package_dir = {'': 'src'},
