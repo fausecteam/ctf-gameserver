@@ -40,7 +40,12 @@ Contest services
 The checker ships with a ``checkermaster@.service`` file. The checker
 config files most be stored in ``/etc/ctf-gameserver`` and can then be
 used with the ``checkermaster@dummy`` services. The python module
-should go to the ``checker/`` subdirectory.
+should go to the ``checker/`` subdirectory. The supplied setup has the
+checkermaster logging to systemd's journal. Additionally to the full
+journal for the individual checkermaster units (one per service to
+check) you can also access the checkerscript's logging from the journal::
+
+  journalctl -u ctf-checkermaster@someservice.service SYSLOG_IDENTIFIER=team023-tick042
 
 API Baseclass
 =============
