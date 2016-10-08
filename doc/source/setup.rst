@@ -38,7 +38,8 @@ and ``TIME_ZONE``.
 .. note::
 
    setup.py does not install the templates properly. All templates
-   need to be copied manually to the installed location
+   need to be copied manually to the installed location. The same is
+   true for ``countrynames.txt``.
 
 .. note::
 
