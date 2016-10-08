@@ -2,6 +2,8 @@
 Description=FAUST-CTF: run game tick
 Wants=postgresql.service
 After=postgresql.service
+Before=ctf-scoring.service
+Wants=ctf-scoring.service
 
 [Service]
 Type=oneshot

@@ -1,0 +1,58 @@
+#!/usr/bin/python3
+
+import argparse
+import logging
+import psycopg2
+import datetime
+
+UPDATE_BONUS_QUERY="""
+UPDATE scoring_flag as outerflag
+SET bonus = 1 / (
+  SELECT greatest(1, count(*))
+  FROM scoring_flag
+  LEFT OUTER JOIN scoring_capture ON scoring_capture.flag_id = scoring_flag.id
+  WHERE scoring_capture.flag_id = outerflag.id)
+FROM scoring_gamecontrol
+WHERE outerflag.tick + scoring_gamecontrol.valid_ticks < scoring_gamecontrol.current_tick
+  AND outerflag.bonus IS NULL;
+"""
+
+def update_database(db):
+    with db:
+        with db.cursor() as cursor:
+            cursor.execute(UPDATE_BONUS_QUERY)
+            cursor.execute('REFRESH MATERIALIZED VIEW "scoring_scoreboard"')
+
+
+def main():
+    logging.basicConfig()
+    parser = argparse.ArgumentParser(description="CTF checker runner")
+    parser.add_argument('--db', type=str, required=True)
+    parser.add_argument('-v', '--loglevel', default='INFO', type=str,
+                        choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+                        help='Loglevel')
+
+    args = parser.parse_args()
+
+    numeric_level = getattr(logging, args.loglevel.upper())
+    logging.getLogger().setLevel(numeric_level)
+
+    db = psycopg2.connect(args.db)
+
+    with db:
+        with db.cursor() as cursor:
+            cursor.execute('SELECT start, "end" FROM scoring_gamecontrol')
+            start, end = cursor.fetchone()
+
+    now = datetime.datetime.now(tz=datetime.timezone.utc)
+    if now < start:
+        logging.info("Contest not running yet")
+        return
+    elif now > end:
+        logging.info("contest already over")
+        return
+    else:
+        update_database(db)
+
+if __name__ == '__main__':
+    main()

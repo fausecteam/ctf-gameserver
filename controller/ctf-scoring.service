@@ -1,0 +1,10 @@
+[Unit]
+Description=FAUST-CTF: update scoring after a game tick
+Wants=postgresql.service
+After=postgresql.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/ctf-scoring
+User=nobody
+Group=nogroup
