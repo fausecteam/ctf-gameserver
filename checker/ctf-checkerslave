@@ -5,9 +5,27 @@ import argparse
 import importlib
 import sys
 import socket
+import requests
+
+from requests.adapters import TimeoutSauce
+class MyTimeout(TimeoutSauce):
+    def __init__(self, *args, **kwargs):
+        connect = kwargs.get('connect', 10.0)
+        if connect is None:
+            connect = 10.0
+        read = kwargs.get('read', connect)
+        if read is None:
+            read = 10.0
+        total = kwargs.get('total', connect)
+        if total is None:
+            total = 10.0
+        super(MyTimeout, self).__init__(connect=connect, read=read, total=total)
+
 
 def run(args):
-    socket.setdefaulttimeout(20)
+    socket.setdefaulttimeout(10.0)
+    requests.adapters.TimeoutSauce = MyTimeout
+
     logging.debug("Importing checker")
     checkermod, checkerclass = args.checker.split(":")
     checkermod = importlib.import_module(checkermod)
