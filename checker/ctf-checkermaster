@@ -10,6 +10,7 @@ import base64
 import datetime
 import codecs
 import signal
+import os
 
 from ctf_gameserver.lib import flag
 from ctf_gameserver.checker import string_to_result
@@ -73,6 +74,8 @@ def run_checker(service, team, tick, checker, loglevel, dbconnection):
     logger = logging.getLogger("service%02d-team%03d-tick%03d" % (service, team, tick))
     logger.info("running checker")
     result = None
+    subenv = dict(os.environ)
+    subenv['CHECKER_CONTEST'] = ''
     process = yield from asyncio.create_subprocess_exec("ctf-checkerslave",
                                                         "--service", str(service),
                                                         "--team", str(team),
@@ -80,6 +83,7 @@ def run_checker(service, team, tick, checker, loglevel, dbconnection):
                                                         "--loglevel", logging.getLevelName(loglevel),
                                                         "--ip", "10.66.%d.2" % team,
                                                         checker,
+                                                        env=subenv,
                                                         stdout=asyncio.subprocess.PIPE,
                                                         stderr=asyncio.subprocess.PIPE,
                                                         stdin=asyncio.subprocess.PIPE)

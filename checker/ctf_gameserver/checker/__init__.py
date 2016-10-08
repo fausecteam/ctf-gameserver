@@ -1,6 +1,10 @@
 #!/usr/bin/python3
 
-from .local import LocalChecker as BaseChecker
-#from .contest import ContestChecker as BaseChecker
+import os
+
+if 'CHECKER_CONTEST' in os.environ:
+    from .contest import ContestChecker as BaseChecker
+else:
+    from .local import LocalChecker as BaseChecker
 
 from .constants import *
