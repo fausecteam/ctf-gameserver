@@ -25,6 +25,7 @@ setup(name='CTF Gameserver',
       ],
       scripts=[
           'controller/ctf-controller',
+          'controller/ctf-scoring',
           'checker/ctf-checkermaster',
           'checker/ctf-checkerslave',
           'checker/ctf-testrunner',
@@ -35,6 +36,7 @@ setup(name='CTF Gameserver',
               'submission/ctf-submission@.service',
               'checker/ctf-checkermaster@.service',
               'controller/ctf-controller.service',
+              'controller/ctf-scoring.service',
               'controller/ctf-controller.timer',
           ]
        )
