@@ -38,7 +38,10 @@ and ``TIME_ZONE``. For the ``prod_manage.py`` utility add
 
 .. note::
 
-   setup.py does not install ``countrynames.txt``.
+   setup.py does not install ``countrynames.txt`` as well as the
+   external javascript dependencies. The files needs to be
+   downloaded. Please refer to ``web/Makefile`` in the source tree for
+   details.
 
 .. note::
 
