@@ -14,9 +14,9 @@ the script may be started in parallel. Each such process needs to take
 care of exactly one team.
 
 Currently checkers are expected to be implemented as python modules
-with one class inheriting ``ctf_gameserver.checker.BaseChecker``. The
-``BaseChecker`` inherits from the ``AbstractChecker`` documented
-below.
+with one class inheriting
+:py:class:`ctf_gameserver.checker.BaseChecker`. The :py:class:`BaseChecker`
+inherits from the :py:class:`AbstractChecker` documented below.
 
 For service authors to locally test their checker a ``testrunner`` is
 provided which can be called like this::
