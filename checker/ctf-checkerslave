@@ -48,6 +48,13 @@ def main():
     numeric_level = getattr(logging, args.loglevel.upper())
     logging.getLogger().setLevel(numeric_level)
 
+    try:
+        from systemd.journal import JournalHandler
+        identifier = "team%03d-tick%03d" % (args.team, args.tick)
+        logging.root.addHandler(JournalHandler(SYSLOG_IDENTIFIER=identifier))
+    except ImportError:
+        logging.warn("Missing systemd module")
+
     run(args)
 
 if __name__ == '__main__':
