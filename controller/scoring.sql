@@ -48,13 +48,13 @@ WITH
     GROUP BY team_id
   ),
   teams as (
-    SELECT count(*) as teams
+    SELECT user_id as team_id
     FROM registration_team
     INNER JOIN auth_user ON auth_user.id = registration_team.user_id
     WHERE is_active = true
   ),
   sla AS (
-    SELECT (SELECT sqrt(teams) FROM teams) * (coalesce(sla_ok, 0) + coalesce(sla_recover, 0)) as sla,
+    SELECT (SELECT sqrt(count(*)) FROM teams) * (coalesce(sla_ok, 0) + coalesce(sla_recover, 0)) as sla,
            team_id
     FROM sla_ok
     NATURAL FULL OUTER JOIN sla_recover
@@ -63,9 +63,10 @@ SELECT team_id,
        coalesce(attack, 0)::double precision as attack,
        coalesce(bonus, 0) as bonus,
        coalesce(defense, 0) as defense,
-       sla,
-       coalesce(attack, 0) + coalesce(defense, 0) + coalesce(bonus, 0) + sla as total
+       coalesce(sla, 0) as sla,
+       coalesce(attack, 0) + coalesce(defense, 0) + coalesce(bonus, 0) + coalesce(sla, 0) as total
 FROM attack
 NATURAL FULL OUTER JOIN defense
 NATURAL FULL OUTER JOIN sla
+NATURAL RIGHT OUTER JOIN teams
 ORDER BY team_id;
