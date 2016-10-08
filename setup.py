@@ -12,6 +12,10 @@ setup(name='CTF Gameserver',
       install_requires=[
           'psycopg2',
           'django',
+          'markdown',
+          'requests',
+          'pil',
+          'systemd'
       ],
       packages=[
           'ctf_gameserver.checker',
