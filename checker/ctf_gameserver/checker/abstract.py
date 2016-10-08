@@ -110,7 +110,13 @@ class AbstractChecker(metaclass=ABCMeta):
         except requests.exceptions.Timeout:
             self.logger.info("Timeout catched by BaseLogger")
             return TIMEOUT
+        except requests.exceptions.ConnectTimeout:
+            self.logger.info("Timeout catched by BaseLogger")
+            return TIMEOUT
         except urllib3.exceptions.ProtocolError:
             # no route to host/network
             self.logger.info("Timeout catched by BaseLogger")
             return TIMEOUT
+        except Exception as e:
+            self.logger.debug(repr(e))
+            raise e
