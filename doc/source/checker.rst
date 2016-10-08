@@ -22,7 +22,7 @@ For service authors to locally test their checker a ``testrunner`` is
 provided which can be called like this::
 
   mytemp=`mktemp -d`
-  for i in {1..10}
+  for i in {0..10}
   do
     ./testrunner.py --first 1437258032 --backend $mytemp --tick $i --ip $someip --team 1 --service 1 dummy:DummyChecker
   done
