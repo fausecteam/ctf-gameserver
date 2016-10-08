@@ -30,12 +30,17 @@ class AbstractChecker(metaclass=ABCMeta):
         self._service = service
         self._tickduration = 300
         self._lookback = 5
-        self.logger = logging.getLogger("service%02d-team%03d-tick%03d" % (service, team, tick))
+        self._logger = logging.getLogger("service%02d-team%03d-tick%03d" % (service, team, tick))
 
     @property
     def tick(self):
-        """Returns the current tick"""
+        """Accessor for the current tick"""
         return self._tick
+
+    @property
+    def logger(self):
+        """Accessor for the logger to use"""
+        return self._logger
 
     def check_service(self):
         """ Check if the service is running as expected"""
