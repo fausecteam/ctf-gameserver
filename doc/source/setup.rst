@@ -67,7 +67,8 @@ should contain exactly one table:
      team_id INTEGER,
      service_id INTEGER,
      identifier CHARACTER VARYING (128),
-     data BYTEA);
+     data BYTEA
+   );
 
 Checker
 -------
@@ -85,6 +86,29 @@ examples.
    Currently it is necessary to manually switch to the contestchecker
    TODO reconfigure checkermodule for contest in the ``__init__.py``
    for :py:mod:`ctf_gameserver.checker`
+
+Scoring
+-------
+
+The gameserver comes with an example scoring function. If you want to
+use it, apply the ``scoring.sql`` patch to the database. The
+ctf-scoring unit will take care of periodically updating the
+score. You can implement your own scoring either by adapting the SQL
+for the materialized view in ``scoring.sql`` or by writing your
+scoring code to the ``ctf-scoring`` programm. Scoring needs to create
+a table or view with the schema produced below and contain a row for
+every team.
+
+.. code-block:: sql
+
+    CREATE TABLE "scoring_scoreboard" (
+      "team_id" integer NOT NULL,
+      "attack" integer NOT NULL,
+      "bonus" integer NOT NULL,
+      "defense" double precision NOT NULL,
+      "sla" double precision NOT NULL,
+      "total" double precision NOT NULL
+    );
 
 Networking
 ----------
