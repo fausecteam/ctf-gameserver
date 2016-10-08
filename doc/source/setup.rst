@@ -22,12 +22,13 @@ setup we use uwsgi and nginx to serve it and example configuration is
 provided with the software. From the gameserver the package
 ``ctf-gameserver-web`` is needed. In the prod_settings the following
 keys need adaption: ``SECRET_KEY``, ``ALLOWED_HOSTS``, ``DATABASES``
-and ``TIME_ZONE``.
+and ``TIME_ZONE``. For the ``prod_manage.py`` utility add
+``/usr/lib/ctf-gameserver/bin`` to your ``PATH``.
 
 .. code-block:: bash
 
-   ./prod_manage.py migrate auth
-   ./prod_manage.py migrate
+   prod_manage.py migrate auth
+   prod_manage.py migrate
 
 .. note::
 
@@ -43,11 +44,6 @@ and ``TIME_ZONE``.
 
    ``prod_settings.py`` is part of the installed tree and needs to be
    modified there
-
-.. note::
-	  
-   ``prod_manage.py`` is not installed by setup.py at all and needs to
-   be copied over manually
 
 Submission and Controller
 -------------------------

@@ -43,7 +43,11 @@ setup(name='CTF Gameserver',
               'controller/ctf-scoring.service',
               'controller/ctf-controller.timer',
           ]
-          )
+          ),
+          ("/usr/lib/ctf-gameserver/bin/", [
+               "web/prod_manage.py",
+          ]
+          ),
       ],
       package_data={
           "ctf_gameserver.web": ['*/templates/*.html', 'templates/*.html']
