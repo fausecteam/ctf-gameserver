@@ -47,6 +47,30 @@ check) you can also access the checkerscript's logging from the journal::
 
   journalctl -u ctf-checkermaster@someservice.service SYSLOG_IDENTIFIER=team023-tick042
 
+Writing a checker
+=================
+
+Having robust checker scripts is essential for a fun
+competition. Checkerscripts will encounter different kinds of half
+broken services, slow network, unreachable hosts and lots of other
+things. The checkerscript should therefore set reasonable timeouts for
+all interactions and handle all exceptions for which it can properly
+assign a return value. If an unexpected (and therefore unhandled)
+exception occurs, the :py:class:`BaseChecker` will create an
+appropriate logentry and not write any result into the database.
+
+The baseclass :py:class:`BaseChecker` provides a :py:mod:`logging`
+logger which is set up properly to create well integrated logs with
+all the relevant metainformation. All checkers should use it instead
+of the global functions from the :py:mod:`logging` module.
+
+Checkers need to be able to recover from partial data loss on the
+vulnboxes. They should not create login credentials on first run and
+continue using them forever -- doing so would make it trivial to
+distinguish the gameserver and will make the checker fail for the rest
+of the competition if a vulnbox has been reset in the middle of the
+game.
+
 API Baseclass
 =============
 
