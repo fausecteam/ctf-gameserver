@@ -118,5 +118,5 @@ class AbstractChecker(metaclass=ABCMeta):
             self.logger.info("Timeout catched by BaseLogger")
             return TIMEOUT
         except Exception as e:
-            self.logger.debug(repr(e))
+            self.logger.exception("Checker script failed with unhandled exception")
             raise e
