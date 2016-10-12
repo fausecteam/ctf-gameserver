@@ -5,12 +5,14 @@ from sys import argv, exit, stderr
 import re
 import shlex
 
+allowed_services = argv[1].split(",")
+
 if not 'SSH_ORIGINAL_COMMAND' in environ:
     print("No service selected", file=stderr)
+    print("Your authorized to access %s" % allowed_services, file=stderr)
     exit(1)
 
 origcmd = environ['SSH_ORIGINAL_COMMAND']
-allowed_services = argv[1].split(",")
 origargs = shlex.split(origcmd)
 
 service = origargs[0]
@@ -20,10 +22,10 @@ if not service in allowed_services:
     exit(1)
 
 if len(origargs) == 1:
-    execlp("journalctl", "journalctl", "-f", "-n", "200", "-u", "ctf-checkermaster@%s.service" % service)
+    execlp("journalctl", "journalctl", "--no-pager", "-f", "-n", "200", "-u", "ctf-checkermaster@%s.service" % service)
 else:
     matchobj = re.match("team([0-9]+)-tick([0-9]+)", origargs[1])
     if matchobj is not None:
-        execlp("journalctl", "journalctl", "-u", "ctf-checkermaster@%s.service" % service, "SYSLOG_IDENTIFIER=%s" % matchobj.group(0))
+        execlp("journalctl", "journalctl", "--no-pager", "-u", "ctf-checkermaster@%s.service" % service, "SYSLOG_IDENTIFIER=%s" % matchobj.group(0))
     else:
         print("Expected 'team([0-9]+)-tick([0-9]+)' but got '%s'" % origargs[1], file=stderr)
