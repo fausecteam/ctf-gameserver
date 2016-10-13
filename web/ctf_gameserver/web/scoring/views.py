@@ -14,14 +14,10 @@ def scoreboard(request):
     else:
         to_tick = game_control.current_tick - 1
 
-    services = models.Service.objects.all()
-    score = calculations.score(to_tick)
-    statuses = calculations.team_statuses(to_tick, to_tick)
+    scores = models.ScoreBoard.objects.all()
 
     return render(request, 'scoreboard.html', {
-        'score': score,
-        'services': services,
-        'statuses': statuses,
+        'scores': scores,
         'tick': to_tick
     })
 
