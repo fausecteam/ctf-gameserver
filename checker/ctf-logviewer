@@ -9,7 +9,7 @@ allowed_services = argv[1].split(",")
 
 if not 'SSH_ORIGINAL_COMMAND' in environ:
     print("No service selected", file=stderr)
-    print("Your authorized to access %s" % allowed_services, file=stderr)
+    print("You are authorized to access %s" % allowed_services, file=stderr)
     exit(1)
 
 origcmd = environ['SSH_ORIGINAL_COMMAND']
