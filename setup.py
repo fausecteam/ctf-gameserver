@@ -48,6 +48,10 @@ setup(name='CTF Gameserver',
                "web/prod_manage.py",
           ]
           ),
+          ("/etc/ctf-gameserver/web/", [
+               "web/ctf_gameserver/web/prod_settings.py",
+          ]
+          ),
       ],
       package_data={
           "ctf_gameserver.web": ['*/templates/*.html', 'templates/*.html']

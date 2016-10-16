@@ -5,7 +5,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/.
 """
 
 # pylint: disable=wildcard-import, unused-wildcard-import
-from .base_settings import *
+from ctf_gameserver.web.base_settings import *
 
 
 # The human-readable title of your CTF
