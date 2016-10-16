@@ -1,9 +1,13 @@
 #!/usr/bin/python3
 
 import argparse
-import logging
-import psycopg2
 import datetime
+import logging
+
+import psycopg2
+
+from ctf_gameserver.lib.helper import convert_arg_line_to_args
+
 
 UPDATE_BONUS_QUERY="""
 UPDATE scoring_flag as outerflag
@@ -17,6 +21,7 @@ WHERE outerflag.tick + scoring_gamecontrol.valid_ticks < scoring_gamecontrol.cur
   AND outerflag.bonus IS NULL;
 """
 
+
 def update_database(db):
     with db:
         with db.cursor() as cursor:
@@ -26,18 +31,32 @@ def update_database(db):
 
 def main():
     logging.basicConfig()
-    parser = argparse.ArgumentParser(description="CTF checker runner")
-    parser.add_argument('--db', type=str, required=True)
-    parser.add_argument('-v', '--loglevel', default='INFO', type=str,
+    parser = argparse.ArgumentParser(description="CTF checker runner",
+                                     fromfile_prefix_chars='@')
+    parser.convert_arg_line_to_args = convert_arg_line_to_args
+
+    parser.add_argument('-v', '--loglevel', default='WARNING', type=str,
                         choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
                         help='Loglevel')
+    parser.add_argument('--dbname', type=str, required=True,
+                        help='Name of the used database')
+    parser.add_argument('--dbuser', type=str, required=True,
+                        help='username for database access')
+    parser.add_argument('--dbpassword', type=str,
+                        help='password for database access if needed')
+    parser.add_argument('--dbhost', type=str,
+                        help='hostname of the database. If unspecified '
+                             'ctf-submission will connect via default UNIX socket')
 
     args = parser.parse_args()
 
     numeric_level = getattr(logging, args.loglevel.upper())
     logging.getLogger().setLevel(numeric_level)
 
-    db = psycopg2.connect(args.db)
+    db = psycopg2.connect(host=args.dbhost,
+                          database=args.dbname,
+                          user=args.dbuser,
+                          password=args.dbpassword)
 
     with db:
         with db.cursor() as cursor:

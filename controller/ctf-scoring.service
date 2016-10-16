@@ -5,6 +5,6 @@ After=postgresql.service
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/ctf-scoring
+ExecStart=/usr/bin/ctf-scoring @/etc/ctf-gameserver/scoring.conf
 User=nobody
 Group=nogroup
