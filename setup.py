@@ -52,6 +52,10 @@ setup(name='CTF Gameserver',
                "web/ctf_gameserver/web/prod_settings.py",
           ]
           ),
+          ("/etc/ctf-gameserver/", [
+               "submission/submission.conf",
+          ]
+          ),
       ],
       package_data={
           "ctf_gameserver.web": ['*/templates/*.html', 'templates/*.html']
