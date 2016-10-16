@@ -8,7 +8,7 @@ setup(name='CTF Gameserver',
       description='FAUST CTF Gameserver',
       author='Christoph Egger, Felix Dreissig',
       author_email='Christoph.Egger@fau.de, Felix.Dreissig@fau.de',
-      url='http://faustctf.net/',
+      url='http://ctf-gameserver.faust.ninja/',
       install_requires=[
           'psycopg2',
           'django',
