@@ -20,9 +20,10 @@ Website
 The web part is a standard django webapplication. For the example
 setup we use uwsgi and nginx to serve it and example configuration is
 provided with the software. From the gameserver the package
-``ctf-gameserver-web`` is needed. In the prod_settings the following
-keys need adaption: ``SECRET_KEY``, ``ALLOWED_HOSTS``, ``DATABASES``
-and ``TIME_ZONE``. For the ``prod_manage.py`` utility add
+``ctf-gameserver-web`` is needed. In the
+``/etc/ctf-gameserver/web/prod_settings`` the following keys need
+adaption: ``SECRET_KEY``, ``ALLOWED_HOSTS``, ``DATABASES`` and
+``TIME_ZONE``. For the ``prod_manage.py`` utility add
 ``/usr/lib/ctf-gameserver/bin`` to your ``PATH``.
 
 .. code-block:: bash
@@ -42,11 +43,6 @@ and ``TIME_ZONE``. For the ``prod_manage.py`` utility add
    external javascript dependencies. The files needs to be
    downloaded. Please refer to ``web/Makefile`` in the source tree for
    details.
-
-.. note::
-
-   ``prod_settings.py`` is part of the installed tree and needs to be
-   modified there
 
 Submission and Controller
 -------------------------
