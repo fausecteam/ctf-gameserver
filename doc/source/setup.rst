@@ -84,12 +84,6 @@ ctf-checkermaster@exampleservice``. For advice on how the service
 description is supposed to look like please refer to the provided
 examples.
 
-.. note::
-
-   Currently it is necessary to manually switch to the contestchecker
-   TODO reconfigure checkermodule for contest in the ``__init__.py``
-   for :py:mod:`ctf_gameserver.checker`
-
 Scoring
 -------
 
