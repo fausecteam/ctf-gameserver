@@ -54,6 +54,7 @@ setup(name='CTF Gameserver',
           ]
           ),
           ("/etc/ctf-gameserver/", [
+               "controller/controller.conf",
                "submission/submission.conf",
           ]
           ),
