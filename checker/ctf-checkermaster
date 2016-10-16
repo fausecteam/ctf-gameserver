@@ -1,31 +1,42 @@
 #!/usr/bin/python3
 
-import logging
 import argparse
-import configparser
 import asyncio
 import asyncio.subprocess
-import psycopg2
 import base64
-import datetime
 import codecs
-import signal
+import configparser
+import datetime
+import logging
 import os
+import signal
+import sys
+
+import psycopg2
+try:
+    import systemd.daemon
+    notify = systemd.daemon.notify
+except ImportError:
+    logging.warning("Missing systemd module")
+    #pylint: disable=unused-argument
+    def notify(arg):
+        pass
 
 from ctf_gameserver.lib import flag
 from ctf_gameserver.checker import string_to_result
 
-MAXRUNTIME = datetime.timedelta(minutes = 1)
+MAXRUNTIME = datetime.timedelta(minutes=1)
 conteststart = None
 flagvalidity = None
 tickduration = None
 open_tasks = dict()
 stopping = False
 
+#pylint: disable=unused-argument
 def handle_stop(signum, frame):
     global stopping
     stopping = True
-    logging.warn("Received signal, stopping the checkermaster gracefully")
+    logging.warning("Received signal, stopping the checkermaster gracefully")
 
 
 def do_store(line, dbconnection, service, team):
@@ -81,7 +92,7 @@ def run_checker(service, team, tick, checker, loglevel, dbconnection):
                                                         "--team", str(team),
                                                         "--tick", str(tick),
                                                         "--loglevel", logging.getLevelName(loglevel),
-                                                        "--ip", "10.66.%d.2" % team,
+                                                        "--ip", "172.30.%d.2" % team,
                                                         checker,
                                                         env=subenv,
                                                         stdout=asyncio.subprocess.PIPE,
@@ -93,11 +104,11 @@ def run_checker(service, team, tick, checker, loglevel, dbconnection):
         try:
             line = yield from process.stdout.readline()
             if process.returncode is not None:
-                logger.warn(repr(process.returncode))
+                logger.warning(repr(process.returncode))
 
             if line == b'':
                 err = yield from process.stderr.read()
-                logger.warn(err.decode("utf-8"))
+                logger.warning(err.decode("utf-8"))
                 return
 
             logger.debug(repr(line))
@@ -114,7 +125,7 @@ def run_checker(service, team, tick, checker, loglevel, dbconnection):
                     process.stdin.write(b"OK\n")
                 except Exception as e:
                     process.stdin.write(b"FAIL\n")
-                    logger.warn("Database store failed with %s", repr(e))
+                    logger.exception("Database store failed")
 
             elif "RETRIEVE" == line[0]:
                 try:
@@ -123,13 +134,13 @@ def run_checker(service, team, tick, checker, loglevel, dbconnection):
 
                 except Exception as e:
                     process.stdin.write(b"\n")
-                    logger.warn("Database get failed with %s", repr(e))
+                    logger.exception("Database get failed")
 
             elif line[0] in ["OK", "TIMEOUT", "NOTWORKING", "NOTFOUND", "RECOVERING"]:
                 result = line[0]
                 break
         except ValueError as e:
-            logger.warn(repr(e))
+            logger.warning(repr(e))
             break
 
     yield from process.wait()
@@ -148,7 +159,7 @@ def get_fresh_jobs(gamedb, cachedb, config):
         if task.done():
             try:
                 if task.result() is None:
-                    logging.warn("Checkerscript failed for Team %d Tick %d", team, tick)
+                    logging.warning("Checkerscript failed for Team %d Tick %d", team, tick)
                 else:
                     result = string_to_result(task.result())
                     with gamedb:
@@ -157,7 +168,7 @@ def get_fresh_jobs(gamedb, cachedb, config):
                                                  (service_id, team_id, tick, status, timestamp)
                                               VALUES
                                                  (%s, %s, %s, %s, now())""",
-                                            (service, team, tick, result))
+                                           (service, team, tick, result))
                             cursor.execute("""UPDATE scoring_flag
                                               SET placement_end = now()
                                               WHERE service_id = %s
@@ -166,9 +177,9 @@ def get_fresh_jobs(gamedb, cachedb, config):
                                            (service, team, tick))
                 del open_tasks[task]
             except Exception as e:
-                logging.warn(repr(e))
+                logging.warning(repr(e))
         elif starttime + MAXRUNTIME < datetime.datetime.now():
-            logging.warn("aborting job(service=%d, team=%d, tick=%d) due to timeout",
+            logging.warning("aborting job(service=%d, team=%d, tick=%d) due to timeout",
                          service, team, tick)
             if task.cancel():
                 del open_tasks[task]
@@ -217,7 +228,7 @@ def get_fresh_jobs(gamedb, cachedb, config):
         logging.info("started %d (of %d possible) new jobs", len(jobs), new_tasks)
 
     except Exception as e:
-        logging.warn(repr(e))
+        logging.warning(repr(e))
 
 
 def main():
@@ -275,15 +286,6 @@ def main():
     notify("READY=1")
 
     loop.run_forever()
-
-try:
-    import systemd.daemon
-    notify = systemd.daemon.notify
-except ImportError:
-    logging.warn("Missing systemd module")
-    def notify(arg):
-        pass
-
 
 if __name__ == '__main__':
     main()
