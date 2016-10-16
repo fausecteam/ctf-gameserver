@@ -28,11 +28,12 @@ setup(name='CTF Gameserver',
           'ctf_gameserver.web.templatetags.templatetags',
       ],
       scripts=[
-          'controller/ctf-controller',
-          'controller/ctf-scoring',
           'checker/ctf-checkermaster',
           'checker/ctf-checkerslave',
+          'checker/ctf-logviewer'
           'checker/ctf-testrunner',
+          'controller/ctf-controller',
+          'controller/ctf-scoring',
           'submission/ctf-submission',
       ],
       data_files=[
