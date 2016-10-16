@@ -1,6 +1,7 @@
-include doc/Makefile
-include doc/source/*
+include */*.conf
 include */*.service
 include */*.timer
-include */*.conf
-recursive-include  web *.html
+include doc/Makefile
+include doc/source/*
+recursive-include examples *
+recursive-include web *.html
