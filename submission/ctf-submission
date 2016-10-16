@@ -10,6 +10,7 @@ import datetime
 import psycopg2
 
 from ctf_gameserver.lib import flag
+from ctf_gameserver.lib.helper import convert_arg_line_to_args
 
 class FlagHandler(asynchat.async_chat):
     def __init__(self, sock, addr, dbconnection,
@@ -156,11 +157,14 @@ class FlagServer(asyncore.dispatcher):
         self._logger.info('Incoming connection from %s', repr(addr))
         handler = FlagHandler(sock, addr, *self._otherargs)
 
+
 def main():
     logging.basicConfig(format='%(asctime)s %(levelname)s(%(name)s): %(message)s',
                         datefmt='%m/%d/%Y %H:%M:%S')
 
-    parser = argparse.ArgumentParser(description="Flag submission system")
+    parser = argparse.ArgumentParser(description="Flag submission system",
+                                     fromfile_prefix_chars='@')
+    parser.convert_arg_line_to_args = convert_arg_line_to_args
     parser.add_argument('-v', '--loglevel', default='WARNING', type=str,
                         choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
                         help='Loglevel')
@@ -168,14 +172,25 @@ def main():
                         help='address or hostname to listen on')
     parser.add_argument('-p', '--port', type=int, default="6666",
                         help="Port to listen on")
-    parser.add_argument('--db', type=str, default="dbname=faustctf user=submission")
+    parser.add_argument('--dbname', type=str, required=True,
+                        help='Name of the used database')
+    parser.add_argument('--dbuser', type=str, required=True,
+                        help='username for database access')
+    parser.add_argument('--dbpassword', type=str,
+                        help='password for database access if needed')
+    parser.add_argument('--dbhost', type=str,
+                        help='hostname of the database. If unspecified '
+                             'ctf-submission will connect via default UNIX socket')
     args = parser.parse_args()
 
     numeric_level = getattr(logging, args.loglevel.upper())
     logging.getLogger().setLevel(numeric_level)
 
     logging.debug("connecting to database")
-    dbconnection = psycopg2.connect(args.db)
+    dbconnection = psycopg2.connect(host=args.dbhost,
+                                    database=args.dbname,
+                                    user=args.dbuser,
+                                    password=args.dbpassword)
 
     with dbconnection:
         with dbconnection.cursor() as cursor:
