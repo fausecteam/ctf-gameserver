@@ -62,7 +62,7 @@ class FlagHandler(asynchat.async_chat):
             curflag = self.buffer.decode('us-ascii')
         except UnicodeDecodeError as e:
             self._reply(u"Flags should be of the Format [-_a-zA-Z0-9]+"
-                      .encode('utf-8'))
+                        .encode('utf-8'))
             return
 
         try:
@@ -77,7 +77,6 @@ class FlagHandler(asynchat.async_chat):
             self._reply((u"Flag expired since %.1f seconds" % e.args).encode('utf-8'))
             return
 
-        print("teamcheck", repr(team), repr(self.team))
         if team == self.team:
             self._reply(b"Can't submit a flag for your own team")
             return
@@ -85,11 +84,12 @@ class FlagHandler(asynchat.async_chat):
         try:
             count = self._store_capture(team, service, timestamp)
             if count > 1:
-                self._reply((u"Flags should only be submitted once (this is %d for your team) subtracting penalty!" % count).encode('utf-8'))
+                self._reply((u"Flags should only be submitted once (this is %d for your team) "
+                             "subtracting penalty!" % count).encode('utf-8'))
             else:
                 self._reply(u"Thank you for your submission!".encode('utf-8'))
         except psycopg2.DatabaseError as e:
-            self._logger.warn("%s: %s", e.diag.severity, e.diag.message_primary)
+            self._logger.warning("%s: %s", e.diag.severity, e.diag.message_primary)
             self._logger.info(e.diag.internal_query)
             self._reply(u"Something went wrong with your submission!".encode('utf-8'))
 
@@ -155,7 +155,7 @@ class FlagServer(asyncore.dispatcher):
 
     def handle_accepted(self, sock, addr):
         self._logger.info('Incoming connection from %s', repr(addr))
-        handler = FlagHandler(sock, addr, *self._otherargs)
+        FlagHandler(sock, addr, *self._otherargs)
 
 
 def main():
@@ -194,20 +194,21 @@ def main():
 
     with dbconnection:
         with dbconnection.cursor() as cursor:
-            global conteststart, flagvalidity, tickduration
             cursor.execute('''SELECT start, "end", valid_ticks, tick_duration
                               FROM scoring_gamecontrol''')
             conteststart, contestend, flagvalidity, tickduration = cursor.fetchone()
 
     logging.debug("Starting asyncore")
-    server = FlagServer(args.listen, args.port, dbconnection, conteststart, contestend, flagvalidity, tickduration)
+    FlagServer(args.listen, args.port, dbconnection, conteststart, contestend,
+               flagvalidity, tickduration)
     try:
         import systemd.daemon
         systemd.daemon.notify("READY=1")
     except ImportError:
-        logging.warn("Missing systemd module")
+        logging.warning("Missing systemd module")
 
     asyncore.loop()
+
 
 if __name__ == '__main__':
     main()
