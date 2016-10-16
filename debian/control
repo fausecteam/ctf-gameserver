@@ -40,6 +40,7 @@ Depends:
  python3-requests,
  python3-systemd,
  systemd,
+ procps,
  ${misc:Depends},
  ${python3:Depends}
 Description: ctf-gameserver - servicechecker
