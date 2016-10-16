@@ -238,12 +238,25 @@ def main():
     logging.getLogger().setLevel(numeric_level)
 
     logging.debug("connecting to database")
+    if 'host' in config['checkerdatabase']:
+        checkerdbhost = config['checkerdatabase']['host']
+    else:
+        # Use UNIX socket for database
+        checkerdbhost = None
+
+    if 'host' in config['gamedatabase']:
+        gamedbhost = config['gamedatabase']['host']
+    else:
+        # Use UNIX socket for database
+        gamedbhost = None
+
+
     cachedb = psycopg2.connect(database=config['checkerdatabase']['database'],
-                               host=config['checkerdatabase']['host'],
+                               host=checkerdbhost,
                                user=config['checkerdatabase']['user'],
                                password=config['checkerdatabase']['password'])
     gamedb = psycopg2.connect(database=config['gamedatabase']['database'],
-                              host=config['gamedatabase']['host'],
+                              host=gamedbhost,
                               user=config['gamedatabase']['user'],
                               password=config['gamedatabase']['password'])
 
