@@ -39,7 +39,7 @@ setup(name='CTF Gameserver',
       scripts=[
           'checker/ctf-checkermaster',
           'checker/ctf-checkerslave',
-          'checker/ctf-logviewer'
+          'checker/ctf-logviewer',
           'checker/ctf-testrunner',
           'controller/ctf-controller',
           'controller/ctf-scoring',
