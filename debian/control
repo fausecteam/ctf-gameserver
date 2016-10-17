@@ -7,8 +7,12 @@ Build-Depends:
  dh-systemd,
  python3 (>= 3.3.0-2),
  python3-all,
+ python3-pil,
+ python3-psycopg2,
+ python3-requests,
  python3-setuptools,
- python3-sphinx
+ python3-sphinx,
+ python3-systemd
 Standards-Version: 3.9.6
 Homepage: http://framework.faustctf.net/
 
