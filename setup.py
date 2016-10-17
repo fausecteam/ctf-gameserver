@@ -7,6 +7,7 @@ def all_the_tests():
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
     suite.addTest(loader.discover('submission', top_level_dir='submission'))
+    suite.addTest(loader.discover('lib', top_level_dir='lib'))
     return suite
 
 
