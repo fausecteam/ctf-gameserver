@@ -1,13 +1,14 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-import time
-import struct
-from .Keccak import Keccak
 import base64
-import codecs
 import binascii
+import codecs
+import struct
+import time
 import zlib
+
+from .Keccak import Keccak
 
 # length of the MAC (in bits)
 MACLEN = 80
@@ -35,13 +36,13 @@ def generate(team, service, payload=None, timestamp=None):
      - timestamp: timestamp when to expire validity of the
        flags. Defaults to 15 minutes in the future
     """
-    if timestamp == None:
+    if timestamp is None:
         timestamp = time.time() + VALID
 
     protecteddata = struct.pack("!i c c", int(timestamp),
                                 bytes([team]), bytes([service]))
 
-    if payload == None:
+    if payload is None:
         payload = struct.pack("!I I", zlib.crc32(protecteddata), 0)
 
     protecteddata = protecteddata + payload
@@ -89,8 +90,8 @@ def verify(flag):
     protecteddata, mac = rawdata[:datalength], rawdata[datalength:]
     computedmac = codecs.encode(SECRET, 'hex') + codecs.encode(protecteddata, 'hex')
     computedmac = keccak.Keccak(((len(SECRET) + len(protecteddata))*8,
-                         computedmac.decode('latin-1')),
-                        n=MACLEN)
+                                 computedmac.decode('latin-1')),
+                                n=MACLEN)
 
     computedmac = codecs.decode(computedmac, 'hex')
     if not computedmac == mac:
