@@ -1,14 +1,6 @@
 #!/usr/bin/python3
 
 from setuptools import setup
-import unittest
-
-def all_the_tests():
-    loader = unittest.TestLoader()
-    suite = unittest.TestSuite()
-    suite.addTest(loader.discover('submission', top_level_dir='submission'))
-    suite.addTest(loader.discover('lib', top_level_dir='lib'))
-    return suite
 
 
 setup(name='CTF Gameserver',
@@ -75,5 +67,5 @@ setup(name='CTF Gameserver',
       },
       namespace_packages=['ctf_gameserver'],
       package_dir = {'': 'src'},
-      test_suite = 'setup.all_the_tests'
+      test_suite = 'run_tests.all_the_tests'
 )
