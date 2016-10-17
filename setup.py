@@ -22,6 +22,7 @@ setup(name='CTF Gameserver',
       packages=[
           'ctf_gameserver.checker',
           'ctf_gameserver.lib',
+          'ctf_gameserver.submission',
           'ctf_gameserver.web',
           'ctf_gameserver.web.scoring',
           'ctf_gameserver.web.scoring.templatetags',
