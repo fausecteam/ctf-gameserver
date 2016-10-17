@@ -1,6 +1,14 @@
 #!/usr/bin/python3
 
 from setuptools import setup
+import unittest
+
+def all_the_tests():
+    loader = unittest.TestLoader()
+    suite = unittest.TestSuite()
+    suite.addTest(loader.discover('submission', top_level_dir='submission'))
+    return suite
+
 
 setup(name='CTF Gameserver',
       include_package_data=True,
@@ -66,4 +74,5 @@ setup(name='CTF Gameserver',
       namespace_packages=['ctf_gameserver'],
       package_dir = {'': 'src'},
       license='ISC',
+      test_suite = 'setup.all_the_tests'
 )
