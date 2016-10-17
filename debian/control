@@ -40,12 +40,12 @@ Architecture: all
 Suggests:
  ctf-gameserver-doc
 Depends:
+ procps,
  python3-ctf-gameserver,
  python3-psycopg2,
  python3-requests,
  python3-systemd,
  systemd,
- procps,
  ${misc:Depends},
  ${python3:Depends}
 Description: ctf-gameserver - servicechecker
