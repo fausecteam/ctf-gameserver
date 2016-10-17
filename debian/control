@@ -1,5 +1,5 @@
 Source: ctf-gameserver
-Section: python
+Section: education
 Priority: optional
 Maintainer: Christoph Egger <christoph@debian.org>
 Build-Depends:
@@ -18,6 +18,7 @@ Homepage: http://framework.faustctf.net/
 
 Package: python3-ctf-gameserver
 Architecture: all
+Section: python
 Suggests:
  ctf-gameserver-doc
 Depends:
