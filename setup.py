@@ -17,6 +17,7 @@ setup(name='CTF Gameserver',
       author='Christoph Egger, Felix Dreissig',
       author_email='Christoph.Egger@fau.de, Felix.Dreissig@fau.de',
       url='http://ctf-gameserver.faust.ninja/',
+      license='ISC',
       install_requires=[
           'psycopg2',
           'django',
@@ -73,6 +74,5 @@ setup(name='CTF Gameserver',
       },
       namespace_packages=['ctf_gameserver'],
       package_dir = {'': 'src'},
-      license='ISC',
       test_suite = 'setup.all_the_tests'
 )
