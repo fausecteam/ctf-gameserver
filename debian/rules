@@ -8,5 +8,11 @@ override_dh_auto_clean:
 	dh_auto_clean
 
 override_dh_auto_build:
-	$(MAKE) -C doc html
+	PYTHONPATH=$(CURDIR)/src $(MAKE) -C doc html
 	dh_auto_build
+
+override_dh_auto_test:
+	PYTHONPATH=$(CURDIR)/src python3 ./run_tests.py
+
+override_dh_install:
+	dh_install --fail-missing
