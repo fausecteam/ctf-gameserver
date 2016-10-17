@@ -1,3 +1,7 @@
+etc/ctf-gameserver/controller.conf
+etc/ctf-gameserver/scoring.conf
 lib/systemd/system/ctf-controller.service
 lib/systemd/system/ctf-controller.timer
+lib/systemd/system/ctf-scoring.service
 usr/bin/ctf-controller
+usr/bin/ctf-scoring
