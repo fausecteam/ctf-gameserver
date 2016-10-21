@@ -48,10 +48,6 @@ setup(name='CTF Gameserver',
               'controller/ctf-controller.timer',
           ]
           ),
-          ("/usr/lib/ctf-gameserver/bin/", [
-               "web/prod_manage.py",
-          ]
-          ),
           ("/etc/ctf-gameserver/web/", [
                "web/ctf_gameserver/web/prod_settings.py",
           ]
