@@ -28,8 +28,8 @@ adaption: ``SECRET_KEY``, ``ALLOWED_HOSTS``, ``DATABASES`` and
 
 .. code-block:: bash
 
-   prod_manage.py migrate auth
-   prod_manage.py migrate
+   PYTHONPATH=/etc/ctf-gameserver/web django-admin migrate --settings prod_settings auth
+   PYTHONPATH=/etc/ctf-gameserver/web django-admin migrate --settings prod_settings
 
 .. note::
 
