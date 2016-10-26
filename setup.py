@@ -1,6 +1,38 @@
 #!/usr/bin/python3
 
 from setuptools import setup
+from setuptools.command.install import install
+import glob
+import os.path
+
+
+class ctf_gameserver_install(install):
+    _servicefiles = [
+        'submission/ctf-submission@.service',
+        'checker/ctf-checkermaster@.service',
+        'controller/ctf-controller.service',
+        'controller/ctf-scoring.service',
+        ]
+
+    def run(self):
+        install.run(self)
+
+        if not self.dry_run:
+            bindir = self.install_scripts
+            if bindir.startswith(self.root):
+                bindir = bindir[len(self.root):]
+
+            systemddir = os.path.join(self.root, "lib/systemd/system")
+
+            for servicefile in self._servicefiles:
+                service = os.path.split(servicefile)[1]
+                self.announce("Creating %s" % os.path.join(systemddir, service),
+                              level=2)
+                with open(servicefile) as servicefd:
+                    servicedata = servicefd.read()
+
+                with open(os.path.join(systemddir, service), "w") as servicefd:
+                    servicefd.write(servicedata.replace("%BINDIR%", bindir))
 
 
 setup(name='CTF Gameserver',
@@ -41,10 +73,6 @@ setup(name='CTF Gameserver',
       ],
       data_files=[
           ("/lib/systemd/system", [
-              'submission/ctf-submission@.service',
-              'checker/ctf-checkermaster@.service',
-              'controller/ctf-controller.service',
-              'controller/ctf-scoring.service',
               'controller/ctf-controller.timer',
           ]
           ),
@@ -65,5 +93,6 @@ setup(name='CTF Gameserver',
       },
       namespace_packages=['ctf_gameserver'],
       package_dir = {'': 'src'},
-      test_suite = 'run_tests.all_the_tests'
+      test_suite = 'run_tests.all_the_tests',
+      cmdclass={'install': ctf_gameserver_install},
 )

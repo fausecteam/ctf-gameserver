@@ -7,6 +7,6 @@ Wants=ctf-scoring.service
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/ctf-controller @/etc/ctf-gameserver/controller.conf
+ExecStart=%BINDIR%/ctf-controller @/etc/ctf-gameserver/controller.conf
 User=nobody
 Group=nogroup
