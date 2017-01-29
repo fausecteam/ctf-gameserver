@@ -24,7 +24,7 @@ provided which can be called like this::
   mytemp=`mktemp -d`
   for i in {0..10}
   do
-    ./testrunner.py --first 1437258032 --backend $mytemp --tick $i --ip $someip --team 1 --service 1 dummy:DummyChecker
+    ./ctf-testrunner --first 1437258032 --backend $mytemp --tick $i --ip $someip --team 1 --service 1 dummy:DummyChecker
   done
 
 During the contest, checks are run by the ``checkermaster`` and
