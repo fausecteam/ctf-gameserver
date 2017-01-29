@@ -85,6 +85,13 @@ For Debian/Ubuntu users a packaged version is available. For the
 submission, checker and controller components, individual packages are
 provided (named ``ctf-gameserver-$something``).
 
+Source Code
+-----------
+
+Source Code is available on `Github
+<https://github.com/fausecteam/ctf-gameserver>`_ including all the
+usual github infrastructure.
+
 Licensing
 ---------
 
