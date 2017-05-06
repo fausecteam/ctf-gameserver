@@ -74,7 +74,8 @@ game.
 Checker return codes
 ===================
 
-The checker offers several return codes. Return codes to be used by
+The checker offers several return codes. They can all be imported from
+:py:mod:`ctf_gameserver.checker.constants`. Return codes to be used by
 individual checkerscripts are :py:data:`OK`, :py:data:`TIMEOUT`,
 :py:data:`NOTWORKING` and :py:data:`NOTFOUND`. Additionally the
 returncode :py:data:`RECOVERING` can be the result of a checker
