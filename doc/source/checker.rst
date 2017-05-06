@@ -71,6 +71,34 @@ distinguish the gameserver and will make the checker fail for the rest
 of the competition if a vulnbox has been reset in the middle of the
 game.
 
+Checker return codes
+===================
+
+The checker offers several return codes. Return codes to be used by
+individual checkerscripts are :py:data:`OK`, :py:data:`TIMEOUT`,
+:py:data:`NOTWORKING` and :py:data:`NOTFOUND`. Additionally the
+returncode :py:data:`RECOVERING` can be the result of a checker
+invocation.
+
+* :py:data:`OK` is returned by the individual checker when the check
+  was sccessfull.
+* :py:data:`TIMEOUT` is to be used whenever a timeout is reached. The
+  checker baseclass will correctly catch timeout excetions from both,
+  :py:mod:`requests` and :py:mod:`socket`. Individual checker scripts
+  may want to add additional timeouts and return this in case the
+  timeout is reached.
+* :py:data:`NOTWORKING` is returned iff there is a general error with
+  the service (like requests to a website result in unexpected error
+  pages, the connection gets dropped, or similar things.
+* :py:data:`NOTFOUND` is returned by :py:meth:`get_flag` when the flag
+  was not returned by the server. It should only be used iff
+  everything else works but the service could not find the right flag.
+
+* :py:data:`RECOVERING` is used internally. it is set iff the service
+  is working and the current flag could be placed and retrieved but
+  one or more of the older flags (within the checker window) are
+  :py:data:`NOTFOUND`
+	
 API Baseclass
 =============
 
