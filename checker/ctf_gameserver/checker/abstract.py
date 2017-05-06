@@ -98,16 +98,18 @@ class AbstractChecker(metaclass=ABCMeta):
                 return result
 
             oldesttick = max(self._tick - self._lookback, -1)
+            recovering = False
             for tick in range(self._tick, oldesttick, -1):
                 self.logger.debug("Checking for flag of tick %d", tick)
                 result = self.check_flag(tick)
                 if result != OK:
+                    self.logger.info("Got %d for flag of tick %d", result, tick)
                     if tick != self._tick and result == NOTFOUND:
-                        return RECOVERING
+                        recovering = True
                     else:
                         return result
 
-            return OK
+            return RECOVERING if recovering else OK
 
         except socket.timeout:
             self.logger.info("Timeout catched by BaseLogger")
