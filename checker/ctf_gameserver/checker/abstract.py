@@ -70,8 +70,12 @@ class AbstractChecker(metaclass=ABCMeta):
         pass
 
     def retrieve_yaml(self, ident):
+        blob = self.retrieve_blob(ident)
+        if blob is None:
+            return None
+
         try:
-            return json.loads(self.retrieve_blob(ident).decode('utf-8'))
+            return json.loads(blob.decode('utf-8'))
         except ValueError:
             return None
 
