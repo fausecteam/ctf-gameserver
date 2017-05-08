@@ -75,6 +75,9 @@ class AbstractChecker(metaclass=ABCMeta):
             return None
 
         try:
+            blob = self.retrieve_blob(ident)
+            if blob is None:
+                return None
             return json.loads(blob.decode('utf-8'))
         except ValueError:
             return None
