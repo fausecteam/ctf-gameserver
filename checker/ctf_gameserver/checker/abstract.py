@@ -89,15 +89,25 @@ class AbstractChecker(metaclass=ABCMeta):
         "returns the flag for tick possibly including payload"
         pass
 
+    @staticmethod
+    def _validate_result(result):
+        try:
+            result_to_string(result)
+        except KeyError:
+            self.logger.error("Checker returned unexpected return value '%s'", result)
+            raise Exception("broken checker: invalid return value")
+
     def run(self):
         try:
             self.logger.debug("Placing flag")
             result = self.place_flag()
+            self._validate_result(result)
             if result != OK:
                 return result
 
             self.logger.debug("General Service Checks")
             result = self.check_service()
+            self._validate_result(result)
             if result != OK:
                 return result
 
@@ -106,6 +116,8 @@ class AbstractChecker(metaclass=ABCMeta):
             for tick in range(self._tick, oldesttick, -1):
                 self.logger.debug("Checking for flag of tick %d", tick)
                 result = self.check_flag(tick)
+                self._validate_result(result)
+
                 if result != OK:
                     self.logger.info("Got %d for flag of tick %d", result, tick)
                     if tick != self._tick and result == NOTFOUND:
