@@ -5,6 +5,8 @@ from ctf_gameserver.lib import flag
 
 import os
 import os.path
+import logging
+import sys
 
 import yaml
 
@@ -13,6 +15,8 @@ class LocalChecker(AbstractChecker):
         AbstractChecker.__init__(self, tick, team, service, ip)
         self._starttime = 0
         self._backend = '/tmp'
+        self.logger.setLevel(logging.DEBUG)
+        self.logger.addHandler(logging.StreamHandler(sys.stderr))
 
     def store_blob(self, ident, blob):
         filename = os.path.join(self._backend, "%s.blob" % ident)
