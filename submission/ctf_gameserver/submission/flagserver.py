@@ -80,12 +80,12 @@ class FlagHandler(asynchat.async_chat):
             return
 
         try:
-            count = self._store_capture(team, service, timestamp)
-            if count > 1:
+            result = self._store_capture(team, service, timestamp)
+            if result:
+                self._reply(u"Thank you for your submission!".encode('utf-8'))
+            else:
                 self._reply((u"Flags should only be submitted once (this is %d for your team) "
                              "subtracting penalty!" % count).encode('utf-8'))
-            else:
-                self._reply(u"Thank you for your submission!".encode('utf-8'))
         except psycopg2.DatabaseError as psqle:
             self._logger.exception("Error while inserting values into database")
             self._logger.warning("%s: %s", psqle.diag.severity, psqle.diag.message_primary)
@@ -104,26 +104,23 @@ class FlagHandler(asynchat.async_chat):
                                (service, team, tick))
                 flag_id = cursor.fetchone()[0]
 
-                cursor.execute("""SELECT max(count) FROM scoring_capture
+                cursor.execute("""SELECT count(*) FROM scoring_capture
                                   WHERE flag_id = %s
                                     AND capturing_team_id = %s""",
                                (flag_id, self.team))
-                count = cursor.fetchone()
+                count = cursor.fetchone()[0]
 
-                if count is None:
-                    count = 1
-                else:
-                    count = count[0] + 1
+                if count > 0:
+                    return False
 
                 cursor.execute("""INSERT INTO scoring_capture
-                                      (flag_id, capturing_team_id, timestamp,
-                                       count, tick)
+                                      (flag_id, capturing_team_id, timestamp, tick)
                                   VALUES
-                                      (%s, %s, now(), %s,
+                                      (%s, %s, now(),
                                        (SELECT current_tick
                                         FROM scoring_gamecontrol))""",
-                               (flag_id, self.team, count))
-                return count
+                               (flag_id, self.team))
+                return True
 
 
     def _banner(self):
