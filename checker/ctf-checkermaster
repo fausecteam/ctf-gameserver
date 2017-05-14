@@ -81,7 +81,7 @@ def do_flag(line, service, team):
 
 
 @asyncio.coroutine
-def run_checker(service, team, tick, checker, loglevel, dbconnection):
+def run_checker(service, team, tick, checker, ippattern, loglevel, dbconnection):
     logger = logging.getLogger("service%02d-team%03d-tick%03d" % (service, team, tick))
     logger.info("running checker")
     result = None
@@ -92,7 +92,7 @@ def run_checker(service, team, tick, checker, loglevel, dbconnection):
                                                         "--team", str(team),
                                                         "--tick", str(tick),
                                                         "--loglevel", logging.getLevelName(loglevel),
-                                                        "--ip", "172.30.%d.2" % team,
+                                                        "--ip", ippattern % team,
                                                         checker,
                                                         env=subenv,
                                                         stdout=asyncio.subprocess.PIPE,
@@ -222,7 +222,8 @@ def get_fresh_jobs(gamedb, cachedb, args):
         for _, team, tick in jobs:
             service = args.serviceid
             checker = args.checker
-            task = loop.create_task(run_checker(service, team, tick, checker,
+            ippattern = args.ippattern
+            task = loop.create_task(run_checker(service, team, tick, checker, ippattern,
                                                 logging.getLogger().level, cachedb))
             open_tasks[task] = service, team, tick, datetime.datetime.now()
         logging.info("started %d (of %d possible) new jobs", len(jobs), new_tasks)
@@ -241,6 +242,8 @@ def main():
                         choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
                         help='Loglevel')
 
+    parser.add_argument('--ippattern', type=str, required=True,
+                        help="python formatstring to build IP to connect to")
     group = parser.add_argument_group("gamedb")
     group.add_argument('--gamedbname', type=str, required=True,
                        help='Name of the used database')
