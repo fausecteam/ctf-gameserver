@@ -12,7 +12,8 @@ Build-Depends:
  python3-requests,
  python3-setuptools,
  python3-sphinx,
- python3-systemd
+ python3-systemd,
+ python3-yaml
 Standards-Version: 3.9.6
 Homepage: http://framework.faustctf.net/
 
@@ -45,6 +46,7 @@ Depends:
  python3-psycopg2,
  python3-requests,
  python3-systemd,
+ python3-yaml,
  systemd,
  ${misc:Depends},
  ${python3:Depends}
@@ -84,6 +86,7 @@ Architecture: all
 Depends:
  ${misc:Depends},
  ${sphinxdoc:Depends}
+Built-Using: ${sphinxdoc:Built-Using}
 Description: ctf-gameserver - documentation
  Attack-defence Capture the Flag (CTF) is a special kind of
  information security competitions. Every team has own network(or only
