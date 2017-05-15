@@ -105,6 +105,25 @@ class AbstractChecker(metaclass=ABCMeta):
             raise Exception("broken checker: invalid return value")
 
     def run(self):
+        def is_timeout(ex):
+            exception_types = (
+                socket.timeout,
+                requests.exceptions.Timeout,
+                requests.exceptions.ConnectTimeout,
+                requests.packages.urllib3.exceptions.NewConnectionError,
+                urllib3.exceptions.NewConnectionError,
+                )
+            if isinstance(ex, requests.exceptions.ConnectionError):
+                return len(ex.args) == 1 and is_timeout(ex.args[0])
+            if isinstance(ex, (urllib3.exceptions.MaxRetryError,
+                               requests.packages.urllib3.exceptions.MaxRetryError)):
+                return is_timeout(ex.reason)
+            if isinstance(ex, (urllib3.exceptions.ProtocolError,
+                               requests.packages.urllib3.exceptions.ProtocolError)):
+                return len(ex.args) == 2 and is_timeout(ex.args[1])
+            return isinstance(ex, exception_types)
+
+
         try:
             self._checker_action = 'place_flag'
             self.logger.debug("Placing flag")
@@ -137,25 +156,12 @@ class AbstractChecker(metaclass=ABCMeta):
 
             return RECOVERING if recovering else OK
 
-        except socket.timeout:
-            self.logger.info("Timeout catched by BaseLogger")
-            return TIMEOUT
-        except requests.exceptions.Timeout:
-            self.logger.info("Timeout catched by BaseLogger")
-            return TIMEOUT
-        except requests.exceptions.ConnectTimeout:
-            self.logger.info("Timeout catched by BaseLogger")
-            return TIMEOUT
-        except requests.exceptions.ConnectionError:
-            # no route to host/network
-            self.logger.info("Timeout catched by BaseLogger")
-            return TIMEOUT
-        except urllib3.exceptions.ProtocolError:
-            # no route to host/network
-            self.logger.info("Timeout catched by BaseLogger")
-            return TIMEOUT
         except Exception as e:
-            self.logger.exception("Checker script failed with unhandled exception")
-            raise e
+            if is_timeout(e):
+                self.logger.info("Timeout caught by BaseLogger")
+                return TIMEOUT
+            else:
+                self.logger.exception("Checker script failed with unhandled exception")
+                raise e
         finally:
             self._checker_action = None
