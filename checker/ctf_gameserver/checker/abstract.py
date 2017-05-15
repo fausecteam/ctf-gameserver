@@ -31,6 +31,7 @@ class AbstractChecker(metaclass=ABCMeta):
         self._tickduration = 300
         self._lookback = 5
         self._logger = logging.getLogger("service%02d-team%03d-tick%03d" % (service, team, tick))
+        self._checker_action = None
 
     @property
     def tick(self):
@@ -40,6 +41,9 @@ class AbstractChecker(metaclass=ABCMeta):
     @property
     def logger(self):
         """Accessor for the logger to use"""
+        if self._checker_action:
+            extra = {'CHECKER_ACTION' : self._checker_action}
+            return logging.LoggerAdapter(self._logger, extra)
         return self._logger
 
     def check_service(self):
@@ -102,12 +106,14 @@ class AbstractChecker(metaclass=ABCMeta):
 
     def run(self):
         try:
+            self._checker_action = 'place_flag'
             self.logger.debug("Placing flag")
             result = self.place_flag()
             self._validate_result(result)
             if result != OK:
                 return result
 
+            self._checker_action = 'check_service'
             self.logger.debug("General Service Checks")
             result = self.check_service()
             self._validate_result(result)
@@ -116,6 +122,7 @@ class AbstractChecker(metaclass=ABCMeta):
 
             oldesttick = max(self._tick - self._lookback, -1)
             recovering = False
+            self._checker_action = 'check_flag'
             for tick in range(self._tick, oldesttick, -1):
                 self.logger.debug("Checking for flag of tick %d", tick)
                 result = self.check_flag(tick)
@@ -150,3 +157,5 @@ class AbstractChecker(metaclass=ABCMeta):
         except Exception as e:
             self.logger.exception("Checker script failed with unhandled exception")
             raise e
+        finally:
+            self._checker_action = None
