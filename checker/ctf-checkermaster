@@ -113,6 +113,7 @@ def run_checker(service, team, tick, checker, ippattern, loglevel, dbconnection)
 
             logger.debug(repr(line))
             line = line.decode('us-ascii').split()
+            logging.debug(repr(line))
 
             if "FLAG" == line[0]:
                 newflag = do_flag(line, service, team)
@@ -140,7 +141,7 @@ def run_checker(service, team, tick, checker, ippattern, loglevel, dbconnection)
                 result = line[0]
                 break
         except ValueError as e:
-            logger.warning(repr(e))
+            logging.exception("Exception while communicating with checkerslave")
             break
 
     yield from process.wait()
@@ -177,7 +178,7 @@ def get_fresh_jobs(gamedb, cachedb, args):
                                            (service, team, tick))
                 del open_tasks[task]
             except Exception as e:
-                logging.warning(repr(e))
+                logging.exception("Exception while trying to update service status in database")
         elif starttime + MAXRUNTIME < datetime.datetime.now():
             logging.warning("aborting job(service=%d, team=%d, tick=%d) due to timeout",
                             service, team, tick)
@@ -229,7 +230,7 @@ def get_fresh_jobs(gamedb, cachedb, args):
         logging.info("started %d (of %d possible) new jobs", len(jobs), new_tasks)
 
     except Exception as e:
-        logging.warning(repr(e))
+        logging.exception("Exception while trying to get new jobs")
 
 
 def main():
