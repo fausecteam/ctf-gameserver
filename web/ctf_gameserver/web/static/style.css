@@ -51,3 +51,22 @@ th.border-right, td.border-right {
 #mail-teams-content {
     margin-top: 40px;
 }
+
+.navbar-brand {
+    padding: 10px 15px;
+}
+
+.navbar-brand img {
+    height: 30px;
+}
+
+.nav-pills a {
+    /* 'nav-link-color' cannot be set using the Bootstrap customizer */
+    color: #B00D10;
+}
+
+#supporter-column img {
+    margin-top: 10px;
+    margin-bottom: 30px;
+    width: 100%;
+}
