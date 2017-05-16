@@ -7,6 +7,7 @@ import json
 import socket
 import requests
 import urllib3
+import errno
 
 from .constants import *
 
@@ -121,6 +122,12 @@ class AbstractChecker(metaclass=ABCMeta):
             if isinstance(ex, (urllib3.exceptions.ProtocolError,
                                requests.packages.urllib3.exceptions.ProtocolError)):
                 return len(ex.args) == 2 and is_timeout(ex.args[1])
+            if isinstance(ex, OSError):
+                return ex.errno in (errno.ETIMEDOUT, errno.ECONNREFUSED, errno.EHOSTDOWN,
+                                    errno.EHOSTUNREACH, errno.ENETUNREACH, errno.ENETDOWN)
+                # TODO: what about these?
+                #errno.ENETRESET, errno.ECONNRESET, errno.ECONNABORTED,
+                #errno.EPIPE)
             return isinstance(ex, exception_types)
 
 
