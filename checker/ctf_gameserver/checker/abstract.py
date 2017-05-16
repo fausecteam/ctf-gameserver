@@ -111,9 +111,15 @@ class AbstractChecker(metaclass=ABCMeta):
                 socket.timeout,
                 requests.exceptions.Timeout,
                 requests.exceptions.ConnectTimeout,
-                requests.packages.urllib3.exceptions.NewConnectionError,
-                urllib3.exceptions.NewConnectionError,
+                requests.packages.urllib3.exceptions.ConnectionError,
+                urllib3.exceptions.ConnectionError,
                 )
+            # these only exist in recent urllib3 versions:
+            if hasattr(requests.packages.urllib3.exceptions, 'NewConnectionError'):
+                exception_types += (requests.packages.urllib3.exceptions.NewConnectionError,)
+            if hasattr(urllib3.exceptions, 'NewConnectionError'):
+                exception_types += (urllib3.exceptions.NewConnectionError,)
+
             if isinstance(ex, requests.exceptions.ConnectionError):
                 return len(ex.args) == 1 and is_timeout(ex.args[0])
             if isinstance(ex, (urllib3.exceptions.MaxRetryError,
