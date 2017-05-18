@@ -24,7 +24,7 @@ class CategoryAdminForm(forms.ModelForm):
         counter = 1
 
         # Titles are just as unique as slugs, but slugify() is not bijective
-        while models.Category.objects.filter(slug=slug).exclude(pk=page.pk).exists():
+        while models.Category.objects.filter(slug=slug).exclude(pk=slug.pk).exists():
             slug = '{}-{:d}'.format(raw_slug, counter)
             counter += 1
 
