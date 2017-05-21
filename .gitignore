@@ -10,4 +10,4 @@ __pycache__/
 /web/ctf_gameserver/web/dev-db.sqlite3
 /web/ctf_gameserver/web/uploads/
 /web/ctf_gameserver/web/static/ext/
-/web/ctf_gameserver/web/registration/countrynames.txt
+/web/ctf_gameserver/web/registration/countries.csv

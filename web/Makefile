@@ -6,7 +6,7 @@ EXT_DIR ?= $(SOURCE_DIR)/static/ext
 
 dev: $(SOURCE_DIR)/dev-db.sqlite3 ext
 prod: prod-db ext
-ext: $(EXT_DIR)/jquery.min.js $(EXT_DIR)/bootstrap $(SOURCE_DIR)/registration/countrynames.txt
+ext: $(EXT_DIR)/jquery.min.js $(EXT_DIR)/bootstrap $(SOURCE_DIR)/registration/countries.csv
 
 
 $(SOURCE_DIR)/dev-db.sqlite3:
@@ -30,8 +30,9 @@ $(EXT_DIR)/bootstrap: bootstrap.zip
 	unzip -n $< -d $(EXT_DIR)
 	mv -v $(EXT_DIR)/bootstrap-3.3.5-dist $(EXT_DIR)/bootstrap
 
-$(SOURCE_DIR)/registration/countrynames.txt:
-	curl http://www.opengeocode.org/download/countrynames.txt -o $@
+$(SOURCE_DIR)/registration/countries.csv:
+	# Official download link from http://data.okfn.org/data/core/country-list, under Public Domain
+	curl https://raw.githubusercontent.com/datasets/country-list/master/data.csv -o $@
 
 
 lint:

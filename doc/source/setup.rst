@@ -39,10 +39,9 @@ adaption: ``SECRET_KEY``, ``ALLOWED_HOSTS``, ``DATABASES`` and
 
 .. note::
 
-   setup.py does not install ``countrynames.txt`` as well as the
-   external javascript dependencies. The files needs to be
-   downloaded. Please refer to ``web/Makefile`` in the source tree for
-   details.
+   setup.py does not install the external javascript dependencies. The
+   files needs to be downloaded. Please refer to ``web/Makefile`` in the
+   source tree for details.
 
 Submission and Controller
 -------------------------
