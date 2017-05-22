@@ -4,6 +4,33 @@ General
 Database
 ========
 
+Basically each component needs access to the database. However access
+can be (somewhat) restricted.
+
+Checkermaster
+^^^^^^^^^^^^^
+
+Submission
+^^^^^^^^^^
+
+ - Read on ``scoring_gamecontrol``
+ - Read on ``scoring_flag``
+ - Write on ``scoring_capture``
+ - Write on ``scoring_capture_id_seq``
+
+Controller / Scoring
+^^^^^^^^^^^^^^^^^^^^
+
+ - Read on ``registration_team``
+ - Read on ``scoring_service``
+ - Write on ``scoring_gamecontrol``
+ - Write on ``scoring_flag``
+ - Write on ``scoring_flag_id_seq``
+ - Owner on ``scoring_scoreboard``
+
+Web
+^^^
+
 Configuration
 =============
 
