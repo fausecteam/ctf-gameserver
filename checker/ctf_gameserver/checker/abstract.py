@@ -120,6 +120,8 @@ class AbstractChecker(metaclass=ABCMeta):
             if hasattr(urllib3.exceptions, 'NewConnectionError'):
                 exception_types += (urllib3.exceptions.NewConnectionError,)
 
+            if isinstance(ex, exception_types):
+                return True
             if isinstance(ex, requests.exceptions.ConnectionError):
                 return len(ex.args) == 1 and is_timeout(ex.args[0])
             if isinstance(ex, (urllib3.exceptions.MaxRetryError,
@@ -134,7 +136,7 @@ class AbstractChecker(metaclass=ABCMeta):
                 # TODO: what about these?
                 #errno.ENETRESET, errno.ECONNRESET, errno.ECONNABORTED,
                 #errno.EPIPE)
-            return isinstance(ex, exception_types)
+            return False
 
 
         try:
