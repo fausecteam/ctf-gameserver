@@ -89,7 +89,8 @@ setup(name='CTF Gameserver',
           ),
       ],
       package_data={
-          "ctf_gameserver.web": ['*/templates/*.html', 'templates/*.html', 'static/style.css']
+          "ctf_gameserver.web": ['*/templates/*.html', 'templates/*.html', 'static/style.css',
+                                 'registration/countries.csv']
       },
       namespace_packages=['ctf_gameserver'],
       package_dir = {'': 'src'},

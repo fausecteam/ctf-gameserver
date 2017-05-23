@@ -36,23 +36,19 @@ email_token_generator = EmailConfirmationTokenGenerator()    # pylint: disable=i
 
 def get_country_names():
     """
-    Returns a list of (English) country names from the Open Geocode 'Country Codes to Country Names mapping'
-    list, which has to be available as a file called "countrynames.txt" in the same directory as this source
-    file.
+    Returns a list of (English) country names from the OKFN/Core Datasets "List of all countries with their
+    2 digit codes" list, which has to be available as a file called "countries.csv" in the same directory as
+    this source file.
     """
 
-    def get_name(row):
-        # 'BGN English short name' (column 18) of the countrynames file looks like the most feasible
-        # property, use 'ISO 3166-1 English short name' (column 5) as a fallback
-        return row[18] if row[18] else row[5]
-
-    csv_file_name = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'countrynames.txt')
+    csv_file_name = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'countries.csv')
 
     with open(csv_file_name, encoding='utf8') as csv_file:
-        csv_reader = csv.reader(filter(lambda row: not row.startswith('#'), csv_file), delimiter=';',
-                                skipinitialspace=True)
+        csv_reader = csv.reader(csv_file)
+        # Skip header line
+        next(csv_reader)
 
-        countries = [get_name(row) for row in csv_reader]
+        countries = [row[0] for row in csv_reader]
         # Some teams have members in multiple countries
         countries.append('International')
 
