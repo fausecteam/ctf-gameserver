@@ -45,6 +45,10 @@ def do_store(line, dbconnection, service, team):
             ident = line[1]
             data = psycopg2.Binary(base64.b64decode(line[2]))
 
+            # TODO: think about proper on conflict replace
+            cursor.execute("""DELETE FROM checkercache
+                              WHERE service_id = %s AND team_id = %s AND identifier = %s""",
+                           (service, team, ident, data))
             cursor.execute("""INSERT INTO checkercache
                                  (service_id,team_id,identifier,data)
                               VALUES
