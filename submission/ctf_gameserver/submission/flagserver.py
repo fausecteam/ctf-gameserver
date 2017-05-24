@@ -84,8 +84,7 @@ class FlagHandler(asynchat.async_chat):
             if result:
                 self._reply(u"Thank you for your submission!".encode('utf-8'))
             else:
-                self._reply((u"Flags should only be submitted once (this is %d for your team) "
-                             "subtracting penalty!" % count).encode('utf-8'))
+                self._reply((u"Flags should only be submitted once!").encode('utf-8'))
         except psycopg2.DatabaseError as psqle:
             self._logger.exception("Error while inserting values into database")
             self._logger.warning("%s: %s", psqle.diag.severity, psqle.diag.message_primary)
