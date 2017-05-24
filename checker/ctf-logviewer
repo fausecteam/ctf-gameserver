@@ -28,7 +28,7 @@ if len(origargs) == 1:
            "-n", "200", "-u", "ctf-checkermaster@%s.service" % service)
 else:
     matchobj = re.match("(?:team(?P<CTF_TEAM_ID>[0-9]+))?-?(?:tick(?P<CTF_TICK>[0-9]+))?", origargs[1])
-    groups = [(key, value) for key, value in matchobj.groupdict().items if value is not None]
+    groups = [(key, value) for key, value in matchobj.groupdict().items() if value is not None]
     if matchobj is not None and groups:
         filters = ["=".join(kv) for kv in groups]
         execlp("journalctl", "journalctl", "--no-pager", "-u",

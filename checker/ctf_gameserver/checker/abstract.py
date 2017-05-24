@@ -114,6 +114,8 @@ class AbstractChecker(metaclass=ABCMeta):
                 requests.packages.urllib3.exceptions.ConnectionError,
                 urllib3.exceptions.ConnectionError,
                 )
+            if isinstance(ex, exception_types):
+                return True
             # these only exist in recent urllib3 versions:
             if hasattr(requests.packages.urllib3.exceptions, 'NewConnectionError'):
                 exception_types += (requests.packages.urllib3.exceptions.NewConnectionError,)
