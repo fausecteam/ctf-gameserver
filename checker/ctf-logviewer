@@ -5,7 +5,10 @@ from sys import argv, exit, stderr
 import re
 import shlex
 
-allowed_services = argv[1].split(",")
+if len(argv) > 1:
+    allowed_services = argv[1].split(",")
+else:
+    allowed_services = ["*"]
 
 if not 'SSH_ORIGINAL_COMMAND' in environ:
     print("No service selected", file=stderr)
@@ -18,7 +21,7 @@ origargs = shlex.split(origcmd)
 
 service = origargs[0]
 
-if not service in allowed_services:
+if not service in allowed_services and not "*" in allowed_services:
     print("You are not authorized to access logs for service %s" % service,
           file=stderr)
     exit(1)
