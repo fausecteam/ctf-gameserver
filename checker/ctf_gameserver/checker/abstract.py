@@ -7,6 +7,7 @@ import json
 import socket
 import requests
 import urllib3
+import errno
 
 from .constants import *
 
@@ -110,9 +111,19 @@ class AbstractChecker(metaclass=ABCMeta):
                 socket.timeout,
                 requests.exceptions.Timeout,
                 requests.exceptions.ConnectTimeout,
-                requests.packages.urllib3.exceptions.NewConnectionError,
-                urllib3.exceptions.NewConnectionError,
+                requests.packages.urllib3.exceptions.ConnectionError,
+                urllib3.exceptions.ConnectionError,
                 )
+            if isinstance(ex, exception_types):
+                return True
+            # these only exist in recent urllib3 versions:
+            if hasattr(requests.packages.urllib3.exceptions, 'NewConnectionError'):
+                exception_types += (requests.packages.urllib3.exceptions.NewConnectionError,)
+            if hasattr(urllib3.exceptions, 'NewConnectionError'):
+                exception_types += (urllib3.exceptions.NewConnectionError,)
+
+            if isinstance(ex, exception_types):
+                return True
             if isinstance(ex, requests.exceptions.ConnectionError):
                 return len(ex.args) == 1 and is_timeout(ex.args[0])
             if isinstance(ex, (urllib3.exceptions.MaxRetryError,
@@ -121,7 +132,13 @@ class AbstractChecker(metaclass=ABCMeta):
             if isinstance(ex, (urllib3.exceptions.ProtocolError,
                                requests.packages.urllib3.exceptions.ProtocolError)):
                 return len(ex.args) == 2 and is_timeout(ex.args[1])
-            return isinstance(ex, exception_types)
+            if isinstance(ex, OSError):
+                return ex.errno in (errno.ETIMEDOUT, errno.ECONNREFUSED, errno.EHOSTDOWN,
+                                    errno.EHOSTUNREACH, errno.ENETUNREACH, errno.ENETDOWN)
+                # TODO: what about these?
+                #errno.ENETRESET, errno.ECONNRESET, errno.ECONNABORTED,
+                #errno.EPIPE)
+            return False
 
 
         try:
