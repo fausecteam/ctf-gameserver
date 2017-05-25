@@ -83,8 +83,7 @@ class FlagHandler(asynchat.async_chat):
             result = self._store_capture(team, service, timestamp)
             if result:
                 self._reply(u"Thank you for your submission!".encode('utf-8'))
-            else:
-                self._reply((u"Flags should only be submitted once!").encode('utf-8'))
+
         except psycopg2.DatabaseError as psqle:
             self._logger.exception("Error while inserting values into database")
             self._logger.warning("%s: %s", psqle.diag.severity, psqle.diag.message_primary)
@@ -95,6 +94,13 @@ class FlagHandler(asynchat.async_chat):
     def _store_capture(self, team, service, timestamp):
         with self._dbconnection:
             with self._dbconnection.cursor() as cursor:
+                cursor.execute("""SELECT nop_team FROM registration_team WHERE user_id = %s""",
+                               (team,))
+                nopp, = cursor.fetchone()
+                if nopp:
+                    self._reply(u"Can not submit flags for the NOP team".encode("utf-8"))
+                    return False
+
                 tick = self._get_tick(timestamp)
                 cursor.execute("""SELECT id FROM scoring_flag
                                   WHERE service_id = %s
@@ -110,6 +116,7 @@ class FlagHandler(asynchat.async_chat):
                 count = cursor.fetchone()[0]
 
                 if count > 0:
+                    self._reply(u"Flags should only be submitted once!".encode('utf-8'))
                     return False
 
                 cursor.execute("""INSERT INTO scoring_capture
