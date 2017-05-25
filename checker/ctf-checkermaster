@@ -48,7 +48,7 @@ def do_store(line, dbconnection, service, team):
             # TODO: think about proper on conflict replace
             cursor.execute("""DELETE FROM checkercache
                               WHERE service_id = %s AND team_id = %s AND identifier = %s""",
-                           (service, team, ident, data))
+                           (service, team, ident))
             cursor.execute("""INSERT INTO checkercache
                                  (service_id,team_id,identifier,data)
                               VALUES
