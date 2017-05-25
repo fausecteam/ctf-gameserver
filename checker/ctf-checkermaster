@@ -182,8 +182,14 @@ def get_fresh_jobs(gamedb, cachedb, args):
                                                 AND tick = %s""",
                                            (service, team, tick))
                 del open_tasks[task]
+            except psycopg2.InterfaceError:
+                global stopping
+                stopping = True
+                logging.warn("Database connection closed, restarting checkermaster")
+
             except Exception as e:
                 logging.exception("Exception while trying to update service status in database")
+
         elif starttime + MAXRUNTIME < datetime.datetime.now():
             logging.warning("aborting job(service=%d, team=%d, tick=%d) due to timeout",
                             service, team, tick)
@@ -234,6 +240,11 @@ def get_fresh_jobs(gamedb, cachedb, args):
                                                 logging.getLogger().level, cachedb))
             open_tasks[task] = service, team, tick, datetime.datetime.now()
         logging.info("started %d (of %d possible) new jobs", len(jobs), new_tasks)
+
+    except psycopg2.InterfaceError:
+        global stopping
+        stopping = True
+        logging.warn("Database connection closed, restarting checkermaster")
 
     except Exception as e:
         logging.exception("Exception while trying to get new jobs")
