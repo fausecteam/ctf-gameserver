@@ -8,6 +8,8 @@ Type=notify
 ExecStart=%BINDIR%/ctf-submission @/etc/ctf-gameserver/submission.conf --port %i
 User=nobody
 Group=nogroup
+RestartSec=10
+Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
