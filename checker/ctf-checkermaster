@@ -186,7 +186,8 @@ def get_fresh_jobs(gamedb, cachedb, args):
         elif starttime + MAXRUNTIME < datetime.datetime.now():
             logging.warning("aborting job(service=%d, team=%d, tick=%d) due to timeout",
                             service, team, tick)
-            if task.cancel():
+            task.cancel()
+            if task.cancelled():
                 del open_tasks[task]
 
     current_tasks = len(open_tasks)
