@@ -311,7 +311,7 @@ def main():
                               FROM scoring_gamecontrol""")
             conteststart, flagvalidity, tickduration = cursor.fetchone()
             cursor.execute("""SELECT id FROM scoring_service WHERE name = %s""",
-                           args.service)
+                           (args.service,))
             serviceid, = cursor.fetchone()
 
     signal.signal(signal.SIGUSR1, handle_stop)
