@@ -6,6 +6,7 @@ import importlib
 import sys
 import socket
 import requests
+import resource
 
 from requests.adapters import TimeoutSauce
 class MyTimeout(TimeoutSauce):
@@ -26,6 +27,9 @@ def run(args):
     socket.setdefaulttimeout(10.0)
     requests.adapters.TimeoutSauce = MyTimeout
 
+    if args.benchmark:
+        res_baseline = resource.getrusage(resource.RUSAGE_SELF)
+
     logging.debug("Importing checker")
     checkermod, checkerclass = args.checker.split(":")
     checkermod = importlib.import_module(checkermod)
@@ -34,6 +38,17 @@ def run(args):
     logging.debug("Initializing checker")
     checker = checkerclass(args.tick, args.team, args.service, args.ip)
     result = checker.run()
+
+    if args.benchmark:
+        res_finished = resource.getrusage(resource.RUSAGE_SELF)
+        res_children = resource.getrusage(resource.RUSAGE_CHILDREN)
+        logging.info("Resource usage during checker run:")
+        logging.info("    utime: %d", res_finished.ru_utime - res_baseline.ru_utime + res_children.ru_utime)
+        logging.info("    stime: %d", res_finished.ru_stime - res_baseline.ru_stime + res_children.ru_stime)
+        logging.info("    additional maxrss: %d", res_finished.ru_maxrss - res_baseline.ru_maxrss + res_children.ru_maxrss)
+        logging.info("    nvcsw: %d", res_finished.ru_nvcsw - res_baseline.ru_nvcsw + res_children.ru_nvcsw)
+        logging.info("    ru_oublock: %d", res_finished.ru_oublock - res_baseline.ru_oublock + res_children.ru_oublock)
+        logging.info("    ru_inblock: %d", res_finished.ru_inblock - res_baseline.ru_inblock + res_children.ru_inblock)
 
     if 0 == result:
         print("OK")
@@ -45,6 +60,8 @@ def run(args):
         print("NOTFOUND")
     elif 4 == result:
         print("RECOVERING")
+    else:
+        print("UNKNOWN RESULT: {}".format(result))
     sys.stdout.flush()
 
 
@@ -57,6 +74,7 @@ def main():
     parser.add_argument('--ip', type=str, required=True)
     parser.add_argument('--tick', type=int, required=True)
     parser.add_argument('--team', type=int, required=True)
+    parser.add_argument('--benchmark', action='store_true')
     parser.add_argument('-v', '--loglevel', default='WARNING', type=str,
                         choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
                         help='Loglevel')
