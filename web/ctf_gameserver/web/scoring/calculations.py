@@ -39,7 +39,7 @@ def scores():
         team_scores[score.team]['total'] += score.total
 
     sorted_team_scores = OrderedDict(sorted(team_scores.items(), key=lambda s: s[1]['total'], reverse=True))
-    cache.set(cache_key, sorted_team_scores, 10)
+    cache.set(cache_key, sorted_team_scores, 20)
 
     return sorted_team_scores
 
@@ -77,6 +77,6 @@ def team_statuses(from_tick, to_tick):
             statuses[team][check.tick][check.service] = check.get_status_display()
 
     sorted_statuses = OrderedDict(sorted(statuses.items(), key=lambda s: s[0].user.username))
-    cache.set(cache_key, sorted_statuses, 10)
+    cache.set(cache_key, sorted_statuses, 20)
 
     return sorted_statuses
