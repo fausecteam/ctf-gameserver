@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load cache %}
 {% load dict_access %}
 {% load status_css_class %}
 
@@ -20,6 +21,8 @@
     </p>
 </div>
 
+{% get_current_language as LANGUAGE_CODE %}
+{% cache 10 html_scoreboard LANGUAGE_CODE %}
 <div class="table-responsive">
     <table class="table">
         <thead>
@@ -95,4 +98,5 @@
         </tbody>
     </table>
 </div>
+{% endcache %}
 {% endblock %}
