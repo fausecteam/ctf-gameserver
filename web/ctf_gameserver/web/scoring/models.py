@@ -109,7 +109,7 @@ class ScoreBoard(models.Model):
     total = models.FloatField(editable=False)
 
     class Meta:
-        ordering = ('-total', '-attack', '-defense')
+        ordering = ('team', '-total', '-attack', '-defense')
 
     def __str__(self):
         return 'Score for team {:d}'.format(self.team)
