@@ -41,7 +41,7 @@ def scoreboard_json(request):
     standings = []
     scores = calculations.scores()
 
-    for rank, (team, points) in enumerate(scores.items()):
+    for rank, (team, points) in enumerate(scores.items(), start=1):
         standings.append({
             'pos': rank,
             'team': team.user.username,
