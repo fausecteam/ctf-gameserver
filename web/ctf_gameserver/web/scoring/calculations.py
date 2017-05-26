@@ -29,7 +29,7 @@ def scores():
 
     team_scores = defaultdict(lambda: {'offense': [{}, 0], 'defense': [{}, 0], 'sla': [{}, 0], 'total': 0})
 
-    for score in models.ScoreBoard.objects.all():
+    for score in models.ScoreBoard.objects.exclude(total=0):
         team_scores[score.team]['offense'][0][score.service] = score.attack
         team_scores[score.team]['offense'][1] += score.attack
         team_scores[score.team]['defense'][0][score.service] = score.defense
