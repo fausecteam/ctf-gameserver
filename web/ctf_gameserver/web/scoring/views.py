@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.shortcuts import render
 
 from . import models, calculations
@@ -14,12 +15,45 @@ def scoreboard(request):
     else:
         to_tick = game_control.current_tick - 1
 
-    scores = models.ScoreBoard.objects.all()
+    scores = calculations.scores()
+    statuses = calculations.team_statuses(to_tick, to_tick)
 
     return render(request, 'scoreboard.html', {
         'scores': scores,
+        'services': models.Service.objects.all(),
+        'statuses': statuses,
         'tick': to_tick
     })
+
+
+def scoreboard_json(request):
+    """
+    View which returns the scoreboard in CTFTime scoreboard feed format,
+    see https://ctftime.org/json-scoreboard-feed.
+    """
+
+    game_control = models.GameControl.objects.get()
+
+    if not game_control.competition_running() and not game_control.competition_over():
+        return JsonResponse({'error': 'Scoreboard is not available yet'}, status=404)
+
+    tasks = ['Offense', 'Defense', 'SLA']
+    standings = []
+    scores = calculations.scores()
+
+    for rank, (team, points) in enumerate(scores.items()):
+        standings.append({
+            'pos': rank,
+            'team': team.user.username,
+            'score': points['total'],
+            'taskStats': {
+                'Offense': {'points': points['offense'][1]},
+                'Defense': {'points': points['defense'][1]},
+                'SLA': {'points': points['sla'][1]}
+            }
+        })
+
+    return JsonResponse({'tasks': tasks, 'standings': standings})
 
 
 @competition_started_required

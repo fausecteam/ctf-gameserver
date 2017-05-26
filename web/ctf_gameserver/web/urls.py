@@ -79,6 +79,10 @@ urlpatterns = [
         scoring_views.scoreboard,
         name='scoreboard'
     ),
+    url(r'^competition/scoreboard.json$',
+        scoring_views.scoreboard_json,
+        name='scoreboard_json'
+    ),
     url(r'^competition/status/$',
         scoring_views.service_status,
         name='service_status'

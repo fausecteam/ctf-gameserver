@@ -101,7 +101,7 @@ class ScoreBoard(models.Model):
     read-only from within the website.
     """
     team = models.OneToOneField(Team, editable=False, primary_key=True)
-    service = models.OneToOneField(Service, editable=False, primary_key=True)
+    service = models.OneToOneField(Service, editable=False)
     attack = models.FloatField(editable=False)
     bonus = models.FloatField(editable=False)
     defense = models.FloatField(editable=False)
@@ -109,7 +109,7 @@ class ScoreBoard(models.Model):
     total = models.FloatField(editable=False)
 
     class Meta:
-        ordering = ('-total', '-attack', '-defense')
+        ordering = ('team', '-total', '-attack', '-defense')
 
     def __str__(self):
         return 'Score for team {:d}'.format(self.team)
