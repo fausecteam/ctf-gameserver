@@ -114,6 +114,7 @@ class AbstractChecker(metaclass=ABCMeta):
                 requests.packages.urllib3.exceptions.ConnectionError,
                 urllib3.exceptions.ConnectionError,
                 urllib3.exceptions.ReadTimeoutError,
+                ConnectionResetError
                 )
             if isinstance(ex, exception_types):
                 return True
