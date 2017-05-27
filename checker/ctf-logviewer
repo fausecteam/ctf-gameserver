@@ -2,6 +2,7 @@
 
 from os import execlp, environ
 from sys import argv, exit, stderr
+import subprocess
 import re
 import shlex
 
@@ -20,22 +21,26 @@ origcmd = environ['SSH_ORIGINAL_COMMAND']
 origargs = shlex.split(origcmd)
 
 service = origargs[0]
+unit = "ctf-checkermaster@%s.service" % service
 
-if not service in allowed_services and not "*" in allowed_services:
+units = subprocess.check_output(["journalctl", "-F_SYSTEMD_UNIT"]).decode().split("\n")
+if unit not in units:
+    print("No logs for service '%s' does not exist!" % service, file=stderr)
+    exit(1)
+
+if service not in allowed_services and "*" not in allowed_services:
     print("You are not authorized to access logs for service %s" % service,
           file=stderr)
     exit(1)
 
 if len(origargs) == 1:
-    execlp("journalctl", "journalctl", "--no-pager", "-f",
-           "-n", "200", "-u", "ctf-checkermaster@%s.service" % service)
+    execlp("journalctl", "journalctl", "--no-pager", "-f", "-n", "200", "-u", unit)
 else:
     matchobj = re.match("(?:team(?P<CTF_TEAM_ID>[0-9]+))?-?(?:tick(?P<CTF_TICK>[0-9]+))?", origargs[1])
     groups = [(key, value) for key, value in matchobj.groupdict().items() if value is not None]
     if matchobj is not None and groups:
         filters = ["=".join(kv) for kv in groups]
-        execlp("journalctl", "journalctl", "--no-pager", "-u",
-               "ctf-checkermaster@%s.service" % service, *filters)
+        execlp("journalctl", "journalctl", "--no-pager", "-u", unit, *filters)
     else:
         print("Expected 'team([0-9]+)-tick([0-9]+)' but got '%s'" % origargs[1],
               file=stderr)
