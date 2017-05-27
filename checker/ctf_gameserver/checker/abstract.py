@@ -4,12 +4,10 @@ from abc import ABCMeta, abstractmethod
 
 import logging
 import json
-import socket
-import requests
-import urllib3
-import errno
+import ssl
 
 from .constants import *
+from .helpers import is_timeout
 
 class AbstractChecker(metaclass=ABCMeta):
     """Base class for custom checker scripts
@@ -106,43 +104,6 @@ class AbstractChecker(metaclass=ABCMeta):
             raise Exception("broken checker: invalid return value")
 
     def run(self):
-        def is_timeout(ex):
-            exception_types = (
-                socket.timeout,
-                requests.exceptions.Timeout,
-                requests.exceptions.ConnectTimeout,
-                requests.packages.urllib3.exceptions.ConnectionError,
-                urllib3.exceptions.ConnectionError,
-                urllib3.exceptions.ReadTimeoutError,
-                ConnectionResetError
-                )
-            if isinstance(ex, exception_types):
-                return True
-            # these only exist in recent urllib3 versions:
-            if hasattr(requests.packages.urllib3.exceptions, 'NewConnectionError'):
-                exception_types += (requests.packages.urllib3.exceptions.NewConnectionError,)
-            if hasattr(urllib3.exceptions, 'NewConnectionError'):
-                exception_types += (urllib3.exceptions.NewConnectionError,)
-
-            if isinstance(ex, exception_types):
-                return True
-            if isinstance(ex, requests.exceptions.ConnectionError):
-                return len(ex.args) == 1 and is_timeout(ex.args[0])
-            if isinstance(ex, (urllib3.exceptions.MaxRetryError,
-                               requests.packages.urllib3.exceptions.MaxRetryError)):
-                return is_timeout(ex.reason)
-            if isinstance(ex, (urllib3.exceptions.ProtocolError,
-                               requests.packages.urllib3.exceptions.ProtocolError)):
-                return len(ex.args) == 2 and is_timeout(ex.args[1])
-            if isinstance(ex, OSError):
-                return ex.errno in (errno.ETIMEDOUT, errno.ECONNREFUSED, errno.EHOSTDOWN,
-                                    errno.EHOSTUNREACH, errno.ENETUNREACH, errno.ENETDOWN)
-                # TODO: what about these?
-                #errno.ENETRESET, errno.ECONNRESET, errno.ECONNABORTED,
-                #errno.EPIPE)
-            return False
-
-
         try:
             self._checker_action = 'place_flag'
             self.logger.debug("Placing flag")
@@ -177,8 +138,11 @@ class AbstractChecker(metaclass=ABCMeta):
 
         except Exception as e:
             if is_timeout(e):
-                self.logger.info("Timeout caught by BaseLogger")
+                self.logger.info("Timeout caught by BaseLogger: %s", e)
                 return TIMEOUT
+            elif isinstance(e, ssl.SSLError):
+                self.logger.info("generic SSLError: %s", e)
+                return NOTWORKING
             else:
                 self.logger.exception("Checker script failed with unhandled exception")
                 raise e
