@@ -95,13 +95,13 @@ class AbstractChecker(metaclass=ABCMeta):
         "returns the flag for tick possibly including payload"
         pass
 
-    @staticmethod
-    def _validate_result(result):
+    def _validate_result(self, result):
         try:
-            result_to_string(result)
+            text = result_to_string(result)
         except KeyError:
             self.logger.error("Checker returned unexpected return value '%s'", result)
             raise Exception("broken checker: invalid return value")
+        self.logger.debug("checker result: %s", text)
 
     def run(self):
         try:
