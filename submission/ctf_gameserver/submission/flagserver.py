@@ -69,7 +69,7 @@ class FlagHandler(asynchat.async_chat):
             self._reply(b"Flag not recognized")
             return
         except flag.InvalidFlagMAC:
-            self._reply(b"Not such Flag")
+            self._reply(b"No such Flag")
             return
         except flag.FlagExpired as e:
             self._reply((u"Flag expired since %.1f seconds" % e.args).encode('utf-8'))
