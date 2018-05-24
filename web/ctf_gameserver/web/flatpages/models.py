@@ -82,7 +82,7 @@ class Flatpage(models.Model):
         Access siblings of this page, i.e. pages in the same category. For convenience, this includes this
         page itself.
         """
-        return self._default_manager.filter(category=self.category)
+        return type(self)._default_manager.filter(category=self.category)
 
     def has_siblings(self):
         """
