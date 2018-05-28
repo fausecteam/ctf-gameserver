@@ -62,7 +62,7 @@ class Flatpage(models.Model):
         when category is NULL. Django's constraint validation skips this case, and the actual constraint's
         behavior is database-specific.
         """
-        if self.category is None and self._default_manager.filter(
+        if self.category is None and type(self)._default_manager.filter(
             category = self.category,
             title = self.title
         ).exclude(pk=self.pk).exists():
@@ -82,7 +82,7 @@ class Flatpage(models.Model):
         Access siblings of this page, i.e. pages in the same category. For convenience, this includes this
         page itself.
         """
-        return self._default_manager.filter(category=self.category)
+        return type(self)._default_manager.filter(category=self.category)
 
     def has_siblings(self):
         """
