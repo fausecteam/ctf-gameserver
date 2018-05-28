@@ -22,6 +22,13 @@ def is_timeout(ex):
         ssl.SSLWantReadError,
         ssl.SSLWantWriteError,
         )
+
+    try:
+        import nclib
+        exception_types += (nclib.NetcatError,)
+    except ImportError:
+        pass
+
     # these only exist in recent urllib3 versions:
     if hasattr(requests.packages.urllib3.exceptions, 'NewConnectionError'):
         exception_types += (requests.packages.urllib3.exceptions.NewConnectionError,)
