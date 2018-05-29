@@ -91,7 +91,7 @@ def main():
                                                CTF_TEAM_ID=args.team,
                                                CTF_TICK=args.tick))
     except ImportError:
-        logging.warn("Missing systemd module")
+        logging.warning("Missing systemd module")
 
     run(args)
 
