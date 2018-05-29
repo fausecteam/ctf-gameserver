@@ -11,12 +11,10 @@
 #   done
 
 import time
-from subprocess import Popen, PIPE
 import argparse
-import codecs
-import sys
 import importlib
 import logging
+from base64 import b64decode
 
 def run_job(args):
     logging.debug("Importing checker")
@@ -28,6 +26,7 @@ def run_job(args):
     checker = checkerclass(args.tick, args.team, args.service, args.ip)
     checker.set_starttime(args.first)
     checker.set_backend(args.backend)
+    checker.set_secret(b64decode(args.secret))
 
     logging.debug("Running checker")
     result = checker.run()
@@ -54,6 +53,7 @@ def main():
     parser.add_argument('--tick', type=int, required=True)
     parser.add_argument('--team', type=int, required=True)
     parser.add_argument('--service', type=int, required=True)
+    parser.add_argument('--secret', type=str, default='dGVzdHRlc3R0ZQ==')
     parser.add_argument('--first', type=int, default=int(time.time()) // 60 * 60,
                         help="timestamp of first tick")
     parser.add_argument('--backend', type=str, default='/tmp',
@@ -70,7 +70,7 @@ def main():
     logging.debug(repr(args))
     starttime = time.time()
     run_job(args)
-    logging.info("Processing took %.2f seconds" % (time.time() - starttime,))
+    logging.info("Processing took %.2f seconds", (time.time() - starttime,))
 
 if __name__ == '__main__':
     main()

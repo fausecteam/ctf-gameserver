@@ -35,7 +35,7 @@ class LocalChecker(AbstractChecker):
             return None
 
     def get_flag(self, tick, payload=None):
-        generatedflag = flag.generate(self._team, self._service, payload,
+        generatedflag = flag.generate(self._team, self._service, self._secret, payload,
                                       self._starttime + self._tickduration * tick)
         return generatedflag
 
@@ -44,3 +44,6 @@ class LocalChecker(AbstractChecker):
 
     def set_starttime(self, starttime):
         self._starttime = starttime
+
+    def set_secret(self, secret):
+        self._secret = secret
