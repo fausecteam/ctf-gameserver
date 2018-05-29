@@ -11,7 +11,7 @@ import psycopg2
 from ctf_gameserver.lib import flag
 
 class FlagHandler(asynchat.async_chat):
-    def __init__(self, sock, addr, dbconnection,
+    def __init__(self, sock, addr, dbconnection, secret,
                  conteststart, contestend, flagvalidity, tickduration):
         asynchat.async_chat.__init__(self, sock=sock)
         ipaddr, port = addr
@@ -21,6 +21,7 @@ class FlagHandler(asynchat.async_chat):
         self._logger = logging.getLogger("%13s %5d" % (ipaddr, port))
         self._cursor = None
         self._dbconnection = dbconnection
+        self._secret = secret
         self.buffer = b''
         self._logger.info("Accepted connection from Team %s", self.team)
         self._banner()
@@ -64,7 +65,7 @@ class FlagHandler(asynchat.async_chat):
             return
 
         try:
-            team, service, _, timestamp = flag.verify(curflag)
+            team, service, _, timestamp = flag.verify(curflag, self._secret)
         except flag.InvalidFlagFormat:
             self._reply(b"Flag not recognized")
             return
