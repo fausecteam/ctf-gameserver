@@ -74,19 +74,19 @@ def do_retrieve(line, dbconnection, service, team):
     return b""
 
 
-def do_flag(line, service, team):
+def do_flag(line, service, team, secret):
     tick = int(line[1])
     timestamp = conteststart.timestamp() + (flagvalidity + tick) * tickduration
     payload = None
     if len(line) > 2:
         payload = codecs.decode(line[2], 'hex')
-    newflag = flag.generate(team=team, service=service, payload=payload,
-                            timestamp=timestamp)
+    newflag = flag.generate(team=team, service=service, secret=secret,
+                            payload=payload, timestamp=timestamp)
     return newflag
 
 
 @asyncio.coroutine
-def run_checker(service, team, tick, checker, ippattern, loglevel, dbconnection):
+def run_checker(service, team, tick, checker, ippattern, loglevel, dbconnection, secret):
     logger = logging.getLogger("service%02d-team%03d-tick%03d" % (service, team, tick))
     logger.info("running checker")
     result = None
@@ -121,7 +121,7 @@ def run_checker(service, team, tick, checker, ippattern, loglevel, dbconnection)
             logging.debug(repr(line))
 
             if "FLAG" == line[0]:
-                newflag = do_flag(line, service, team)
+                newflag = do_flag(line, service, team, secret)
                 process.stdin.write(newflag.encode('us-ascii'))
                 process.stdin.write(b"\n")
 
@@ -237,7 +237,7 @@ def get_fresh_jobs(gamedb, cachedb, args):
             checker = args.checker
             ippattern = args.ippattern
             task = loop.create_task(run_checker(service, team, tick, checker, ippattern,
-                                                logging.getLogger().level, cachedb))
+                                                logging.getLogger().level, cachedb, args.secret))
             open_tasks[task] = service, team, tick, datetime.datetime.now()
         logging.info("started %d (of %d possible) new jobs", len(jobs), new_tasks)
 
@@ -297,6 +297,8 @@ def main():
                        help="module:Class of the checker")
     group.add_argument("--service", type=str, required=True,
                        help="database id of the service")
+    parser.add_argument('--secret', type=str, required=True,
+                        help="base64 random string consistent with checkers")
 
     args = parser.parse_args()
 
