@@ -8,13 +8,12 @@ import os.path
 import logging
 import sys
 
-import yaml
-
 class LocalChecker(AbstractChecker):
     def __init__(self, tick, team, service, ip):
         AbstractChecker.__init__(self, tick, team, service, ip)
         self._starttime = 0
         self._backend = '/tmp'
+        self._secret = b'testtestte'
         self.logger.setLevel(logging.DEBUG)
         self.logger.addHandler(logging.StreamHandler(sys.stderr))
 
