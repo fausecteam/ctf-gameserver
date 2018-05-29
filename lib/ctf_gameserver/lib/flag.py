@@ -19,13 +19,11 @@ PREFIX = "FAUST"
 # gültigkeit in sekunden
 VALID = 900
 
-SECRET = b'\x1d\x14H\xb4y\xc6\x93\x8d\x0e\xae'
-
 keccak = Keccak(100)
 # timestamp + team + service + payload
 datalength = 4 + 1 + 1 + PAYLOADLEN
 
-def generate(team, service, payload=None, timestamp=None):
+def generate(team, service, secret, payload=None, timestamp=None):
     """Generates a new flag
 
     Arguments:
@@ -47,9 +45,9 @@ def generate(team, service, payload=None, timestamp=None):
 
     protecteddata = protecteddata + payload
 
-    mac = codecs.encode(SECRET, 'hex') + codecs.encode(protecteddata, 'hex')
+    mac = codecs.encode(secret, 'hex') + codecs.encode(protecteddata, 'hex')
     # this is not sha1 / sha2, macs are that simple!
-    mac = keccak.Keccak(((len(SECRET) + len(protecteddata))*8,
+    mac = keccak.Keccak(((len(secret) + len(protecteddata))*8,
                          mac.decode('latin-1')),
                         n=MACLEN)
 
@@ -73,7 +71,7 @@ class FlagExpired(FlagVerificationError):
     "Flag is already expired"
     pass
 
-def verify(flag):
+def verify(flag, secret):
     """ Returns the data encoded within the flag:
         (team, service, payload, timestamp)
 
@@ -88,8 +86,8 @@ def verify(flag):
         raise InvalidFlagFormat("Flag is not in the expected format")
 
     protecteddata, mac = rawdata[:datalength], rawdata[datalength:]
-    computedmac = codecs.encode(SECRET, 'hex') + codecs.encode(protecteddata, 'hex')
-    computedmac = keccak.Keccak(((len(SECRET) + len(protecteddata))*8,
+    computedmac = codecs.encode(secret, 'hex') + codecs.encode(protecteddata, 'hex')
+    computedmac = keccak.Keccak(((len(secret) + len(protecteddata))*8,
                                  computedmac.decode('latin-1')),
                                 n=MACLEN)
 
