@@ -5,6 +5,7 @@ import asyncore
 import socket
 import logging
 import datetime
+import base64
 
 import psycopg2
 
@@ -21,7 +22,7 @@ class FlagHandler(asynchat.async_chat):
         self._logger = logging.getLogger("%13s %5d" % (ipaddr, port))
         self._cursor = None
         self._dbconnection = dbconnection
-        self._secret = secret
+        self._secret = base64.b64decode(secret)
         self.buffer = b''
         self._logger.info("Accepted connection from Team %s", self.team)
         self._banner()
