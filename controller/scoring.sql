@@ -73,3 +73,6 @@ NATURAL FULL OUTER JOIN defense
 NATURAL FULL OUTER JOIN sla
 NATURAL RIGHT OUTER JOIN fill
 ORDER BY team_id, service_id;
+
+ALTER MATERIALIZED VIEW scoring_scoreboard OWNER TO gameserver_controller;
+GRANT SELECT on TABLE scoring_scoreboard TO gameserver_web;
