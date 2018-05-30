@@ -86,7 +86,7 @@ def main():
 
     try:
         from systemd.journal import JournalHandler
-        identifier = "team%03d-tick%03d" % (args.team, args.tick)
+        identifier = "%s-team%03d-tick%03d" % (args.checker, args.team, args.tick)
         logging.root.addHandler(JournalHandler(SYSLOG_IDENTIFIER=identifier,
                                                CTF_TEAM_ID=args.team,
                                                CTF_TICK=args.tick))
