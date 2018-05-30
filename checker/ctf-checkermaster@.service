@@ -1,8 +1,6 @@
 [Unit]
 Description=CTF Checker Runner
-Description=CTF Flag-Submission Service
-Wants=postgresql.service
-After=postgresql.service
+After=network.target postgresql.service
 
 [Service]
 Type=notify
@@ -14,6 +12,7 @@ TimeoutStopSec=65
 Environment=PYTHONPATH=/etc/ctf-gameserver/checker/modules/
 User=nobody
 Group=nogroup
+SyslogIdentifier=ctf-checkermaster@%i
 
 [Install]
 WantedBy=multi-user.target
