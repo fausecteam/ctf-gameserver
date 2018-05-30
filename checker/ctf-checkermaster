@@ -237,7 +237,8 @@ def get_fresh_jobs(gamedb, cachedb, args):
             checker = args.checker
             ippattern = args.ippattern
             task = loop.create_task(run_checker(service, team, tick, checker, ippattern,
-                                                logging.getLogger().level, cachedb, args.secret))
+                                                logging.getLogger().level, cachedb,
+                                                base64.b64decode(args.secret)))
             open_tasks[task] = service, team, tick, datetime.datetime.now()
         logging.info("started %d (of %d possible) new jobs", len(jobs), new_tasks)
 
