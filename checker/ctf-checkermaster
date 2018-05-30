@@ -25,7 +25,7 @@ from ctf_gameserver.lib import flag
 from ctf_gameserver.lib.helper import convert_arg_line_to_args
 from ctf_gameserver.checker import string_to_result
 
-MAXRUNTIME = datetime.timedelta(minutes=1)
+MAXRUNTIME = datetime.timedelta(minutes=3)
 conteststart = None
 flagvalidity = None
 tickduration = None
