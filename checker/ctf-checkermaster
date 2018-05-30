@@ -155,6 +155,8 @@ def run_checker(service, team, tick, checker, ippattern, loglevel, dbconnection,
 
 
 def get_fresh_jobs(gamedb, cachedb, args):
+    global stopping
+
     notify("WATCHDOG=1")
     loop = asyncio.get_event_loop()
     loop.call_later(args.refresh, get_fresh_jobs, gamedb, cachedb, args)
@@ -183,7 +185,6 @@ def get_fresh_jobs(gamedb, cachedb, args):
                                            (service, team, tick))
                 del open_tasks[task]
             except psycopg2.InterfaceError:
-                global stopping
                 stopping = True
                 logging.warning("Database connection closed, restarting checkermaster")
 
@@ -243,7 +244,6 @@ def get_fresh_jobs(gamedb, cachedb, args):
         logging.info("started %d (of %d possible) new jobs", len(jobs), new_tasks)
 
     except psycopg2.InterfaceError:
-        global stopping
         stopping = True
         logging.warning("Database connection closed, restarting checkermaster")
 
