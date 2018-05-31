@@ -149,7 +149,7 @@ def run_checker(service, team, tick, checker, ippattern, loglevel, dbconnection,
             logging.exception("Exception while communicating with checkerslave")
             break
 
-    yield from process.communicate()
+    process.terminate()
     logger.info("checker finished with result %s", result)
     return result
 
