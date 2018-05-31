@@ -228,7 +228,7 @@ def get_fresh_jobs(gamedb, cachedb, args):
                                     AND sc.service_id = %s
                                   ORDER BY RANDOM()
                                   LIMIT %s
-                                  FOR UPDATE""",
+                                  FOR UPDATE OF sc """,
                                (serviceid, new_tasks))
                 jobs = cursor.fetchall()
                 cursor.executemany("""UPDATE scoring_flag
