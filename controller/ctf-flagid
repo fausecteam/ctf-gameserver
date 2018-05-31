@@ -10,14 +10,27 @@ import psycopg2.extras
 from ctf_gameserver.lib.helper import convert_arg_line_to_args
 
 
+SERVICES = {
+    1: "JODLGANG",
+    2: "Cryptocurrencies helpline",
+    3: "Diagon Alley",
+    4: "FAUST Coin",
+    5: "MtCamlX",
+    6: "RESTchain",
+    7: "The Tangle",
+}
+
+
 def process_row(row, result):
-    if not row.service_id in result:
-        result[row.service_id] = dict()
+    service_id = SERVICES[row.service_id]
 
-    if not row.team_id in result[row.service_id]:
-        result[row.service_id][row.team_id] = dict()
+    if not service_id in result:
+        result[service_id] = dict()
 
-    result[row.service_id][row.team_id][row.identifier] = row.data.tobytes().decode()
+    if not row.team_id in result[service_id]:
+        result[service_id][row.team_id] = dict()
+
+    result[service_id][row.team_id][row.identifier] = row.data.tobytes().decode()
 
 
 def clean_dict(result):
@@ -34,7 +47,7 @@ def update_flagids(db, fh):
     result = dict()
     with db:
         with db.cursor(cursor_factory=psycopg2.extras.NamedTupleCursor) as cursor:
-            cursor.execute("SELECT service_id, team_id, data, identifier FROM checkercache WHERE identifier LIKE 'flagid_%'")
+            cursor.execute("SELECT service_id, format('10.66.%s.2', team_id) as team_id, data, identifier FROM checkercache WHERE identifier LIKE 'flagid_%'")
             rows = cursor.fetchall()
             for row in rows:
                 process_row(row, result)
