@@ -5,6 +5,9 @@ import logging
 import json
 
 import psycopg2
+import psycopg2.extras
+
+from ctf_gameserver.lib.helper import convert_arg_line_to_args
 
 
 def process_row(row, result):
@@ -14,7 +17,7 @@ def process_row(row, result):
     if not row.team_id in result[row.service_id]:
         result[row.service_id][row.team_id] = dict()
 
-    result[row.service_id][row.team_id][row.identifier] = row.data
+    result[row.service_id][row.team_id][row.identifier] = row.data.tobytes().decode()
 
 
 def clean_dict(result):
@@ -31,7 +34,7 @@ def update_flagids(db, fh):
     result = dict()
     with db:
         with db.cursor(cursor_factory=psycopg2.extras.NamedTupleCursor) as cursor:
-            cursor.execute("SELECT service_id, team_id, data FROM checkercache WHERE identifier LIKE 'flagid_%'")
+            cursor.execute("SELECT service_id, team_id, data, identifier FROM checkercache WHERE identifier LIKE 'flagid_%'")
             rows = cursor.fetchall()
             for row in rows:
                 process_row(row, result)
