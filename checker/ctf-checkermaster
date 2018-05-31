@@ -225,9 +225,9 @@ def get_fresh_jobs(gamedb, cachedb, args):
                                     (select sc2.id,
                                             row_number() OVER (ORDER BY RANDOM()) AS idx
                                        FROM scoring_flag sc2
-                                       WHERE sc2.placement_start is NULL
-                                         AND sc2.tick = (SELECT current_tick FROM scoring_gamecontrol)
-                                         AND sc2.service_id = %s
+                                       WHERE placement_start is NULL
+                                         AND sc.tick = (SELECT current_tick FROM scoring_gamecontrol)
+                                         AND sc.service_id = %s
                                     ) as seq
                                   WHERE sc.id = seq.id
                                     AND seq.idx <= %d
