@@ -219,7 +219,8 @@ def get_fresh_jobs(gamedb, cachedb, args):
         jobs = []
         with gamedb:
             with gamedb.cursor() as cursor:
-                cursor.execute("""SELECT sc.id, protecting_team_id, sc.tick
+                cursor.execute("""SELECT FOR UPDATE
+                                       sc.id, protecting_team_id, sc.tick
                                   FROM scoring_flag sc, scoring_gamecontrol gc
                                   WHERE placement_start is NULL
                                     AND sc.tick = gc.current_tick
