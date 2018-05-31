@@ -164,7 +164,10 @@ def get_fresh_jobs(gamedb, cachedb, args):
     tasks = list(open_tasks.keys())
     for task in tasks:
         service, team, tick, starttime = open_tasks[task]
-        if task.done():
+        if task.cancelled():
+            del open_tasks[task]
+
+        elif task.done():
             try:
                 if task.result() is None:
                     logging.warning("Checkerscript failed for Team %d Tick %d", team, tick)
@@ -195,8 +198,6 @@ def get_fresh_jobs(gamedb, cachedb, args):
             logging.warning("aborting job(service=%d, team=%d, tick=%d) due to timeout",
                             service, team, tick)
             task.cancel()
-            if task.cancelled():
-                del open_tasks[task]
 
     current_tasks = len(open_tasks)
 
