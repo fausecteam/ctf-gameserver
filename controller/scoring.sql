@@ -14,7 +14,7 @@ WITH
     GROUP BY capturing_team_id, service_id
   ),
   flagdefense AS (
-    SELECT sqrt(count(*)) as score,
+    SELECT count(*) ^ 0.75 as score,
            scoring_flag.protecting_team_id as team_id,
            service_id
     FROM scoring_capture
