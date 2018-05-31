@@ -49,6 +49,7 @@ WITH
     FROM registration_team
     INNER JOIN auth_user ON auth_user.id = registration_team.user_id
     WHERE is_active = true
+	  AND nop_team = false
   ),
   sla AS (
     SELECT (SELECT sqrt(count(*)) FROM teams) * (coalesce(sla_ok, 0) + coalesce(sla_recover, 0)) as sla,
