@@ -225,11 +225,11 @@ def get_fresh_jobs(gamedb, cachedb, args):
                                     (select sc2.id,
                                             row_number() OVER (ORDER BY RANDOM()) AS idx
                                        FROM scoring_flag sc2
-                                       WHERE placement_start is NULL
-                                         AND sc.tick = (SELECT current_tick FROM scoring_gamecontrol)
-                                         AND sc.service_id = %s
                                     ) as seq
-                                  WHERE sc.id = seq.id
+                                  WHERE placement_start is NULL
+                                    ANC sc.id = seq.id
+                                    AND sc.tick = (SELECT current_tick FROM scoring_gamecontrol)
+                                    AND sc.service_id = %s
                                     AND seq.idx <= %d
                                   RETURNING sc.id, sc.protecting_team_id, sc.tick
                                   """,
