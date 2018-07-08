@@ -11,7 +11,6 @@ from .fields import ClearableThumbnailImageInput
 from .util import email_token_generator, get_country_names
 
 FIVE_MB = 5 * 1024**2
-ALLOWED_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.gif']
 
 
 class UserForm(forms.ModelForm):
@@ -149,11 +148,8 @@ class TeamForm(forms.ModelForm):
         self.fields['country'].choices = [('', '----------')] + self.fields['country'].choices
 
     def clean_image(self):
-        if self.cleaned_data['image']:
-            if self.cleaned_data['image'].size > FIVE_MB:
-                raise forms.ValidationError(_('The file must not be larger than 5 MB!'))
-            if not any(self.cleaned_data['image'].path.endswith(ext) for ext in ALLOWED_EXTENSIONS):
-                raise forms.ValidationError(_('The image does not have a known file extension.'))
+        if self.cleaned_data['image'] and self.cleaned_data['image'].size > FIVE_MB:
+            raise forms.ValidationError(_('The file must not be larger than 5 MB!'))
 
         return self.cleaned_data['image']
 
