@@ -1,4 +1,5 @@
 import os
+import warnings
 from urllib.parse import urljoin
 from io import BytesIO
 
@@ -8,6 +9,10 @@ from django.conf import settings
 from django.utils.encoding import filepath_to_uri
 from django.utils.html import conditional_escape, format_html
 from PIL import Image
+
+# force an error when image decompression takes too much memory
+Image.MAX_IMAGE_PIXELS = 1000*1000
+warnings.simplefilter('error', Image.DecompressionBombWarning)
 
 
 class ThumbnailImageFieldFile(ImageFieldFile):
