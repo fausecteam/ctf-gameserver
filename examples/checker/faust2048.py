@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 from ctf_gameserver.checker import BaseChecker, OK, NOTFOUND
 
 import time

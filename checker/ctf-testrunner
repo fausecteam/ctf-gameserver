@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 #
 # set $PYTHONPATH to your local ctf-gameserver/src checkout
 #

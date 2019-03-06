@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 OK = 0
 TIMEOUT = 1
 NOTWORKING = 2

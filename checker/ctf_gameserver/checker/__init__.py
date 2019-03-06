@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 import os
 
 if 'CHECKER_CONTEST' in os.environ:

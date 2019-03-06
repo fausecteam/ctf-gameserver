@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 from os import execlp, environ
 from sys import argv, exit, stderr

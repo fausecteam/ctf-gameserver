@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 import asynchat
 import asyncore
 import socket
