@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # CTF Gameserver documentation build configuration file, created by
 # sphinx-quickstart on Sat Dec 26 10:37:08 2015.
 #

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import shlex
 
 def convert_arg_line_to_args(arg_line):
