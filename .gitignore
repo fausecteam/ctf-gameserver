@@ -11,3 +11,6 @@ __pycache__/
 /web/ctf_gameserver/web/uploads/
 /web/ctf_gameserver/web/static/ext/
 /web/ctf_gameserver/web/registration/countries.csv
+# We don't actually migrate anything and generate migrations files dynamically
+/web/ctf_gameserver/web/*/migrations/__init__.py
+/web/ctf_gameserver/web/*/migrations/0001_initial.py

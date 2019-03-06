@@ -9,11 +9,13 @@ prod: prod-db ext
 ext: $(EXT_DIR)/jquery.min.js $(EXT_DIR)/bootstrap $(SOURCE_DIR)/registration/countries.csv
 
 
-$(SOURCE_DIR)/dev-db.sqlite3:
+$(SOURCE_DIR)/dev-db.sqlite3: $(SOURCE_DIR)/registration/countries.csv
+	./dev_manage.py makemigrations templatetags registration scoring flatpages
 	./dev_manage.py migrate
 	./dev_manage.py createsuperuser --username admin --email ''
 
 prod-db:
+	./prod_manage.py makemigrations templatetags registration scoring flatpages
 	./prod_manage.py migrate auth
 	./prod_manage.py migrate
 	@echo 'Run `./prod_manage.py createsuperuser` to create an initial superuser account!'
