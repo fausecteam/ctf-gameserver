@@ -22,7 +22,8 @@ class ThumbnailImageFieldFile(ImageFieldFile):
     """
 
     def save(self, name, content, *args, **kwargs):
-        image = content.image
+        # Can't use `content.image` because of https://code.djangoproject.com/ticket/30252
+        image = Image.open(content)
 
         # We store a newly serialized version of the image, to (hopefully) prevent attacks where users
         # upload a valid image file that might also be interpreted as HTML/JS due to content sniffing.
