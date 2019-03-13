@@ -1,4 +1,5 @@
 import os
+import warnings
 from urllib.parse import urljoin
 from io import BytesIO
 
@@ -9,21 +10,34 @@ from django.utils.encoding import filepath_to_uri
 from django.utils.html import conditional_escape, format_html
 from PIL import Image
 
+# force an error when image decompression takes too much memory
+Image.MAX_IMAGE_PIXELS = 1000*1000
+warnings.simplefilter('error', Image.DecompressionBombWarning)
+
 
 class ThumbnailImageFieldFile(ImageFieldFile):
     """
-    Custom variant of ImageFieldFile which automatically generates a thumbnail when saving an image.
+    Custom variant of ImageFieldFile which automatically generates a thumbnail when saving an image and
+    stores the serialized PIL image instead of the raw input data to disk.
     """
 
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
+    def save(self, name, content, *args, **kwargs):
+        image = content.image
+
+        # We store a newly serialized version of the image, to (hopefully) prevent attacks where users
+        # upload a valid image file that might also be interpreted as HTML/JS due to content sniffing.
+        # If we didn't convert everything to PNG, we'd also have to take care to only allow file
+        # extensions for which the web server sends a image/* mime type.
+        data = BytesIO()
+        image.save(data, 'PNG')
+        data.seek(0)
+        super().save(name, data, *args, **kwargs)
 
         thumbnail_data = BytesIO()
-
-        image = Image.open(self.storage.open(self.name))
-        image.thumbnail(settings.THUMBNAIL_SIZE)
-        image.save(thumbnail_data, 'PNG')
-
+        thumbnail = image.copy()
+        thumbnail.thumbnail(settings.THUMBNAIL_SIZE)
+        thumbnail.save(thumbnail_data, 'PNG')
+        thumbnail_data.seek(0)
         self.storage.save(self.get_thumbnail_path(), thumbnail_data)
 
     # Keep property of the parent method
@@ -41,17 +55,11 @@ class ThumbnailImageFieldFile(ImageFieldFile):
         """
         Returns the path of the image's thumbnail version relative to the storage root (i.e. its "name" in
         storage system terms).
-        Thumbnails have the same base name as their original images with a '.png' extension and are stored in
-        a 'thumbnails' directory alongside the original images.
+        Thumbnails have the same name as their original images stored in a 'thumbnails' directory alongside
+        the original images.
         """
         path, filename = os.path.split(self.name)
-
-        path = os.path.join(path, 'thumbnails')
-        filename_parts = os.path.splitext(filename)
-        # Include the original extension to keep the relationship between image and thumbnail unique
-        filename = '{}-{}.png'.format(filename_parts[0], filename_parts[1][1:])
-
-        return os.path.join(path, filename)
+        return os.path.join(path, 'thumbnails', filename)
 
     def get_thumbnail_url(self):
         """
@@ -62,7 +70,7 @@ class ThumbnailImageFieldFile(ImageFieldFile):
 
 class ThumbnailImageField(ImageField):
     """
-    Custom variant of ImageField which uses ThumbnailImageFieldFile for its instances.
+    Custom variant of ImageField which automatically resizes and re-serializes an uploaded image.
     """
 
     attr_class = ThumbnailImageFieldFile

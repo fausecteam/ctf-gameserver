@@ -46,6 +46,8 @@ th.border-right, td.border-right {
 
 .team-image {
     width: 50px;
+    max-height: 50px;
+    object-fit: contain;
 }
 
 #mail-teams-content {

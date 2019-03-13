@@ -12,10 +12,8 @@ def _gen_image_name(instance, filename):
     Returns the upload path (relative to settings.MEDIA_ROOT) for the specified Team's image.
     """
 
-    extension = os.path.splitext(filename)[1]
-
     # Must "return a Unix-style path (with forward slashes)"
-    return 'team-images' + '/' + instance.user.username + extension
+    return 'team-images' + '/' + str(instance.user.id) + '.png'
 
 
 class Team(models.Model):
