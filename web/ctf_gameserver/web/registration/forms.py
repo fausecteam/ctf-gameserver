@@ -1,6 +1,6 @@
 from django import forms
 from django.core.mail import send_mail
-from django.template import Context, loader
+from django.template import loader
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import User
@@ -102,13 +102,13 @@ class UserForm(forms.ModelForm):
         Args:
             request: The HttpRequest from which this function is being called
         """
-        context = Context({
+        context = {
             'competition_name': settings.COMPETITION_NAME,
             'protocol': 'https' if request.is_secure() else 'http',
             'domain': get_current_site(request),
             'user': self.instance.pk,
             'token': email_token_generator.make_token(self.instance)
-        })
+        }
         message = loader.render_to_string('confirmation_mail.txt', context)
 
         send_mail(settings.COMPETITION_NAME+' email confirmation', message, settings.DEFAULT_FROM_EMAIL,
