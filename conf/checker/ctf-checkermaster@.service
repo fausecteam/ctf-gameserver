@@ -4,7 +4,7 @@ After=network.target postgresql.service
 
 [Service]
 Type=notify
-ExecStart=%BINDIR%/ctf-checkermaster @/etc/ctf-gameserver/checkermaster.conf @/etc/ctf-gameserver/checker/%i.conf
+ExecStart=/usr/bin/ctf-checkermaster @/etc/ctf-gameserver/checkermaster.conf @/etc/ctf-gameserver/checker/%i.conf
 ExecStop=/bin/kill -s usr1 $MAINPID
 WatchdogSec=20
 Restart=on-failure

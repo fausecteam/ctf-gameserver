@@ -1,10 +1,20 @@
 __pycache__/
 
+# Python packaging
+/build/
+/dist/
+/src/ctf_gameserver.egg-info/
+
+# Debian packaging
+/.pybuild/
+/debian/ctf-gameserver/
+/debian/files
+
 # Web component
-/web/ctf_gameserver/web/dev-db.sqlite3
-/web/ctf_gameserver/web/uploads/
-/web/ctf_gameserver/web/static/ext/
-/web/ctf_gameserver/web/registration/countries.csv
+/src/ctf_gameserver/web/dev-db.sqlite3
+/src/ctf_gameserver/web/uploads/
+/src/ctf_gameserver/web/static/ext/
+/src/ctf_gameserver/web/registration/countries.csv
 # We don't actually migrate anything and generate migrations files dynamically
-/web/ctf_gameserver/web/*/migrations/__init__.py
-/web/ctf_gameserver/web/*/migrations/0001_initial.py
+/src/ctf_gameserver/web/*/migrations/__init__.py
+/src/ctf_gameserver/web/*/migrations/0001_initial.py

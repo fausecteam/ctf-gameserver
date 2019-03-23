@@ -1,6 +1,0 @@
-etc/ctf-gameserver/checkermaster.conf
-lib/systemd/system/ctf-checkermaster@.service
-usr/bin/ctf-checkermaster
-usr/bin/ctf-checkerslave
-usr/bin/ctf-logviewer
-usr/bin/ctf-testrunner

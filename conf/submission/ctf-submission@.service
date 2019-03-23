@@ -5,7 +5,7 @@ After=postgresql.service
 
 [Service]
 Type=notify
-ExecStart=%BINDIR%/ctf-submission @/etc/ctf-gameserver/submission.conf --port %i
+ExecStart=/usr/bin/ctf-submission @/etc/ctf-gameserver/submission.conf --port %i
 User=nobody
 Group=nogroup
 RestartSec=10

@@ -1,4 +1,0 @@
-Django==1.11.*
-pytz
-Pillow
-Markdown

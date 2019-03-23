@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# No dh-systemd because we don't want to enable/start any services
+if test -x /bin/systemctl; then
+	systemctl daemon-reload
+fi
+
+#DEBHELPER#

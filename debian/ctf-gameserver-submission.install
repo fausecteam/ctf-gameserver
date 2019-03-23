@@ -1,3 +1,0 @@
-etc/ctf-gameserver/submission.conf
-lib/systemd/system/ctf-submission@.service
-usr/bin/ctf-submission

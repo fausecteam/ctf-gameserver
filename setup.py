@@ -1,101 +1,57 @@
 #!/usr/bin/env python3
 
-from setuptools import setup
-from setuptools.command.install import install
-import glob
-import os.path
+import os
+
+from setuptools import setup, find_packages
 
 
-class ctf_gameserver_install(install):
-    _servicefiles = [
-        'submission/ctf-submission@.service',
-        'checker/ctf-checkermaster@.service',
-        'controller/ctf-controller.service',
-        'controller/ctf-scoring.service',
+setup(
+    name = 'ctf_gameserver',
+    description = 'FAUST CTF Gameserver',
+    url = 'http://ctf-gameserver.org',
+    version = '1.0',
+    author = 'Christoph Egger, Felix Dreissig',
+    author_email = 'christoph.egger@fau.de, f30@f30.me',
+    license = 'ISC',
+
+    install_requires = [
+        'Django==1.11.*',
+        'Markdown',
+        'Pillow',
+        'pytz',
+        'psycopg2',
+        'requests',
+        # TODO: Make this platform independent for development
+        #'systemd'
+    ],
+
+    package_dir = {'': 'src'},
+    packages = find_packages('src'),
+    scripts = [
+        'scripts/checker/ctf-checkermaster',
+        'scripts/checker/ctf-checkerslave',
+        'scripts/checker/ctf-logviewer',
+        'scripts/checker/ctf-testrunner',
+        'scripts/controller/ctf-controller',
+        'scripts/controller/ctf-flagid',
+        'scripts/controller/ctf-scoring',
+        'scripts/submission/ctf-submission'
+    ],
+    package_data = {
+        'ctf_gameserver.web': [
+            '*/templates/*.html',
+            '*/templates/*.txt',
+            'templates/*.html',
+            'templates/*.txt',
+            'static/robots.txt',
+            'static/style.css',
+            'static/ext/jquery.min.js',
+            'static/ext/bootstrap/css/*',
+            'static/ext/bootstrap/fonts/*',
+            'static/ext/bootstrap/js/*'
+        ],
+        'ctf_gameserver.web.registration': [
+            'countries.csv'
         ]
-
-    def run(self):
-        install.run(self)
-
-        if not self.dry_run:
-            bindir = self.install_scripts
-            if bindir.startswith(self.root):
-                bindir = bindir[len(self.root):]
-
-            systemddir = os.path.join(self.root, "lib/systemd/system")
-
-            for servicefile in self._servicefiles:
-                service = os.path.split(servicefile)[1]
-                self.announce("Creating %s" % os.path.join(systemddir, service),
-                              level=2)
-                with open(servicefile) as servicefd:
-                    servicedata = servicefd.read()
-
-                with open(os.path.join(systemddir, service), "w") as servicefd:
-                    servicefd.write(servicedata.replace("%BINDIR%", bindir))
-
-
-setup(name='CTF Gameserver',
-      include_package_data=True,
-      version='0.1-rc0',
-      description='FAUST CTF Gameserver',
-      author='Christoph Egger, Felix Dreissig',
-      author_email='Christoph.Egger@fau.de, Felix.Dreissig@fau.de',
-      url='http://ctf-gameserver.faust.ninja/',
-      license='ISC',
-      install_requires=[
-          'psycopg2',
-          'django',
-          'markdown',
-          'requests',
-          'pil',
-          'systemd'
-      ],
-      packages=[
-          'ctf_gameserver.checker',
-          'ctf_gameserver.lib',
-          'ctf_gameserver.submission',
-          'ctf_gameserver.web',
-          'ctf_gameserver.web.flatpages',
-          'ctf_gameserver.web.registration',
-          'ctf_gameserver.web.scoring',
-          'ctf_gameserver.web.scoring.templatetags',
-          'ctf_gameserver.web.templatetags.templatetags',
-      ],
-      scripts=[
-          'checker/ctf-checkermaster',
-          'checker/ctf-checkerslave',
-          'checker/ctf-logviewer',
-          'checker/ctf-testrunner',
-          'controller/ctf-controller',
-          'controller/ctf-flagid',
-          'controller/ctf-scoring',
-          'submission/ctf-submission',
-      ],
-      data_files=[
-          ("/lib/systemd/system", [
-              'controller/ctf-controller.timer',
-          ]
-          ),
-          ("/etc/ctf-gameserver/web/", [
-               "web/ctf_gameserver/web/prod_settings.py",
-          ]
-          ),
-          ("/etc/ctf-gameserver/", [
-               "checker/checkermaster.conf",
-               "controller/controller.conf",
-               "controller/scoring.conf",
-               "controller/flagid.conf",
-               "submission/submission.conf",
-          ]
-          ),
-      ],
-      package_data={
-          "ctf_gameserver.web": ['*/templates/*.html', 'templates/*.html', 'static/style.css',
-                                 'registration/countries.csv']
-      },
-      namespace_packages=['ctf_gameserver'],
-      package_dir = {'': 'src'},
-      test_suite = 'run_tests.all_the_tests',
-      cmdclass={'install': ctf_gameserver_install},
+    }
 )
