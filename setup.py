@@ -15,7 +15,7 @@ setup(
     license = 'ISC',
 
     install_requires = [
-        'Django==1.11.*',
+        'Django == 1.11.*, >= 1.11.19',
         'Markdown',
         'Pillow',
         'pytz',
