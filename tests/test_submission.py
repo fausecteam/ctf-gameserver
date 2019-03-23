@@ -7,7 +7,7 @@ from ctf_gameserver.lib import flag
 
 class UserInputTestCase(unittest.TestCase):
     def setUp(self):
-        self._handler = FlagHandler(None, ("203.0.113.42", 1337), None,
+        self._handler = FlagHandler(None, ("203.0.113.42", 1337), None, 'c2VjcmV0',
                                     datetime.datetime.now(tz=datetime.timezone.utc),
                                     datetime.datetime.now(tz=datetime.timezone.utc) + datetime.timedelta(minutes=10),
                                     None, None)
@@ -49,7 +49,7 @@ class UserInputTestCase(unittest.TestCase):
 
     def test_not_against_self(self):
         with mock.patch.object(self._handler, '_reply') as reply:
-            testflag = flag.generate(113, 12)
+            testflag = flag.generate(113, 12, b'secret')
             self._handler.buffer = testflag.encode('us-ascii')
             self._handler._handle_flag()
             reply.assert_called_with(b"Can't submit a flag for your own team")

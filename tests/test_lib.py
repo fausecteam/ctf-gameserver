@@ -9,8 +9,8 @@ from ctf_gameserver.lib import flag
 class FlagTestCase(unittest.TestCase):
     def test_deterministic(self):
         tstamp = time.time()
-        flag1 = flag.generate(12, 13, timestamp=tstamp)
-        flag2 = flag.generate(12, 13, timestamp=tstamp)
+        flag1 = flag.generate(12, 13, b'secret', timestamp=tstamp)
+        flag2 = flag.generate(12, 13, b'secret', timestamp=tstamp)
         self.assertEqual(flag1, flag2)
 
 
@@ -19,8 +19,8 @@ class FlagTestCase(unittest.TestCase):
         timestamp = int(time.time() + 12)
         team = 12
         service = 13
-        flag1 = flag.generate(team, service, payload=payload, timestamp=timestamp)
-        team_, service_, payload_, timestamp_ = flag.verify(flag1)
+        flag1 = flag.generate(team, service, b'secret', payload=payload, timestamp=timestamp)
+        team_, service_, payload_, timestamp_ = flag.verify(flag1, b'secret')
         self.assertEqual(team, team_)
         self.assertEqual(service, service_)
         self.assertEqual(payload, payload_)
@@ -29,12 +29,12 @@ class FlagTestCase(unittest.TestCase):
 
     def test_old_flag(self):
         timestamp = int(time.time() - 12)
-        testflag = flag.generate(12, 13, timestamp=timestamp)
-        self.assertRaises(flag.FlagExpired, flag.verify, testflag)
+        testflag = flag.generate(12, 13, b'secret', timestamp=timestamp)
+        self.assertRaises(flag.FlagExpired, flag.verify, testflag, b'secret')
 
 
     def test_invalid_mac(self):
-        testflag = flag.generate(12, 13)
+        testflag = flag.generate(12, 13, b'secret')
         s = set("0123456789")
         try:
             s.remove(testflag[-1])
@@ -42,4 +42,4 @@ class FlagTestCase(unittest.TestCase):
             pass
 
         wrongflag = testflag[:-1] + random.choice(list(s))
-        self.assertRaises(flag.InvalidFlagMAC, flag.verify, wrongflag)
+        self.assertRaises(flag.InvalidFlagMAC, flag.verify, wrongflag, b'secret')
