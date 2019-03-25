@@ -1,0 +1,42 @@
+version: 2.1
+
+commands:
+  apt_get:
+    parameters:
+      args:
+        type: string
+    steps:
+      - run:
+          command: apt-get -y -qq << parameters.args >>
+          environment:
+            DEBIAN_FRONTEND: noninteractive
+  setup_container:
+    steps:
+      - apt_get:
+          args: update
+      - apt_get:
+          args: install ca-certificates python3 python3-pip
+
+jobs:
+  test:
+    docker:
+      - image: debian:stretch
+    steps:
+      - checkout
+      - setup_container
+      - apt_get:
+          args: install python3-pytest python3-pytest-cov
+      - run: pip3 install -e .
+      - run: pytest-3 --junitxml=test-results/pytest/results.xml --cov=src --cov-report=term --cov-report=html tests
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: test-results
+      - store_artifacts:
+          path: htmlcov
+
+workflows:
+  version: 2
+  workflow:
+    jobs:
+      - test
