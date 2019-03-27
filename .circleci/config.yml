@@ -15,6 +15,7 @@ commands:
       - apt_get:
           args: update
       - apt_get:
+          # Required for CircleCI `store_*` and `restore_*` operations
           args: install ca-certificates
 
 jobs:
@@ -34,6 +35,29 @@ jobs:
       - store_artifacts:
           path: .tox/py37/log/htmlcov
           destination: py37/htmlcov
+
+  build_deb_package:
+    docker:
+      - image: debian:stretch
+    steps:
+      - checkout
+      - prepare_debian
+      - apt_get:
+          args: install --no-install-recommends devscripts dpkg-dev equivs
+      # Add `--yes` to mk-build-deps' default options for apt-get
+      - run: mk-build-deps --install --tool 'apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends --yes' debian/control
+      - run: dpkg-buildpackage --unsigned-changes --unsigned-buildinfo
+      - run: |
+          mkdir deb-packages
+          cp ../*.deb deb-packages/
+      - persist_to_workspace:
+          root: deb-packages
+          paths:
+            - "*.deb"
+      - store_artifacts:
+          path: deb-packages
+          destination: deb-packages
+
   # Test with Python and libraries from Debian Stable sources
   test_debian:
     docker:
@@ -41,11 +65,13 @@ jobs:
     steps:
       - checkout
       - prepare_debian
+      - attach_workspace:
+          at: deb-packages
+      # Install our package in order to install its dependencies
       - apt_get:
-          args: install python3 python3-pytest python3-pytest-cov
+          args: install --no-install-recommends ./deb-packages/*.deb
       - apt_get:
-          # TODO: Use dependencies from the Debian package
-          args: install python3-django python3-markdown python3-pil python3-psycopg2 python3-tz python3-requests
+          args: install python3-pytest python3-pytest-cov
       - run: pytest-3 --junitxml=test-results/pytest/results.xml --cov=src --cov-report=term --cov-report=html tests
       - store_test_results:
           path: test-results
@@ -61,4 +87,7 @@ workflows:
   workflow:
     jobs:
       - test_tox_37
-      - test_debian
+      - build_deb_package
+      - test_debian:
+          requires:
+            - build_deb_package
