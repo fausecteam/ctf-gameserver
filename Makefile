@@ -2,6 +2,7 @@ SOURCE_DIR ?= src
 WEB_DIR ?= $(SOURCE_DIR)/ctf_gameserver/web
 EXT_DIR ?= $(WEB_DIR)/static/ext
 DEV_MANAGE ?= ../scripts/web/dev_manage.py
+TESTS_DIR ?= tests
 
 .PHONY: dev ext lint
 .INTERMEDIATE: bootstrap.zip
@@ -35,5 +36,5 @@ $(WEB_DIR)/registration/countries.csv:
 lint:
 	# Run Pylint and pycodestyle to check the code for potential errors and style guideline violations, but
 	# ignore their exit codes
-	-pylint --rcfile $(SOURCE_DIR)/pylintrc $(SOURCE_DIR)
-	-pycodestyle $(SOURCE_DIR)
+	-pylint --rcfile $(SOURCE_DIR)/pylintrc $(SOURCE_DIR) $(TESTS_DIR)/test_*.py
+	-pycodestyle $(SOURCE_DIR) $(TESTS_DIR)
