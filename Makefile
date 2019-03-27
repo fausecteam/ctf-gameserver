@@ -37,7 +37,9 @@ test:
 	pytest --cov $(SOURCE_DIR) $(TESTS_DIR)
 
 lint:
-	# Run Pylint and pycodestyle to check the code for potential errors and style guideline violations, but
-	# ignore their exit codes
+	# Run Pylint, pycodestyle and Bandit to check the code for potential errors, style guideline violations
+	# and security issues
+	# REVISIT: Respect exit codes when linter issues are fixed
 	-pylint --rcfile $(SOURCE_DIR)/pylintrc $(SOURCE_DIR) $(TESTS_DIR)/test_*.py
 	-pycodestyle $(SOURCE_DIR) $(TESTS_DIR)
+	-bandit --ini bandit.ini -r $(SOURCE_DIR)
