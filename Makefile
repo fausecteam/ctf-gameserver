@@ -4,7 +4,7 @@ EXT_DIR ?= $(WEB_DIR)/static/ext
 DEV_MANAGE ?= ../scripts/web/dev_manage.py
 TESTS_DIR ?= tests
 
-.PHONY: dev ext lint
+.PHONY: dev ext test lint
 .INTERMEDIATE: bootstrap.zip
 
 dev: $(WEB_DIR)/dev-db.sqlite3 ext
@@ -32,6 +32,9 @@ $(WEB_DIR)/registration/countries.csv:
 	# Official download link from http://data.okfn.org/data/core/country-list, under Public Domain
 	curl https://raw.githubusercontent.com/datasets/country-list/master/data.csv -o $@
 
+
+test:
+	pytest --cov $(SOURCE_DIR) $(TESTS_DIR)
 
 lint:
 	# Run Pylint and pycodestyle to check the code for potential errors and style guideline violations, but
