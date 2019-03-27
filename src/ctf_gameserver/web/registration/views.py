@@ -31,7 +31,6 @@ def register(request):
         user_form = forms.UserForm(request.POST, prefix='user')
         team_form = forms.TeamForm(request.POST, request.FILES, prefix='team')
 
-        # pylint: disable=no-member
         if user_form.is_valid() and team_form.is_valid():
             user = user_form.save()
             team_form.save(user)
@@ -63,7 +62,6 @@ def edit_team(request):
         user_form = forms.UserForm(request.POST, prefix='user', instance=request.user)
         team_form = forms.TeamForm(request.POST, request.FILES, prefix='team', instance=team)
 
-        # pylint: disable=no-member
         if user_form.is_valid() and team_form.is_valid():
             user = user_form.save()
             team_form.save(user)
@@ -153,7 +151,7 @@ def confirm_email(request):
         messages.error(request, error_message)
         return render(request, '400.html', status=400)
 
-    if email_token_generator.check_token(user, token):    # pylint: disable=no-member
+    if email_token_generator.check_token(user, token):
         User._default_manager.filter(pk=user_pk).update(is_active=True)
         messages.success(request, _('Email address confirmed. Your registration is now complete.'))
     else:

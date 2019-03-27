@@ -1,14 +1,26 @@
-[FORMAT]
-max-line-length = 109
-
-[MESSAGES CONTROL]
-; Disable all "too-many-"/"too-few-" style checks, complaints about `global` statements, missing docstrings,
-; 'TODO' messages and messages about locally disabled messages
-disable = design, global-statement, missing-docstring, fixme, locally-disabled
-
-[TYPECHECK]
-; Don't issue "no-member" warnings for the default attributes of models, model instances and views
-generated-members = objects, id, request
+[MASTER]
+# Use as many jobs as available CPU cores
+jobs = 0
+ignore = migrations, Keccak.py
 
 [REPORTS]
 reports = no
+
+[MESSAGES CONTROL]
+# Disable:
+#     * All "too-many-"/"too-few-" style checks
+#     * Complaints about 'TODO' messages,
+#     * Complaints about `global` statements
+#     * Complaints about missing docstrings
+#     * Complaints about `else` branches after `return`
+#     * "Method could be a function" messages
+#     * Messages about locally disabled messages
+disable = design, fixme, global-statement, missing-docstring, no-else-return, no-self-use, locally-disabled
+
+[FORMAT]
+max-line-length = 109
+expected-line-ending-format = LF
+
+[TYPECHECK]
+# Don't issue "no-member" warnings for the default attributes of models, model instances and views
+generated-members = objects, id, request, DoesNotExist
