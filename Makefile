@@ -1,5 +1,5 @@
-SOURCE_DIR ?= ctf_gameserver
-WEB_DIR ?= $(SOURCE_DIR)/web
+SOURCE_DIR ?= src
+WEB_DIR ?= $(SOURCE_DIR)/ctf_gameserver/web
 EXT_DIR ?= $(WEB_DIR)/static/ext
 DEV_MANAGE ?= ../scripts/web/dev_manage.py
 
@@ -33,7 +33,7 @@ $(WEB_DIR)/registration/countries.csv:
 
 
 lint:
-	# Run Pylint and pep8 to check the code for potential errors and style guideline violations, but ignore
-	# their exit codes
-	-pylint $(SOURCE_DIR)
-	-pep8 --max-line-length=109 $(SOURCE_DIR)
+	# Run Pylint and pycodestyle to check the code for potential errors and style guideline violations, but
+	# ignore their exit codes
+	-pylint --rcfile $(SOURCE_DIR)/pylintrc $(SOURCE_DIR)
+	-pycodestyle $(SOURCE_DIR)

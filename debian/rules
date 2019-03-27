@@ -4,7 +4,7 @@
 	dh $@ --with python3 --buildsystem=pybuild
 
 override_dh_auto_build:
-	make -C src ext
+	make ext
 	dh_auto_build
 
 # If dh-systemd is installed, it tries to enable the services even without being enabled above
