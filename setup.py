@@ -18,8 +18,8 @@ setup(
         'Django == 1.11.*, >= 1.11.19',
         'Markdown',
         'Pillow',
-        'pytz',
         'psycopg2',
+        'pytz',
         'requests',
         # TODO: Make this platform independent for development
         #'systemd'
