@@ -124,7 +124,6 @@ class GameControl(models.Model):
     # blank-able (have to be set upon editing)
     start = models.DateTimeField(null=True)
     end = models.DateTimeField(null=True)
-    paused = models.BooleanField(default=False)
     # Tick duration in seconds
     tick_duration = models.PositiveSmallIntegerField(default=180)
     # Number of ticks a flag is valid for including the one it was generated in
@@ -164,7 +163,7 @@ class GameControl(models.Model):
         """
         Indicates whether the competition is currently active.
         """
-        if self.start is None or self.end is None or self.paused:
+        if self.start is None or self.end is None:
             return False
 
         return self.start < timezone.now() < self.end
