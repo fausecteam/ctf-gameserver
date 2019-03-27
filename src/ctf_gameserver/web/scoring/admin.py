@@ -33,6 +33,8 @@ class CaptureAdmin(admin.ModelAdmin):
         def queryset(self, request, queryset):
             if self.value():
                 return queryset.filter(flag__service__pk=self.value())
+            else:
+                return queryset
 
     def protecting_team(self, capture):
         """
@@ -80,9 +82,9 @@ class GameControlAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 
-    def has_delete_permission(self, request, instance=None):
+    def has_delete_permission(self, request, _=None):
         return False
 
-    def changelist_view(self, extra_context=None):
+    def changelist_view(self, extra_context=None):    # pylint: disable=arguments-differ
         game_control = models.GameControl.objects.get()
         return redirect('admin:scoring_gamecontrol_change', game_control.pk, permanent=True)

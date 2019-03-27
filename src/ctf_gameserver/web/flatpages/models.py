@@ -62,6 +62,7 @@ class Flatpage(models.Model):
         when category is NULL. Django's constraint validation skips this case, and the actual constraint's
         behavior is database-specific.
         """
+        # pylint: disable=bad-whitespace, bad-continuation
         if self.category is None and type(self)._default_manager.filter(
             category = self.category,
             title = self.title
@@ -69,6 +70,7 @@ class Flatpage(models.Model):
             raise self.unique_error_message(self.__class__, ('category', 'title'))
 
     def get_absolute_url(self):
+        # pylint: disable=no-member
         if self.is_home_page():
             return reverse('home_flatpage')
         elif self.category is None:

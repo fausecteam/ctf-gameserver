@@ -1,5 +1,3 @@
-import os
-
 from django.db import models
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
@@ -7,7 +5,7 @@ from django.utils.translation import ugettext_lazy as _
 from .fields import ThumbnailImageField
 
 
-def _gen_image_name(instance, filename):
+def _gen_image_name(instance, _):
     """
     Returns the upload path (relative to settings.MEDIA_ROOT) for the specified Team's image.
     """
@@ -47,4 +45,5 @@ class Team(models.Model):
     active_not_nop_objects = ActiveNotNopObjectsManager()
 
     def __str__(self):
+        # pylint: disable=no-member
         return self.user.username

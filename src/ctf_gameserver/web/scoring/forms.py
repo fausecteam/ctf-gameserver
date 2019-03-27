@@ -12,7 +12,7 @@ class GameControlAdminForm(forms.ModelForm):
     # Ticks longer than 1 hours are possible but don't seem reasonable and would require addtional cleaning
     # logic below
     tick_duration = forms.IntegerField(min_value=1, max_value=3559, help_text=_('Duration of one tick in '
-                                       'seconds'))
+                                                                                'seconds'))
 
     class Meta:
         model = models.GameControl

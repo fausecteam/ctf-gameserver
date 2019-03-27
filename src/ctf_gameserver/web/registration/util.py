@@ -27,9 +27,10 @@ class EmailConfirmationTokenGenerator(PasswordResetTokenGenerator):
         login_timestamp = '' if user.last_login is None else user.last_login.replace(microsecond=0,
                                                                                      tzinfo=None)
         value = (str(user.pk) + user.email + str(login_timestamp) + str(timestamp))
-        hash = salted_hmac(key_salt, value).hexdigest()[::2]    # pylint: disable=redefined-builtin
+        hash_value = salted_hmac(key_salt, value).hexdigest()[::2]
 
-        return '%s-%s' % (ts_b36, hash)
+        return '%s-%s' % (ts_b36, hash_value)
+
 
 email_token_generator = EmailConfirmationTokenGenerator()    # pylint: disable=invalid-name
 

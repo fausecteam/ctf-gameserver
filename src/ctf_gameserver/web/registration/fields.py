@@ -21,7 +21,7 @@ class ThumbnailImageFieldFile(ImageFieldFile):
     stores the serialized PIL image instead of the raw input data to disk.
     """
 
-    def save(self, name, content, *args, **kwargs):
+    def save(self, name, content, *args, **kwargs):    # pylint: disable=arguments-differ
         # Can't use `content.image` because of https://code.djangoproject.com/ticket/30252
         image = Image.open(content)
 
@@ -44,7 +44,7 @@ class ThumbnailImageFieldFile(ImageFieldFile):
     # Keep property of the parent method
     save.alters_data = True
 
-    def delete(self, *args, **kwargs):
+    def delete(self, *args, **kwargs):    # pylint: disable=arguments-differ
         super().delete(*args, **kwargs)
 
         # This shouldn't fail if the thumbnail doesn't exist

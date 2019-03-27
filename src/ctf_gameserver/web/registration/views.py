@@ -114,7 +114,7 @@ def delete_team(request):
     team_form = forms.TeamForm(prefix='team', instance=team)
 
     if request.method == 'POST':
-        delete_form = forms.DeleteForm(request.POST, prefix='delete', user=request.user)
+        delete_form = forms.DeleteForm(request.POST, user=request.user, prefix='delete')
 
         if delete_form.is_valid():
             request.user.delete()
@@ -123,7 +123,7 @@ def delete_team(request):
 
             return redirect(settings.HOME_URL)
     else:
-        delete_form = forms.DeleteForm(prefix='delete', user=request.user)
+        delete_form = forms.DeleteForm(user=request.user, prefix='delete')
 
     return render(request, 'edit_team.html', {
         'user_form': user_form,

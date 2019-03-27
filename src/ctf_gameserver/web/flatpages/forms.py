@@ -1,5 +1,4 @@
 from django import forms
-from django.core.exceptions import ValidationError
 from django.utils.text import slugify
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
@@ -46,6 +45,7 @@ class FlatpageAdminForm(forms.ModelForm):
         exclude = ('slug',)
         help_texts = {
             'title': _('Leave empty for the home page.'),
+            # pylint: disable=no-member
             'content': mark_safe(_('{markdown} or raw HTML are allowed.').format(
                 markdown='<a href="https://daringfireball.net/projects/markdown/syntax" target="_blank">'
                          'Markdown</a>'

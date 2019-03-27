@@ -189,7 +189,7 @@ class DeleteForm(forms.Form):
 
     password = forms.CharField(widget=forms.PasswordInput)
 
-    def __init__(self, data=None, user=None, *args, **kwargs):
+    def __init__(self, data=None, *args, user=None, **kwargs):    # pylint: disable=keyword-arg-before-vararg
         """
         Custom initializer which takes the user account to be deleted as an additional argument.
         """
@@ -217,6 +217,7 @@ class MailTeamsForm(forms.Form):
     """
 
     # Use short property names because they will end up in (visible) GET parameters
+    # pylint: disable=bad-whitespace
     addrs = forms.ChoiceField(
         choices = [('formal', 'Formal'), ('informal', 'Informal')],
         label = _('Address type'),

@@ -19,6 +19,7 @@ class CTFAdminSite(admin.AdminSite):
     site_title = site_header
     index_title = _('Administration home')
 
+
 admin_site = CTFAdminSite()    # pylint: disable=invalid-name
 
 
@@ -47,6 +48,8 @@ class CTFUserAdmin(UserAdmin):
                 return queryset.filter(team__isnull=False)
             elif self.value() == '0':
                 return queryset.filter(team__isnull=True)
+            else:
+                return queryset
 
     def user_has_team(self, user):
         """

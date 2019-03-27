@@ -26,7 +26,7 @@ def scoreboard(request):
     })
 
 
-def scoreboard_json(request):
+def scoreboard_json(_):
     """
     View which returns the scoreboard in CTFTime scoreboard feed format,
     see https://ctftime.org/json-scoreboard-feed.

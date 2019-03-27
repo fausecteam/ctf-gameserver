@@ -8,4 +8,5 @@ def _format_proxy(proxy, *args, **kwargs):
     """
     return str(proxy).format(*args, **kwargs)
 
+
 format_lazy = lazy(_format_proxy, str)    # pylint: disable=invalid-name

@@ -4,8 +4,7 @@ from .scoring import models as scoring_models
 from .flatpages import models as flatpages_models
 
 
-# pylint: disable=unused-argument
-def competition_name(request):
+def competition_name(_):
     """
     Context processor that adds the CTF's title to the context.
     """
@@ -13,7 +12,7 @@ def competition_name(request):
     return {'COMPETITION_NAME': settings.COMPETITION_NAME}
 
 
-def competition_status(request):
+def competition_status(_):
     """
     Context processor which adds information about the competition's status (whether it is running or over
     and whether registration is open) to the context.
@@ -28,7 +27,7 @@ def competition_status(request):
     }
 
 
-def flatpage_nav(request):
+def flatpage_nav(_):
     """
     Context processor which adds data required for the main navigation of flatpages to the context.
     """
