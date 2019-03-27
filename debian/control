@@ -5,9 +5,11 @@ Maintainer: Christoph Egger <christoph.egger@fau.de>
 Build-Depends:
  debhelper (>= 10),
  dh-python,
+ curl,
  python3,
  python3-all,
- python3-setuptools
+ python3-setuptools,
+ unzip
 Standards-Version: 4.3.0
 Homepage: http://ctf-gameserver.org
 
