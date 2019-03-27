@@ -10,6 +10,10 @@ __pycache__/
 /debian/ctf-gameserver/
 /debian/files
 
+# Python testing
+/.tox/
+/.coverage
+
 # Web component
 /src/ctf_gameserver/web/dev-db.sqlite3
 /src/ctf_gameserver/web/uploads/

@@ -10,33 +10,55 @@ commands:
           command: apt-get -y -qq << parameters.args >>
           environment:
             DEBIAN_FRONTEND: noninteractive
-  setup_container:
+  prepare_debian:
     steps:
       - apt_get:
           args: update
       - apt_get:
-          args: install ca-certificates python3 python3-pip
+          args: install ca-certificates
 
 jobs:
-  test:
+  # Test with Tox, a recent Python version and libraries from PyPI
+  test_tox_37:
+    docker:
+      - image: python:3.7-stretch
+    steps:
+      - checkout
+      - run: pip install tox
+      - run: tox -e py37 -- --junitxml=.tox/py37/log/test-results/pytest/results.xml
+      - store_test_results:
+          path: .tox/py37/log/test-results
+      - store_artifacts:
+          path: .tox/py37/log/test-results
+          destination: py37/test-results
+      - store_artifacts:
+          path: .tox/py37/log/htmlcov
+          destination: py37/htmlcov
+  # Test with Python and libraries from Debian Stable sources
+  test_debian:
     docker:
       - image: debian:stretch
     steps:
       - checkout
-      - setup_container
+      - prepare_debian
       - apt_get:
-          args: install python3-pytest python3-pytest-cov
-      - run: pip3 install -e .
+          args: install python3 python3-pytest python3-pytest-cov
+      - apt_get:
+          # TODO: Use dependencies from the Debian package
+          args: install python3-django python3-markdown python3-pil python3-psycopg2 python3-tz python3-requests
       - run: pytest-3 --junitxml=test-results/pytest/results.xml --cov=src --cov-report=term --cov-report=html tests
       - store_test_results:
           path: test-results
       - store_artifacts:
           path: test-results
+          destination: test-results
       - store_artifacts:
           path: htmlcov
+          destination: htmlcov
 
 workflows:
   version: 2
   workflow:
     jobs:
-      - test
+      - test_tox_37
+      - test_debian
