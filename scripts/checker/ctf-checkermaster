@@ -22,7 +22,7 @@ except ImportError:
         pass
 
 from ctf_gameserver.lib import flag
-from ctf_gameserver.lib.helper import convert_arg_line_to_args
+from ctf_gameserver.lib.args import get_arg_parser_with_db
 from ctf_gameserver.checker import string_to_result
 
 MAXRUNTIME = datetime.timedelta(minutes=3)
@@ -261,27 +261,11 @@ def get_fresh_jobs(gamedb, cachedb, args):
 def main():
     logging.basicConfig()
 
-    parser = argparse.ArgumentParser(description="CTF checker runner",
-                                     fromfile_prefix_chars='@')
-    parser.convert_arg_line_to_args = convert_arg_line_to_args
-    parser.add_argument('-v', '--loglevel', default='WARNING', type=str,
-                        choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
-                        help='Loglevel')
-
+    parser = get_arg_parser_with_db('CTF Gameserver Checker Master')
     parser.add_argument('--ippattern', type=str, required=True,
                         help="python formatstring to build IP to connect to")
-    group = parser.add_argument_group("gamedb")
-    group.add_argument('--gamedbname', type=str, required=True,
-                       help='Name of the used database')
-    group.add_argument('--gamedbuser', type=str, required=True,
-                       help='username for database access')
-    group.add_argument('--gamedbpassword', type=str,
-                       help='password for database access if needed')
-    group.add_argument('--gamedbhost', type=str,
-                       help='hostname of the database. If unspecified '
-                            'ctf-submission will connect via default UNIX socket')
 
-    group = parser.add_argument_group("cachedb")
+    group = parser.add_argument_group('cachedb', 'Checker state database')
     group.add_argument('--cachedbname', type=str, required=True,
                        help='Name of the used database')
     group.add_argument('--cachedbuser', type=str, required=True,

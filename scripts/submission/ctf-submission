@@ -6,7 +6,7 @@ import logging
 
 import psycopg2
 
-from ctf_gameserver.lib.helper import convert_arg_line_to_args
+from ctf_gameserver.lib.args import get_arg_parser_with_db
 from ctf_gameserver.submission import flagserver
 
 
@@ -14,27 +14,13 @@ def main():
     logging.basicConfig(format='%(asctime)s %(levelname)s(%(name)s): %(message)s',
                         datefmt='%m/%d/%Y %H:%M:%S')
 
-    parser = argparse.ArgumentParser(description="Flag submission system",
-                                     fromfile_prefix_chars='@')
-    parser.convert_arg_line_to_args = convert_arg_line_to_args
-    parser.add_argument('-v', '--loglevel', default='WARNING', type=str,
-                        choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
-                        help='Loglevel')
+    parser = get_arg_parser_with_db('CTF Gameserver flag submission server')
     parser.add_argument('-l', '--listen', type=str, default="localhost",
                         help='address or hostname to listen on')
     parser.add_argument('-p', '--port', type=int, default="6666",
                         help="Port to listen on")
     parser.add_argument('--secret', type=str, required=True,
                         help="base64 random string consistent with checkers")
-    parser.add_argument('--dbname', type=str, required=True,
-                        help='Name of the used database')
-    parser.add_argument('--dbuser', type=str, required=True,
-                        help='username for database access')
-    parser.add_argument('--dbpassword', type=str,
-                        help='password for database access if needed')
-    parser.add_argument('--dbhost', type=str,
-                        help='hostname of the database. If unspecified '
-                             'ctf-submission will connect via default UNIX socket')
     args = parser.parse_args()
 
     numeric_level = getattr(logging, args.loglevel.upper())
