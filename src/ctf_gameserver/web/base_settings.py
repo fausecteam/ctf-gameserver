@@ -6,7 +6,7 @@ rest of the code.
 
 import os
 
-from django.core.urlresolvers import reverse_lazy
+from django.urls import reverse_lazy
 from django.contrib.messages import constants as messages
 
 # This file's directory, to conveniently build absolute paths using `os.path.join(BASE_DIR, )`

@@ -23,8 +23,8 @@ class Flag(models.Model):
     reconstructed from this information.
     """
 
-    service = models.ForeignKey(Service)
-    protecting_team = models.ForeignKey(Team)
+    service = models.ForeignKey(Service, on_delete=models.CASCADE)
+    protecting_team = models.ForeignKey(Team, on_delete=models.CASCADE)
     tick = models.PositiveSmallIntegerField()
     # NULL means the flag has been generated, but not yet placed
     placement_start = models.DateTimeField(null=True, blank=True, default=None)
@@ -48,8 +48,8 @@ class Capture(models.Model):
     Database representation of a capture, i.e. the (successful) submission of a particular flag by one team.
     """
 
-    flag = models.ForeignKey(Flag)
-    capturing_team = models.ForeignKey(Team)
+    flag = models.ForeignKey(Flag, on_delete=models.CASCADE)
+    capturing_team = models.ForeignKey(Team, on_delete=models.CASCADE)
     tick = models.PositiveSmallIntegerField()
     timestamp = models.DateTimeField(auto_now_add=True)
 
@@ -77,8 +77,8 @@ class StatusCheck(models.Model):
         _('recovering'): 4
     }
 
-    service = models.ForeignKey(Service)
-    team = models.ForeignKey(Team)
+    service = models.ForeignKey(Service, on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
     tick = models.PositiveSmallIntegerField(db_index=True)
     status = models.PositiveSmallIntegerField(choices=[(i, t) for t, i in STATUSES.items()])
     timestamp = models.DateTimeField(auto_now_add=True)
@@ -100,8 +100,8 @@ class ScoreBoard(models.Model):
     (materialized) view or a real table and should just be handled
     read-only from within the website.
     """
-    team = models.OneToOneField(Team, editable=False, primary_key=True)
-    service = models.OneToOneField(Service, editable=False)
+    team = models.OneToOneField(Team, editable=False, primary_key=True, on_delete=models.PROTECT)
+    service = models.OneToOneField(Service, editable=False, on_delete=models.PROTECT)
     attack = models.FloatField(editable=False)
     bonus = models.FloatField(editable=False)
     defense = models.FloatField(editable=False)

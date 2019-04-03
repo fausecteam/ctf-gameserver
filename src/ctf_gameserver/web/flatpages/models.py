@@ -1,4 +1,4 @@
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db import models
 from django.utils.safestring import mark_safe
 from markdown import markdown
@@ -31,7 +31,7 @@ class Flatpage(models.Model):
     # Title may be blank for the home page
     title = models.CharField(max_length=100, blank=True)
     content = models.TextField()
-    category = models.ForeignKey(Category, null=True, blank=True)
+    category = models.ForeignKey(Category, null=True, blank=True, on_delete=models.PROTECT)
     ordering = models.PositiveSmallIntegerField(default=10)
     slug = models.CharField(max_length=100)
 

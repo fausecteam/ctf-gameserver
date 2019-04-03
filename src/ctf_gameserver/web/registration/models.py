@@ -21,7 +21,7 @@ class Team(models.Model):
     particularly attuned to django.contrib.auth.models.User, but should work with other user models as well.
     """
 
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, primary_key=True)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, primary_key=True, on_delete=models.CASCADE)
 
     informal_email = models.EmailField(_('Informal email address'))
     image = ThumbnailImageField(upload_to=_gen_image_name, blank=True)
