@@ -1,7 +1,7 @@
 SOURCE_DIR ?= src
 WEB_DIR ?= $(SOURCE_DIR)/ctf_gameserver/web
 EXT_DIR ?= $(WEB_DIR)/static/ext
-DEV_MANAGE ?= ../scripts/web/dev_manage.py
+DEV_MANAGE ?= src/dev_manage.py
 TESTS_DIR ?= tests
 
 .PHONY: dev build ext migrations test lint
