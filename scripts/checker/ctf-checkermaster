@@ -12,16 +12,8 @@ import signal
 import sys
 
 import psycopg2
-try:
-    import systemd.daemon
-    notify = systemd.daemon.notify
-except ImportError:
-    logging.warning("Missing systemd module")
-    #pylint: disable=unused-argument
-    def notify(arg):
-        pass
 
-from ctf_gameserver.lib import flag
+from ctf_gameserver.lib import daemon, flag
 from ctf_gameserver.lib.args import get_arg_parser_with_db
 from ctf_gameserver.checker import string_to_result
 
@@ -161,7 +153,7 @@ def run_checker(service, team, tick, checker, ippattern, loglevel, dbconnection,
 def get_fresh_jobs(gamedb, cachedb, args):
     global stopping
 
-    notify("WATCHDOG=1")
+    daemon.notify("WATCHDOG=1")
     loop = asyncio.get_event_loop()
     loop.call_later(args.refresh, get_fresh_jobs, gamedb, cachedb, args)
 
@@ -324,7 +316,7 @@ def main():
     loop = asyncio.get_event_loop()
     loop.call_soon(get_fresh_jobs, gamedb, cachedb, args)
 
-    notify("READY=1")
+    daemon.notify("READY=1")
 
     loop.run_forever()
 

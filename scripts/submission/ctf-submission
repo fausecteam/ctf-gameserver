@@ -6,6 +6,7 @@ import logging
 
 import psycopg2
 
+from ctf_gameserver.lib import daemon
 from ctf_gameserver.lib.args import get_arg_parser_with_db
 from ctf_gameserver.submission import flagserver
 
@@ -41,11 +42,7 @@ def main():
     logging.debug("Starting asyncore")
     flagserver.FlagServer(args.listen, args.port, dbconnection, args.secret,
                           conteststart, contestend, flagvalidity, tickduration)
-    try:
-        import systemd.daemon
-        systemd.daemon.notify("READY=1")
-    except ImportError:
-        logging.warning("Missing systemd module")
+    daemon.notify("READY=1")
 
     asyncore.loop()
 
