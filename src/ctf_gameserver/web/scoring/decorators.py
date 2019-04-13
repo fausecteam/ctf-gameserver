@@ -16,7 +16,7 @@ def registration_open_required(view):
 
     @wraps(view)
     def func(request, *args, **kwargs):
-        if not GameControl.objects.get().registration_open:
+        if not GameControl.get_instance().registration_open:
             messages.error(request, _('Sorry, registration is currently closed.'))
             return redirect(settings.HOME_URL)
 
@@ -33,7 +33,7 @@ def competition_started_required(view):
 
     @wraps(view)
     def func(request, *args, **kwargs):
-        game_control = GameControl.objects.get()
+        game_control = GameControl.get_instance()
 
         if not game_control.competition_running() and not game_control.competition_over():
             messages.error(request, _('Sorry, the scoreboard is not available yet.'))

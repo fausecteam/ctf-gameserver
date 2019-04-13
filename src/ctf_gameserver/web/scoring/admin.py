@@ -86,5 +86,5 @@ class GameControlAdmin(admin.ModelAdmin):
         return False
 
     def changelist_view(self, extra_context=None):    # pylint: disable=arguments-differ
-        game_control = models.GameControl.objects.get()
+        game_control = models.GameControl.get_instance()
         return redirect('admin:scoring_gamecontrol_change', game_control.pk, permanent=True)

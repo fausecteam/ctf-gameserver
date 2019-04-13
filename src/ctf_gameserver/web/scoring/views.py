@@ -8,7 +8,7 @@ from .decorators import competition_started_required
 @competition_started_required
 def scoreboard(request):
 
-    game_control = models.GameControl.objects.get()
+    game_control = models.GameControl.get_instance()
 
     if game_control.competition_over():
         to_tick = game_control.current_tick
@@ -32,7 +32,7 @@ def scoreboard_json(_):
     see https://ctftime.org/json-scoreboard-feed.
     """
 
-    game_control = models.GameControl.objects.get()
+    game_control = models.GameControl.get_instance()
 
     if not game_control.competition_running() and not game_control.competition_over():
         return JsonResponse({'error': 'Scoreboard is not available yet'}, status=404)
@@ -59,7 +59,7 @@ def scoreboard_json(_):
 @competition_started_required
 def service_status(request):
 
-    game_control = models.GameControl.objects.get()
+    game_control = models.GameControl.get_instance()
     to_tick = game_control.current_tick
     from_tick = to_tick - 4
 

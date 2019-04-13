@@ -49,6 +49,7 @@ class Flatpage(models.Model):
         def get_queryset(self):
             return super().get_queryset().filter(category=None).exclude(title='')
 
+    # The first Manager in a class is used as default
     objects = models.Manager()
     # QuerySet that only returns Flatpages without a category, but not the home page
     objects_without_category = ObjectsWithoutCategoryManager()

@@ -38,6 +38,7 @@ class Team(models.Model):
         def get_queryset(self):
             return super().get_queryset().filter(nop_team=False)
 
+    # The first Manager in a class is used as default
     objects = models.Manager()
     # QuerySet that only returns Teams whose associated user object is not marked as inactive
     active_objects = ActiveObjectsManager()

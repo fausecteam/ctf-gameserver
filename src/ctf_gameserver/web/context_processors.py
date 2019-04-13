@@ -18,7 +18,7 @@ def competition_status(_):
     and whether registration is open) to the context.
     """
 
-    game_control = scoring_models.GameControl.objects.get()
+    game_control = scoring_models.GameControl.get_instance()
 
     return {
         'competition_running': game_control.competition_running(),
