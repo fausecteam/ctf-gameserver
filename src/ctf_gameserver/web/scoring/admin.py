@@ -6,7 +6,10 @@ from ctf_gameserver.web.admin import admin_site
 from . import models, forms
 
 
-admin_site.register(models.Service)
+@admin.register(models.Service, site=admin_site)
+class ServiceAdmin(admin.ModelAdmin):
+
+    prepopulated_fields = {'slug': ('name',)}
 
 
 @admin.register(models.Flag, site=admin_site)
@@ -28,11 +31,11 @@ class CaptureAdmin(admin.ModelAdmin):
         parameter_name = 'service'
 
         def lookups(self, request, model_admin):
-            return models.Service.objects.values_list('pk', 'name')
+            return models.Service.objects.values_list('slug', 'name')
 
         def queryset(self, request, queryset):
             if self.value():
-                return queryset.filter(flag__service__pk=self.value())
+                return queryset.filter(flag__service__slug=self.value())
             else:
                 return queryset
 

@@ -90,14 +90,16 @@
     "model": "scoring.service",
     "pk": 1,
     "fields": {
-        "name": "Service 1"
+        "name": "Service 1",
+        "slug": "service1"
     }
 },
 {
     "model": "scoring.service",
     "pk": 2,
     "fields": {
-        "name": "Service 2"
+        "name": "Service 2",
+        "slug": "service2"
     }
 },
 {
