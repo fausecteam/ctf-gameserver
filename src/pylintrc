@@ -16,6 +16,8 @@ reports = no
 #     * "Method could be a function" messages
 #     * Messages about locally disabled messages
 disable = design, fixme, global-statement, missing-docstring, no-else-return, no-self-use, locally-disabled
+# Variable names which would generally be invalid, but are accepted anyway
+good-names = e, i, j, k, _
 
 [FORMAT]
 max-line-length = 109
