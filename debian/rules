@@ -10,6 +10,11 @@ override_dh_auto_build:
 override_dh_auto_test:
 	:
 
+override_dh_fixperms:
+	dh_fixperms
+	# These may contain passwords
+	chmod 0600 debian/ctf-gameserver/etc/ctf-gameserver/*.conf
+
 # If dh-systemd is installed, it tries to enable the services even without being enabled above
 override_dh_systemd_enable:
 	:

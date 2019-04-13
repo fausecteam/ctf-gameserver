@@ -1,12 +1,34 @@
 [Unit]
-Description=FAUST-CTF: run game tick
-Wants=postgresql.service
+Description=CTF Gameserver Controller
 After=postgresql.service
 Before=ctf-scoring.service
 Wants=ctf-scoring.service
 
 [Service]
-Type=oneshot
+Type=notify
+DynamicUser=yes
+# Python breaks without HOME environment variable and with `DynamicUser`
+Environment=HOME=/tmp
 ExecStart=/usr/bin/ctf-controller @/etc/ctf-gameserver/controller.conf
-User=nobody
-Group=nogroup
+Restart=on-failure
+
+# Security options
+CapabilityBoundingSet=
+# REVISIT: Enable after Debian Stretch
+#LockPersonality=yes
+MemoryDenyWriteExecute=yes
+NoNewPrivileges=yes
+PrivateDevices=yes
+PrivateTmp=yes
+PrivateUsers=yes
+ProtectControlGroups=yes
+ProtectHome=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectSystem=strict
+RestrictNamespaces=yes
+RestrictRealtime=yes
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target

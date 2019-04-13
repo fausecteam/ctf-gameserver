@@ -5,7 +5,6 @@ conf/controller/controller.conf etc/ctf-gameserver
 conf/controller/flagid.conf etc/ctf-gameserver
 conf/controller/scoring.conf etc/ctf-gameserver
 conf/controller/ctf-controller.service lib/systemd/system
-conf/controller/ctf-controller.timer lib/systemd/system
 conf/controller/ctf-scoring.service lib/systemd/system
 
 conf/submission/submission.conf etc/ctf-gameserver
