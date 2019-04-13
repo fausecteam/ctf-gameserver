@@ -1,0 +1,112 @@
+{% load static %}
+{% load i18n %}
+
+<!DOCTYPE html>
+
+<html lang="{{ LANGUAGE_CODE }}" itemscope="itemscope" itemtype="http://schema.org/WebPage"
+ prefix="og: http://ogp.me/ns#">
+    <head>
+        <meta charset="utf-8" />
+
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+        <link rel="stylesheet" href="{% static 'ext/bootstrap/css/bootstrap.min.css' %}" />
+        <link rel="stylesheet" href="{% static 'ext/bootstrap/css/bootstrap-theme.min.css' %}" />
+        <link rel="stylesheet" href="{% static 'style.css' %}" />
+
+        <!-- Load the scripts asynchronously in the right order -->
+        <script src="{% static 'ext/jquery.min.js' %}" defer="defer"></script>
+        <script src="{% static 'ext/bootstrap/js/bootstrap.min.js' %}" defer="defer"></script>
+
+        <title itemprop="name">{% block title %}{% endblock %} | {{ COMPETITION_NAME }}</title>
+
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="{{ COMPETITION_NAME }}" />
+    </head>
+
+
+    <body>
+        <nav class="navbar navbar-static-top navbar-inverse">
+            <div class="container">
+                <!-- "Hamburger menu" for small screens -->
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#main-menu">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+
+                    <a class="navbar-brand" href="{{ HOME_URL }}">{{ COMPETITION_NAME }}</a>
+                </div>
+
+                <div class="collapse navbar-collapse" id="main-menu">
+                    <ul class="nav navbar-nav">
+                        {% for category in all_categories %}
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">
+                                {{ category.title }} <span class="caret"></span>
+                            </a>
+
+                            <ul class="dropdown-menu">
+                                {% for page in category.flatpage_set.all %}
+                                <li><a href="{{ page.get_absolute_url }}">{{ page.title }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </li>
+                        {% endfor %}
+
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">
+                                {% trans 'Competition' %} <span class="caret"></span>
+                            </a>
+
+                            <ul class="dropdown-menu">
+                                <li><a href="{% url 'team_list' %}">{% trans 'Registered teams' %}</a></li>
+                                {% if competition_running or competition_over %}
+                                <li><a href="{% url 'scoreboard' %}">{% trans 'Scoreboard' %}</a></li>
+                                <li><a href="{% url 'service_status' %}">
+                                    {% trans 'Service status' %}
+                                </a></li>
+                                {% endif %}
+                            </ul>
+                        </li>
+
+                        {% for page in pages_without_category %}
+                        <li><a href="{{ page.get_absolute_url }}">{{ page.title }}</a></li>
+                        {% endfor %}
+                    </ul>
+
+                    <ul class="nav navbar-nav navbar-right">
+                        {% if not user.is_authenticated %}
+                        {% if registration_open %}
+                        <li><a href="{% url 'register' %}">{% trans 'Register' %}</a></li>
+                        {% endif %}
+                        <li><a href="{% url 'login' %}">{% trans 'Login' %}</a></li>
+                        {% else %}
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">
+                                {{ user.username }} <span class="caret"></span>
+                            </a>
+
+                            <ul class="dropdown-menu">
+                                {% if registration_open %}
+                                <li><a href="{% url 'edit_team' %}">{% trans 'Edit' %}</a></li>
+                                {% endif %}
+                                {% if user.is_staff %}
+                                <li><a href="{% url 'admin:index' %}">{% trans 'Administration' %}</a></li>
+                                <li><a href="{% url 'mail_teams' %}">{% trans 'Email teams' %}</a></li>
+                                {% endif %}
+                                <li><a href="{% url 'logout' %}">{% trans 'Logout' %}</a></li>
+                            </ul>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        {% block container %}
+        {% endblock %}
+    </body>
+</html>
