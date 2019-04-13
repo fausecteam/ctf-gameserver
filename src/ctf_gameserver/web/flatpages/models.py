@@ -11,7 +11,7 @@ class Category(models.Model):
 
     title = models.CharField(max_length=100)
     ordering = models.PositiveSmallIntegerField(default=10)
-    slug = models.CharField(max_length=100)
+    slug = models.SlugField(max_length=100, unique=True)
 
     class Meta:
         ordering = ('ordering', 'title')
@@ -33,7 +33,7 @@ class Flatpage(models.Model):
     content = models.TextField()
     category = models.ForeignKey(Category, null=True, blank=True, on_delete=models.PROTECT)
     ordering = models.PositiveSmallIntegerField(default=10)
-    slug = models.CharField(max_length=100)
+    slug = models.SlugField(max_length=100)
 
     class Meta:
         # Slug is usually (automatically) generated from the title, add constraints for both because of
