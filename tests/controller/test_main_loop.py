@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 from ctf_gameserver.lib.database import transaction_cursor
 from ctf_gameserver.lib.test_util import DatabaseTestCase
-from ctf_gameserver.controller import controller
+from ctf_gameserver.controller import controller, database
 
 
 class MainLoopTest(DatabaseTestCase):
@@ -199,3 +199,31 @@ class MainLoopTest(DatabaseTestCase):
             cursor.execute('SELECT COUNT(*) FROM scoring_flag WHERE tick=480')
             tick_flag_count = cursor.fetchone()[0]
         self.assertEqual(tick_flag_count, 6)
+
+
+class DatabaseTest(DatabaseTestCase):
+    """
+    Tests for the `ctf_gameserver.controller.database` module. Only tests special cases, the general
+    functionality is covered by MainLoopTest.
+    """
+
+    fixtures = ['tests/controller/fixtures/main_loop.json']
+
+    def test_prohibit_changes(self):
+        with transaction_cursor(self.connection) as cursor:
+            cursor.execute('SELECT * FROM scoring_gamecontrol ORDER BY id')
+            old_gamecontrol = cursor.fetchall()
+            cursor.execute('SELECT * FROM scoring_flag ORDER BY id')
+            old_flag = cursor.fetchall()
+
+        database.get_control_info(self.connection, prohibit_changes=True)
+        database.increase_tick(self.connection, prohibit_changes=True)
+
+        with transaction_cursor(self.connection) as cursor:
+            cursor.execute('SELECT * FROM scoring_gamecontrol ORDER BY id')
+            new_gamecontrol = cursor.fetchall()
+            cursor.execute('SELECT * FROM scoring_flag ORDER BY id')
+            new_flag = cursor.fetchall()
+
+        self.assertEqual(old_gamecontrol, new_gamecontrol)
+        self.assertEqual(old_flag, new_flag)

@@ -4,10 +4,12 @@ import time
 import os
 
 import psycopg2
+from psycopg2 import errorcodes as postgres_errors
 
 from ctf_gameserver.lib import daemon
 from ctf_gameserver.lib.args import get_arg_parser_with_db
 from ctf_gameserver.lib.database import transaction_cursor
+from ctf_gameserver.lib.exceptions import DBDataError
 
 from . import database
 
@@ -27,8 +29,8 @@ def main():
     try:
         db_conn = psycopg2.connect(host=args.dbhost, database=args.dbname, user=args.dbuser,
                                    password=args.dbpassword)
-    except psycopg2.OperationalError:
-        logging.exception('Could not establish database connection:')
+    except psycopg2.OperationalError as e:
+        logging.error('Could not establish database connection: %s', e)
         return os.EX_UNAVAILABLE
     logging.info('Established database connection')
 
@@ -36,7 +38,20 @@ def main():
     with transaction_cursor(db_conn) as cursor:
         cursor.execute('SET TIME ZONE "UTC"')
 
-    # TODO: Check grants
+    # Check database grants
+    try:
+        database.get_control_info(db_conn, prohibit_changes=True)
+        database.increase_tick(db_conn, prohibit_changes=True)
+    except psycopg2.ProgrammingError as e:
+        if e.pgcode == postgres_errors.INSUFFICIENT_PRIVILEGE:
+            # Log full exception because only the backtrace will tell which kind of permission is missing
+            logging.exception('Missing database permissions:')
+            return os.EX_NOPERM
+        else:
+            raise
+    except DBDataError as e:
+        logging.error('Invalid database state: %s', e)
+        return os.EX_DATAERR
 
     daemon.notify('READY=1')
 

@@ -3,12 +3,12 @@ from ctf_gameserver.lib.date_time import ensure_utc_aware
 from ctf_gameserver.lib.exceptions import DBDataError
 
 
-def get_control_info(db_conn):
+def get_control_info(db_conn, prohibit_changes=False):
     """
     Returns a dictionary contatining relevant information about the competion, as stored in the database.
     """
 
-    with transaction_cursor(db_conn) as cursor:
+    with transaction_cursor(db_conn, prohibit_changes) as cursor:
         cursor.execute('SELECT start, "end", tick_duration, current_tick FROM scoring_gamecontrol')
         result = cursor.fetchone()
 
@@ -24,9 +24,9 @@ def get_control_info(db_conn):
     }
 
 
-def increase_tick(db_conn):
+def increase_tick(db_conn, prohibit_changes=False):
 
-    with transaction_cursor(db_conn) as cursor:
+    with transaction_cursor(db_conn, prohibit_changes) as cursor:
         cursor.execute('UPDATE scoring_gamecontrol SET current_tick = current_tick + 1')
         # Create flags for every service and team in the new tick
         cursor.execute('INSERT INTO scoring_flag (service_id, protecting_team_id, tick)'
