@@ -9,6 +9,8 @@
 # and related or neighboring rights to the source code in this file.
 # http://creativecommons.org/publicdomain/zero/1.0/
 
+# REVISIT: Use SHA3 from hashlib when we have Python >= 3.6
+
 import math
 
 class KeccakError(Exception):
