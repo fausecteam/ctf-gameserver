@@ -31,18 +31,17 @@ INSTALLED_APPS = (
 )
 
 # Ordering of the middlewares is important, see
-# https://docs.djangoproject.com/en/1.8/ref/middleware/#middleware-ordering
-MIDDLEWARE_CLASSES = (
+# https://docs.djangoproject.com/en/1.11/ref/middleware/#middleware-ordering
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.security.SecurityMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'ctf_gameserver.web.middleware.CSPMiddlware'
-)
+    'ctf_gameserver.web.middleware.csp_middleware'
+]
 
 TEMPLATES = [{
     'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -97,5 +96,6 @@ SHORT_DATETIME_FORMAT = SHORT_DATE_FORMAT + ' ' + TIME_FORMAT
 
 PASSWORD_RESET_TIMEOUT_DAYS = 1
 CSRF_COOKIE_HTTPONLY = True
-X_FRAME_OPTIONS = 'DENY'
+SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
+X_FRAME_OPTIONS = 'DENY'

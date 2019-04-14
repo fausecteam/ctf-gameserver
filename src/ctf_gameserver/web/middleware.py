@@ -1,13 +1,15 @@
 from django.conf import settings
 
 
-class CSPMiddlware:
+def csp_middleware(get_response):
     """
     Middleware which adds a 'Content Security Policy' header according to the 'CSP_POLICIES' setting to every
     HTTP response.
     """
 
-    def process_response(self, _, response):
+    def middleware(request):
+        response = get_response(request)
+
         if settings.CSP_POLICIES:
             policies = []
 
@@ -17,3 +19,5 @@ class CSPMiddlware:
             response['Content-Security-Policy'] = '; '.join(policies)
 
         return response
+
+    return middleware
