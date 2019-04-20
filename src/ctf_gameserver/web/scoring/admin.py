@@ -88,6 +88,6 @@ class GameControlAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, _=None):
         return False
 
-    def changelist_view(self, extra_context=None):    # pylint: disable=arguments-differ
+    def changelist_view(self, request, _=None):
         game_control = models.GameControl.get_instance()
         return redirect('admin:scoring_gamecontrol_change', game_control.pk, permanent=True)
