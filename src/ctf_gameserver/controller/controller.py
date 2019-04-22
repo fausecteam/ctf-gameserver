@@ -40,7 +40,11 @@ def main():
 
     # Check database grants
     try:
-        database.get_control_info(db_conn, prohibit_changes=True)
+        try:
+            database.get_control_info(db_conn, prohibit_changes=True)
+        except DBDataError as e:
+            logging.warning('Invalid database state: %s', e)
+
         database.increase_tick(db_conn, prohibit_changes=True)
     except psycopg2.ProgrammingError as e:
         if e.pgcode == postgres_errors.INSUFFICIENT_PRIVILEGE:
@@ -49,9 +53,6 @@ def main():
             return os.EX_NOPERM
         else:
             raise
-    except DBDataError as e:
-        logging.error('Invalid database state: %s', e)
-        return os.EX_DATAERR
 
     daemon.notify('READY=1')
 
@@ -65,7 +66,12 @@ def main_loop_step(db_conn, nonstop):
         logging.info('Sleeping for %d seconds', duration)
         time.sleep(duration)
 
-    control_info = database.get_control_info(db_conn)
+    try:
+        control_info = database.get_control_info(db_conn)
+    except DBDataError as e:
+        logging.warning('Invalid database state: %s', e)
+        sleep(60)
+        return
 
     # These fields are allowed to be NULL
     if control_info['start'] is None or control_info['end'] is None:
