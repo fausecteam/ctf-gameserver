@@ -4,7 +4,7 @@
 	dh $@ --with python3 --buildsystem=pybuild
 
 override_dh_auto_build:
-	make ext
+	make build
 	dh_auto_build
 # Skip tests, we run them separately in CI
 override_dh_auto_test:
