@@ -1,15 +1,14 @@
-import argparse
+import configargparse
 import shlex
 
 
 def get_arg_parser_with_db(description):
     """
     Returns an ArgumentParser pre-initalized with common arguments for configuring logging and the main
-    database connection. It also has improved behavior when reading arguments from config files.
+    database connection. It also supports reading arguments from environment variables.
     """
 
-    parser = argparse.ArgumentParser(description=description, fromfile_prefix_chars='@')
-    parser.convert_arg_line_to_args = convert_arg_line_to_args
+    parser = configargparse.ArgumentParser(description=description, auto_env_var_prefix='ctf_')
 
     parser.add_argument('--loglevel', default='WARNING', type=str,
                         choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'], help='Log level')
@@ -22,12 +21,3 @@ def get_arg_parser_with_db(description):
     db_group.add_argument('--dbpassword', type=str, help='Password for database access if needed')
 
     return parser
-
-
-def convert_arg_line_to_args(arg_line):
-    """
-    Argparse helper for splitting input from config.
-    Allows comment lines in configfiles and allows both argument and value on the same line.
-    """
-
-    return shlex.split(arg_line, comments=True)

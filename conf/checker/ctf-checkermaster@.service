@@ -4,11 +4,13 @@ After=network.target postgresql.service
 
 [Service]
 Type=notify
-ExecStart=/usr/bin/ctf-checkermaster @/etc/ctf-gameserver/checkermaster.conf @/etc/ctf-gameserver/checker/%i.conf
+ExecStart=/usr/bin/ctf-checkermaster
 ExecStop=/bin/kill -s usr1 $MAINPID
 WatchdogSec=20
 Restart=on-failure
 TimeoutStopSec=65
+EnvironmentFile=/etc/ctf-gameserver/checkermaster.env
+EnvironmentFile=-/etc/ctf-gameserver/checker/%i.env
 Environment=PYTHONPATH=/etc/ctf-gameserver/checker/modules/
 User=nobody
 Group=nogroup

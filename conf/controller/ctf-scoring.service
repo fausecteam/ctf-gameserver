@@ -5,6 +5,7 @@ After=postgresql.service
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/ctf-scoring @/etc/ctf-gameserver/scoring.conf
+ExecStart=/usr/bin/ctf-scoring
+EnvironmentFile=/etc/ctf-gameserver/scoring.env
 User=nobody
 Group=nogroup

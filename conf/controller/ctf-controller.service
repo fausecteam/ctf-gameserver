@@ -9,7 +9,8 @@ Type=notify
 DynamicUser=yes
 # Python breaks without HOME environment variable and with `DynamicUser`
 Environment=HOME=/tmp
-ExecStart=/usr/bin/ctf-controller @/etc/ctf-gameserver/controller.conf
+EnvironmentFile=/etc/ctf-gameserver/controller.env
+ExecStart=/usr/bin/ctf-controller
 Restart=on-failure
 
 # Security options

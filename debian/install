@@ -1,11 +1,11 @@
-conf/checker/checkermaster.conf etc/ctf-gameserver
+conf/checker/checkermaster.env etc/ctf-gameserver
 conf/checker/ctf-checkermaster@.service lib/systemd/system
 
-conf/controller/controller.conf etc/ctf-gameserver
-conf/controller/flagid.conf etc/ctf-gameserver
-conf/controller/scoring.conf etc/ctf-gameserver
+conf/controller/controller.env etc/ctf-gameserver
+conf/controller/flagid.env etc/ctf-gameserver
+conf/controller/scoring.env etc/ctf-gameserver
 conf/controller/ctf-controller.service lib/systemd/system
 conf/controller/ctf-scoring.service lib/systemd/system
 
-conf/submission/submission.conf etc/ctf-gameserver
+conf/submission/submission.env etc/ctf-gameserver
 conf/submission/ctf-submission@.service lib/systemd/system
