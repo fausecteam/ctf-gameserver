@@ -104,6 +104,7 @@ def main_loop_step(db_conn, nonstop):
     if get_sleep_seconds(control_info) <= 0:
         logging.info('After tick %d, increasing tick to the next one', control_info['current_tick'])
         database.increase_tick(db_conn)
+        database.update_scoring(db_conn)
 
 
 def get_sleep_seconds(control_info, now=None):

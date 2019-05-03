@@ -5,20 +5,21 @@ from ctf_gameserver.lib.test_util import DatabaseTestCase
 from ctf_gameserver.controller import controller, database
 
 
+@patch('ctf_gameserver.controller.database.update_scoring')
 class MainLoopTest(DatabaseTestCase):
 
     fixtures = ['tests/controller/fixtures/main_loop.json']
 
     @patch('time.sleep')
     @patch('logging.warning')
-    def test_null(self, warning_mock, sleep_mock):
+    def test_null(self, warning_mock, sleep_mock, _):
         controller.main_loop_step(self.connection, False)
 
         warning_mock.assert_called_with('Competition start and end time must be configured in the database')
         sleep_mock.assert_called_once_with(60)
 
     @patch('time.sleep')
-    def test_before_game(self, sleep_mock):
+    def test_before_game(self, sleep_mock, _):
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET start = datetime("now", "+1 hour"), '
                            '                               end = datetime("now", "+1 day")')
@@ -38,7 +39,7 @@ class MainLoopTest(DatabaseTestCase):
         self.assertEqual(total_flag_count, 0)
 
     @patch('time.sleep')
-    def test_first_tick(self, sleep_mock):
+    def test_first_tick(self, sleep_mock, _):
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET start = datetime("now"), '
                            '                               end = datetime("now", "+1 day")')
@@ -72,7 +73,7 @@ class MainLoopTest(DatabaseTestCase):
         self.assertEqual(tick_flag_count, 6)
 
     @patch('time.sleep')
-    def test_next_tick_undue(self, sleep_mock):
+    def test_next_tick_undue(self, sleep_mock, _):
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET start = datetime("now", "-1030 seconds"), '
                            '                               end = datetime("now", "+85370 seconds"), '
@@ -96,7 +97,7 @@ class MainLoopTest(DatabaseTestCase):
         self.assertEqual(tick_flag_count, 0)
 
     @patch('time.sleep')
-    def test_next_tick_overdue(self, sleep_mock):
+    def test_next_tick_overdue(self, sleep_mock, _):
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET start = datetime("now", "-19 minutes"), '
                            '                               end = datetime("now", "+1421 minutes"), '
@@ -117,7 +118,7 @@ class MainLoopTest(DatabaseTestCase):
         self.assertEqual(tick_flag_count, 6)
 
     @patch('time.sleep')
-    def test_last_tick(self, sleep_mock):
+    def test_last_tick(self, sleep_mock, _):
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET start = datetime("now", "-1 day"), '
                            '                               end = datetime("now", "+3 minutes"), '
@@ -137,7 +138,7 @@ class MainLoopTest(DatabaseTestCase):
         self.assertEqual(tick_flag_count, 6)
 
     @patch('time.sleep')
-    def test_shortly_after_game(self, sleep_mock):
+    def test_shortly_after_game(self, sleep_mock, _):
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET start = datetime("now", "-1441 minutes"), '
                            '                               end = datetime("now", "-1 minutes"), '
@@ -159,7 +160,7 @@ class MainLoopTest(DatabaseTestCase):
         self.assertEqual(total_flag_count, 0)
 
     @patch('time.sleep')
-    def test_long_after_game(self, sleep_mock):
+    def test_long_after_game(self, sleep_mock, _):
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET start = datetime("now", "-1465 minutes"), '
                            '                               end = datetime("now", "-25 minutes"), '
@@ -181,7 +182,7 @@ class MainLoopTest(DatabaseTestCase):
         self.assertEqual(total_flag_count, 0)
 
     @patch('time.sleep')
-    def test_after_game_nonstop(self, sleep_mock):
+    def test_after_game_nonstop(self, sleep_mock, _):
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET start = datetime("now", "-1 day"), '
                            '                               end = datetime("now"), '
@@ -201,6 +202,7 @@ class MainLoopTest(DatabaseTestCase):
         self.assertEqual(tick_flag_count, 6)
 
 
+@patch('ctf_gameserver.controller.database.update_scoring')
 class DatabaseTest(DatabaseTestCase):
     """
     Tests for the `ctf_gameserver.controller.database` module. Only tests special cases, the general
@@ -209,7 +211,7 @@ class DatabaseTest(DatabaseTestCase):
 
     fixtures = ['tests/controller/fixtures/main_loop.json']
 
-    def test_prohibit_changes(self):
+    def test_prohibit_changes(self, _):
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('SELECT * FROM scoring_gamecontrol ORDER BY id')
             old_gamecontrol = cursor.fetchall()

@@ -32,3 +32,18 @@ def increase_tick(db_conn, prohibit_changes=False):
         cursor.execute('INSERT INTO scoring_flag (service_id, protecting_team_id, tick)'
                        '    SELECT service.id, user_id, current_tick'
                        '    FROM scoring_service service, registration_team, scoring_gamecontrol')
+
+
+def update_scoring(db_conn):
+
+    with transaction_cursor(db_conn) as cursor:
+        cursor.execute('UPDATE scoring_flag as outerflag'
+                       '    SET bonus = 1 / ('
+                       '        SELECT greatest(1, count(*))'
+                       '        FROM scoring_flag'
+                       '        LEFT OUTER JOIN scoring_capture ON scoring_capture.flag_id = scoring_flag.id'
+                       '        WHERE scoring_capture.flag_id = outerflag.id)'
+                       '    FROM scoring_gamecontrol'
+                       '    WHERE outerflag.tick + scoring_gamecontrol.valid_ticks < '
+                       '        scoring_gamecontrol.current_tick AND outerflag.bonus IS NULL')
+        cursor.execute('REFRESH MATERIALIZED VIEW "scoring_scoreboard"')

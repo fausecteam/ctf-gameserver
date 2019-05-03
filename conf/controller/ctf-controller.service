@@ -1,8 +1,6 @@
 [Unit]
 Description=CTF Gameserver Controller
 After=postgresql.service
-Before=ctf-scoring.service
-Wants=ctf-scoring.service
 
 [Service]
 Type=notify

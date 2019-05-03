@@ -35,7 +35,6 @@ setup(
         'scripts/checker/ctf-testrunner',
         'scripts/controller/ctf-controller',
         'scripts/controller/ctf-flagid',
-        'scripts/controller/ctf-scoring',
         'scripts/submission/ctf-submission'
     ],
     package_data = {
