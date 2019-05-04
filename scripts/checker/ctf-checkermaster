@@ -290,10 +290,10 @@ def main():
     logging.getLogger().setLevel(numeric_level)
 
     logging.debug("connecting to game database")
-    gamedb = psycopg2.connect(host=args.gamedbhost,
-                              database=args.gamedbname,
-                              user=args.gamedbuser,
-                              password=args.gamedbpassword)
+    gamedb = psycopg2.connect(host=args.dbhost,
+                              database=args.dbname,
+                              user=args.dbuser,
+                              password=args.dbpassword)
 
     logging.debug("connecting to cache database")
     cachedb = psycopg2.connect(host=args.cachedbhost,
