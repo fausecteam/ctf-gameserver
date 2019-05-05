@@ -12,7 +12,7 @@ machine on that network. ctf-gameserver has been checked out and built
 
    createuser -P faustctf
    createdb -O faustctf faustctf
-   createdb -O faustctf checkercache
+   createdb -O faustctf checkerstate
 
 Website
 -------
@@ -56,12 +56,12 @@ submission service and even use iptables to do some loadbalancing. The
 submission server is using an event-based architecture and is
 single-threaded.
 
-The database for the checkercache needs to be set up manually and
+The database for the checkerstate needs to be set up manually and
 should contain exactly one table:
 
 .. code-block:: sql
 
-   CREATE TABLE checkercache (
+   CREATE TABLE checkerstate (
      team_id INTEGER,
      service_id INTEGER,
      identifier CHARACTER VARYING (128),

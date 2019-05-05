@@ -39,10 +39,10 @@ def do_store(line, dbconnection, service, team):
             data = psycopg2.Binary(base64.b64decode(line[2]))
 
             # TODO: think about proper on conflict replace
-            cursor.execute("""DELETE FROM checkercache
+            cursor.execute("""DELETE FROM checkerstate
                               WHERE service_id = %s AND team_id = %s AND identifier = %s""",
                            (service, team, ident))
-            cursor.execute("""INSERT INTO checkercache
+            cursor.execute("""INSERT INTO checkerstate
                                  (service_id,team_id,identifier,data)
                               VALUES
                                  (%s, %s, %s, %s)""",
@@ -53,7 +53,7 @@ def do_retrieve(line, dbconnection, service, team):
     with dbconnection:
         with dbconnection.cursor() as cursor:
             ident = line[1]
-            cursor.execute("""SELECT data FROM checkercache
+            cursor.execute("""SELECT data FROM checkerstate
                               WHERE team_id = %s
                                 AND service_id = %s
                                 AND identifier = %s""",
@@ -160,12 +160,12 @@ def run_checker(service, team, tick, checker, ippattern, loglevel, dbconnection,
     return result
 
 
-def get_fresh_jobs(gamedb, cachedb, args):
+def get_fresh_jobs(gamedb, statedb, args):
     global stopping
 
     daemon.notify("WATCHDOG=1")
     loop = asyncio.get_event_loop()
-    loop.call_later(args.refresh, get_fresh_jobs, gamedb, cachedb, args)
+    loop.call_later(args.refresh, get_fresh_jobs, gamedb, statedb, args)
 
     tasks = list(open_tasks.keys())
     for task in tasks:
@@ -247,7 +247,7 @@ def get_fresh_jobs(gamedb, cachedb, args):
             checker = args.checker
             ippattern = args.ippattern
             task = loop.create_task(run_checker(service, team, tick, checker, ippattern,
-                                                logging.getLogger().level, cachedb,
+                                                logging.getLogger().level, statedb,
                                                 base64.b64decode(args.secret), args.journald,
                                                 args.gelf_server))
             open_tasks[task] = service, team, tick, datetime.datetime.now()
@@ -268,14 +268,14 @@ def main():
     parser.add_argument('--ippattern', type=str, required=True,
                         help="python formatstring to build IP to connect to")
 
-    group = parser.add_argument_group('cachedb', 'Checker state database')
-    group.add_argument('--cachedbname', type=str, required=True,
+    group = parser.add_argument_group('statedb', 'Checker state database')
+    group.add_argument('--statedbname', type=str, required=True,
                        help='Name of the used database')
-    group.add_argument('--cachedbuser', type=str, required=True,
+    group.add_argument('--statedbuser', type=str, required=True,
                        help='username for database access')
-    group.add_argument('--cachedbpassword', type=str,
+    group.add_argument('--statedbpassword', type=str,
                        help='password for database access if needed')
-    group.add_argument('--cachedbhost', type=str,
+    group.add_argument('--statedbhost', type=str,
                        help='hostname of the database. If unspecified '
                             'ctf-submission will connect via default UNIX socket')
 
@@ -313,10 +313,10 @@ def main():
                               password=args.dbpassword)
 
     logging.debug("connecting to cache database")
-    cachedb = psycopg2.connect(host=args.cachedbhost,
-                               database=args.cachedbname,
-                               user=args.cachedbuser,
-                               password=args.cachedbpassword)
+    statedb = psycopg2.connect(host=args.statedbhost,
+                               database=args.statedbname,
+                               user=args.statedbuser,
+                               password=args.statedbpassword)
 
     with gamedb:
         with gamedb.cursor() as cursor:
@@ -331,7 +331,7 @@ def main():
     signal.signal(signal.SIGUSR1, handle_stop)
 
     loop = asyncio.get_event_loop()
-    loop.call_soon(get_fresh_jobs, gamedb, cachedb, args)
+    loop.call_soon(get_fresh_jobs, gamedb, statedb, args)
 
     daemon.notify("READY=1")
 

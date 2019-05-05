@@ -43,7 +43,7 @@ def update_flagids(db, fname):
             for row in rows:
                 service_names[row.id] = row.name
         with db.cursor(cursor_factory=psycopg2.extras.NamedTupleCursor) as cursor:
-            cursor.execute("SELECT service_id, format('10.66.%s.2', team_id) as team_id, data, identifier FROM checkercache WHERE identifier LIKE 'flagid_%'")
+            cursor.execute("SELECT service_id, format('10.66.%s.2', team_id) as team_id, data, identifier FROM checkerstate WHERE identifier LIKE 'flagid_%'")
             rows = cursor.fetchall()
             for row in rows:
                 process_row(row, service_names, result)

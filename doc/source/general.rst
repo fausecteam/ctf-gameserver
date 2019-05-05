@@ -10,7 +10,7 @@ can be (somewhat) restricted.
 Checkermaster
 ^^^^^^^^^^^^^
 
- - full access on ``checkercache``
+ - full access on ``checkerstate``
  - read on ``scoring_gamecontrol``
  - write on ``scoring_statuscheck``
  - write on ``scoring_statuscheck_id_seq``
