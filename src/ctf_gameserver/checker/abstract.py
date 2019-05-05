@@ -27,7 +27,7 @@ class AbstractChecker(metaclass=ABCMeta):
         self._service = service
         self._tickduration = 300
         self._lookback = 5
-        self._logger = logging.getLogger("service%02d-team%03d-tick%03d" % (service, team, tick))
+        self._logger = logging.getLogger(self.__class__.__name__)
         self._checker_action = None
 
     @property
@@ -39,7 +39,7 @@ class AbstractChecker(metaclass=ABCMeta):
     def logger(self):
         """Accessor for the logger to use"""
         if self._checker_action:
-            extra = {'CHECKER_ACTION' : self._checker_action}
+            extra = {'checker_action' : self._checker_action}
             return logging.LoggerAdapter(self._logger, extra)
         return self._logger
 
