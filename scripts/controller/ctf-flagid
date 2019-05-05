@@ -23,23 +23,23 @@ SERVICES = {
 
 
 def process_row(row, result):
-    service_id = SERVICES[row.service_id]
+    service = SERVICES[row.service_id]
 
-    if not service_id in result:
-        result[service_id] = dict()
+    if not service in result:
+        result[service] = dict()
 
-    if not row.team_id in result[service_id]:
-        result[service_id][row.team_id] = dict()
+    if not row.team_id in result[service]:
+        result[service][row.team_id] = dict()
 
-    result[service_id][row.team_id][row.identifier] = row.data.tobytes().decode()
+    result[service][row.team_id][row.identifier] = row.data.tobytes().decode()
 
 
 def clean_dict(result):
     result = result.copy()
-    for service_id in result:
-        for team_id in result[service_id]:
-            last5 = sorted(result[service_id][team_id].items())[-5:]
-            result[service_id][team_id] = [ i[1] for i in last5 ]
+    for service in result:
+        for team_id in result[service]:
+            last5 = sorted(result[service][team_id].items())[-5:]
+            result[service][team_id] = [ i[1] for i in last5 ]
 
     return result
 
