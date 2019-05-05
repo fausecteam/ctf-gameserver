@@ -65,6 +65,21 @@ def run(args):
     sys.stdout.flush()
 
 
+class CheckMetadataFilter(logging.Filter):
+
+    def __init__(self, checker, team, tick):
+        super().__init__()
+        self.checker = checker
+        self.team = team
+        self.tick = tick
+
+    def filter(self, record):
+        record.checker = self.checker
+        record.team = self.team
+        record.tick = self.tick
+        return True
+
+
 def main():
     logging.basicConfig()
     parser = argparse.ArgumentParser(description="CTF checker runner")
@@ -78,20 +93,42 @@ def main():
     parser.add_argument('-v', '--loglevel', default='WARNING', type=str,
                         choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
                         help='Loglevel')
+    parser.add_argument('--journald', action='store_true')
+    parser.add_argument('--gelf-server')
 
     args = parser.parse_args()
 
     numeric_level = getattr(logging, args.loglevel.upper())
     logging.getLogger().setLevel(numeric_level)
 
-    try:
-        from systemd.journal import JournalHandler
+    if args.journald:
+        try:
+            from systemd.journal import JournalHandler
+        except ImportError:
+            logging.error('systemd module is required for journald logging')
+            sys.exit(1)
+
         identifier = "%s-team%03d-tick%03d" % (args.checker, args.team, args.tick)
         logging.root.addHandler(JournalHandler(SYSLOG_IDENTIFIER=identifier,
                                                CTF_TEAM_ID=args.team,
                                                CTF_TICK=args.tick))
-    except ImportError:
-        logging.warning("Missing systemd module")
+    if args.gelf_server is not None:
+        try:
+            import graypy
+        except ImportError:
+            logging.error('graypy module is required for GELF logging')
+            sys.exit(1)
+
+        try:
+            gelf_host, gelf_port = args.gelf_server.rsplit(':', 1)
+            gelf_port = int(gelf_port)
+        except ValueError:
+            logging.error('GELF server needs to be specified as "<host>:<port>"')
+            sys.exit(1)
+
+        gelf_handler = graypy.GELFHandler(gelf_host, gelf_port)
+        gelf_handler.addFilter(CheckMetadataFilter(args.checker, args.team, args.tick))
+        logging.getLogger().addHandler(gelf_handler)
 
     run(args)
 

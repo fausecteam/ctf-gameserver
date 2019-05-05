@@ -78,18 +78,28 @@ def do_flag(line, service, team, secret):
 
 
 @asyncio.coroutine
-def run_checker(service, team, tick, checker, ippattern, loglevel, dbconnection, secret):
+def run_checker(service, team, tick, checker, ippattern, loglevel, dbconnection, secret, journald_arg,
+                gelf_server_arg):
     logger = logging.getLogger("service%02d-team%03d-tick%03d" % (service, team, tick))
     logger.info("running checker")
     result = None
     subenv = dict(os.environ)
     subenv['CHECKER_CONTEST'] = ''
+
+    checkerslave_args = [
+        "--service", str(service),
+        "--team", str(team),
+        "--tick", str(tick),
+        "--loglevel", logging.getLevelName(loglevel),
+        "--ip", ippattern % team
+    ]
+    if journald_arg:
+        checkerslave_args.append('--journald')
+    if gelf_server_arg is not None:
+        checkerslave_args.extend(['--gelf-server', gelf_server_arg])
+
     process = yield from asyncio.create_subprocess_exec("ctf-checkerslave",
-                                                        "--service", str(service),
-                                                        "--team", str(team),
-                                                        "--tick", str(tick),
-                                                        "--loglevel", logging.getLevelName(loglevel),
-                                                        "--ip", ippattern % team,
+                                                        *checkerslave_args,
                                                         checker,
                                                         env=subenv,
                                                         stdout=asyncio.subprocess.PIPE,
@@ -238,7 +248,8 @@ def get_fresh_jobs(gamedb, cachedb, args):
             ippattern = args.ippattern
             task = loop.create_task(run_checker(service, team, tick, checker, ippattern,
                                                 logging.getLogger().level, cachedb,
-                                                base64.b64decode(args.secret)))
+                                                base64.b64decode(args.secret), args.journald,
+                                                args.gelf_server))
             open_tasks[task] = service, team, tick, datetime.datetime.now()
         logging.info("started %d (of %d possible) new jobs", len(jobs), new_tasks)
 
@@ -283,6 +294,12 @@ def main():
                        help="database id of the service")
     parser.add_argument('--secret', type=str, required=True,
                         help="base64 random string consistent with checkers")
+
+    group = parser.add_argument_group('logging', 'Checker script logging')
+    group.add_argument('--journald', action='store_true', help='Let checker scripts log to journald with an '
+                                                               'identifier per service, team and tick')
+    group.add_argument('--gelf-server', help='Let checker scripts log to the specified GELF (Graylog) '
+                                             'server ("<host>:<port>")')
 
     args = parser.parse_args()
 
