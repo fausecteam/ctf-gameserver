@@ -11,19 +11,8 @@ import psycopg2.extras
 from ctf_gameserver.lib.args import get_arg_parser_with_db
 
 
-SERVICES = {
-    1: "JODLGANG",
-    2: "Cryptocurrencies helpline",
-    3: "Diagon Alley",
-    4: "FAUST Coin",
-    5: "MtCamlX",
-    6: "RESTchain",
-    7: "The Tangle",
-}
-
-
-def process_row(row, result):
-    service = SERVICES[row.service_id]
+def process_row(row, service_names, result):
+    service = service_names[row.service_id]
 
     if not service in result:
         result[service] = dict()
@@ -45,13 +34,19 @@ def clean_dict(result):
 
 
 def update_flagids(db, fname):
+    service_names = dict()
     result = dict()
     with db:
+        with db.cursor(cursor_factory=psycopg2.extras.NamedTupleCursor) as cursor:
+            cursor.execute("SELECT id, name FROM scoring_service")
+            rows = cursor.fetchall()
+            for row in rows:
+                service_names[row.id] = row.name
         with db.cursor(cursor_factory=psycopg2.extras.NamedTupleCursor) as cursor:
             cursor.execute("SELECT service_id, format('10.66.%s.2', team_id) as team_id, data, identifier FROM checkercache WHERE identifier LIKE 'flagid_%'")
             rows = cursor.fetchall()
             for row in rows:
-                process_row(row, result)
+                process_row(row, service_names, result)
 
     result = clean_dict(result)
 
