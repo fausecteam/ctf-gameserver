@@ -291,7 +291,7 @@ def main():
     group.add_argument("--checker", type=str, required=True,
                        help="module:Class of the checker")
     group.add_argument("--service", type=str, required=True,
-                       help="database id of the service")
+                       help="name of the service")
     parser.add_argument('--secret', type=str, required=True,
                         help="base64 random string consistent with checkers")
 
