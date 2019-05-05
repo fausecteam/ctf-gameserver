@@ -33,15 +33,9 @@ def clean_dict(result):
     return result
 
 
-def update_flagids(db, fname):
-    service_names = dict()
+def update_flagids(db, service_names, fname):
     result = dict()
     with db:
-        with db.cursor(cursor_factory=psycopg2.extras.NamedTupleCursor) as cursor:
-            cursor.execute("SELECT id, name FROM scoring_service")
-            rows = cursor.fetchall()
-            for row in rows:
-                service_names[row.id] = row.name
         with db.cursor(cursor_factory=psycopg2.extras.NamedTupleCursor) as cursor:
             cursor.execute("SELECT service_id, format('10.66.%s.2', team_id) as team_id, data, identifier FROM checkerstate WHERE identifier LIKE 'flagid_%'")
             rows = cursor.fetchall()
@@ -61,6 +55,18 @@ def main():
     parser = get_arg_parser_with_db('CTF Gameserver flag ID helper')
     parser.add_argument('--output', type=str, required=True,
                         help="location where flagid file will be written to")
+
+    group = parser.add_argument_group('statedb', 'Checker state database')
+    group.add_argument('--statedbname', type=str, required=True,
+                       help='Name of the used database')
+    group.add_argument('--statedbuser', type=str, required=True,
+                       help='username for database access')
+    group.add_argument('--statedbpassword', type=str,
+                       help='password for database access if needed')
+    group.add_argument('--statedbhost', type=str,
+                       help='hostname of the database. If unspecified '
+                            'ctf-submission will connect via default UNIX socket')
+
     args = parser.parse_args()
 
     numeric_level = getattr(logging, args.loglevel.upper())
@@ -71,7 +77,21 @@ def main():
                           user=args.dbuser,
                           password=args.dbpassword)
 
-    update_flagids(db, args.output)
+    service_names = dict()
+    with db:
+        with db.cursor(cursor_factory=psycopg2.extras.NamedTupleCursor) as cursor:
+            cursor.execute("SELECT id, name FROM scoring_service")
+            rows = cursor.fetchall()
+            for row in rows:
+                service_names[row.id] = row.name
+
+
+    statedb = psycopg2.connect(host=args.statedbhost,
+                               database=args.statedbname,
+                               user=args.statedbuser,
+                               password=args.statedbpassword)
+
+    update_flagids(statedb, service_names, args.output)
 
 
 if __name__ == '__main__':
