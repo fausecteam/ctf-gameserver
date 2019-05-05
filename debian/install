@@ -4,6 +4,8 @@ conf/checker/ctf-checkermaster@.service lib/systemd/system
 conf/controller/controller.env etc/ctf-gameserver
 conf/controller/flagid.env etc/ctf-gameserver
 conf/controller/ctf-controller.service lib/systemd/system
+conf/controller/ctf-flagid.service lib/systemd/system
+conf/controller/ctf-flagid.timer lib/systemd/system
 
 conf/submission/submission.env etc/ctf-gameserver
 conf/submission/ctf-submission@.service lib/systemd/system

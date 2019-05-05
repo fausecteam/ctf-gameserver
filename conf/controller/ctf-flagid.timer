@@ -1,0 +1,9 @@
+[Unit]
+Description=CTF Gameserver Flagid Exporter
+
+[Timer]
+OnCalendar=minutely
+AccuracySec=5s
+
+[Install]
+WantedBy=timers.target
