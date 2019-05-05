@@ -130,7 +130,11 @@ def main():
         gelf_handler.addFilter(CheckMetadataFilter(args.checker, args.team, args.tick))
         logging.getLogger().addHandler(gelf_handler)
 
-    run(args)
+    try:
+        run(args)
+    except Exception as e:
+        logging.getLogger().exception("Checker script failed with unhandled exception")
+        raise e
 
 if __name__ == '__main__':
     main()
