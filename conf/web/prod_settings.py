@@ -16,10 +16,12 @@ COMPETITION_NAME = ''
 # The initially selected directives should cover most sensitive cases, but still allow YouTube embeds,
 # webfonts etc.
 CSP_POLICIES = {
+    'base-uri': ["'self'"],
+    'connect-src': ["'self'"],
+    'form-action': ["'self'"],
+    'object-src': ["'none'"],
     'script-src': ["'self'"],
-    'style-src': ["'self'"],
-    'object-src': ["'self'"],
-    'connect-src': ["'self'"]
+    'style-src': ["'self'"]
 }
 
 # Set to True if your site is available exclusively through HTTPS and not via plaintext HTTP
