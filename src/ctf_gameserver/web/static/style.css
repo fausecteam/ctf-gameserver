@@ -72,6 +72,11 @@ button#refresh {
     text-decoration: none;
 }
 
+.nav-pills a {
+    /* 'nav-link-color' cannot be set using the Bootstrap customizer */
+    color: #B00D10;
+}
+
 #supporter-column img {
     margin-top: 10px;
     margin-bottom: 35px;
