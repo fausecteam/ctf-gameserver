@@ -71,3 +71,9 @@ button#refresh {
 #history-table td a:hover {
     text-decoration: none;
 }
+
+#supporter-column img {
+    margin-top: 10px;
+    margin-bottom: 35px;
+    width: 100%;
+}
