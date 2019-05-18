@@ -4,7 +4,7 @@ EXT_DIR ?= $(WEB_DIR)/static/ext
 DEV_MANAGE ?= src/dev_manage.py
 TESTS_DIR ?= tests
 
-.PHONY: dev build ext migrations test lint
+.PHONY: dev build ext migrations test lint clean
 .INTERMEDIATE: bootstrap.zip
 
 dev: $(WEB_DIR)/dev-db.sqlite3 ext
@@ -46,3 +46,10 @@ lint:
 	-pylint --rcfile $(SOURCE_DIR)/pylintrc $(SOURCE_DIR) $(TESTS_DIR)/test_*.py
 	-pycodestyle $(SOURCE_DIR) $(TESTS_DIR)
 	-bandit --ini bandit.ini -r $(SOURCE_DIR)
+
+
+clean:
+	rm -rf src/ctf_gameserver/web/*/migrations
+	rm -f src/ctf_gameserver/web/dev-db.sqlite3 src/ctf_gameserver/web/registration/countries.csv
+	rm -rf src/ctf_gameserver/web/static/ext
+	rm -rf build dist src/ctf_gameserver.egg-info
