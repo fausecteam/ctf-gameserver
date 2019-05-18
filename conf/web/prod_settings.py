@@ -87,6 +87,10 @@ TIME_ZONE = ''
 # First day of the week: 0 means Sunday, 1 means Monday and so on
 FIRST_DAY_OF_WEEK = 1
 
+# When using Graylog for checker logging, base URL for generating links to log searches
+# Probably either "http://<host>:<port>/search" or "http://<host>:<port>/streams/<stream>/search"
+#GRAYLOG_SEARCH_URL = 'http://localhost:9000/search'
+
 
 # You should not have to edit anything below this line
 

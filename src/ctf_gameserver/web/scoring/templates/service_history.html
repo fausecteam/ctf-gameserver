@@ -1,0 +1,38 @@
+{% extends 'base-wide.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block content %}
+<script src="{% static 'service_history.js' %}" defer="defer"></script>
+
+<noscript>
+    <div class="alert alert-danger" role="alert">{% trans 'Please enable JavaScript for this page to work!' %}</div>
+</noscript>
+
+<div class="page-header">
+    <h1>{% block title %}{% trans 'Service History' %}{% endblock %}</h1>
+</div>
+
+<div class="dropdown">
+    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+        <span id="selected-service">{% trans 'Select service' %}</span> <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu">
+        {% for service in services %}
+        <li><a href="#{{ service.slug }}" class="service-option">{{ service.name }}</a></li>
+        {% endfor %}
+    </ul>
+</div>
+
+<div class="table-responsive">
+    <table id="history-table" class="table" hidden="hidden">
+        <thead>
+            <tr>
+            </tr>
+        </thead>
+
+        <tbody>
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -53,3 +53,12 @@ th.border-right, td.border-right {
 #mail-teams-content {
     margin-top: 40px;
 }
+
+#history-table td a {
+    /* Make the whole table cell clickable */
+    display: block;
+}
+
+#history-table td a:hover {
+    text-decoration: none;
+}

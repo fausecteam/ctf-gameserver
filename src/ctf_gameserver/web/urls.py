@@ -88,9 +88,17 @@ urlpatterns = [
         name='service_status'
     ),
 
-    url(r'^mail-teams/$',
+    url(r'^internal/mail-teams/$',
         registration_views.mail_teams,
         name='mail_teams'
+    ),
+    url(r'^internal/service-history$',
+        scoring_views.service_history,
+        name='service_history'
+    ),
+    url(r'^internal/service-history.json$',
+        scoring_views.service_history_json,
+        name='service_history_json'
     ),
     url(r'^admin/', include(admin_site.urls)),
 

@@ -47,3 +47,5 @@ FIRST_DAY_OF_WEEK = 1
 
 DEBUG = True
 INTERNAL_IPS = ('127.0.0.1')
+
+GRAYLOG_SEARCH_URL = 'http://localhost:9000/search'

@@ -95,6 +95,7 @@
                                 {% endif %}
                                 {% if user.is_staff %}
                                 <li><a href="{% url 'admin:index' %}">{% trans 'Administration' %}</a></li>
+                                <li><a href="{% url 'service_history' %}">{% trans 'Service History' %}</a></li>
                                 <li><a href="{% url 'mail_teams' %}">{% trans 'Email teams' %}</a></li>
                                 {% endif %}
                                 <li><a href="{% url 'logout' %}">{% trans 'Logout' %}</a></li>
