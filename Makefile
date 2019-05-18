@@ -12,7 +12,7 @@ build: ext migrations
 ext: $(EXT_DIR)/jquery.min.js $(EXT_DIR)/bootstrap $(WEB_DIR)/registration/countries.csv
 
 
-migrations:
+migrations: $(WEB_DIR)/registration/countries.csv
 	$(DEV_MANAGE) makemigrations templatetags registration scoring flatpages
 
 $(WEB_DIR)/dev-db.sqlite3: migrations $(WEB_DIR)/registration/countries.csv
