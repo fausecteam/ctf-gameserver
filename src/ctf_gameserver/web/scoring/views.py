@@ -83,8 +83,17 @@ def service_status(request):
 @staff_member_required
 def service_history(request):
 
+    game_control = models.GameControl.get_instance()
+    max_tick = game_control.current_tick
+    min_tick = max_tick - 30
+
+    if min_tick < 0:
+        min_tick = 0
+
     return render(request, 'service_history.html', {
-        'services': models.Service.objects.all().order_by('name')
+        'services': models.Service.objects.all().order_by('name'),
+        'initial_min_tick': min_tick,
+        'initial_max_tick': max_tick
     })
 
 

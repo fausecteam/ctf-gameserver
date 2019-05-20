@@ -5,6 +5,8 @@ $(document).ready(function() {
     $(window).bind('hashchange', function(e) {
         loadTable()
     })
+    $('#min-tick').change(loadTable)
+    $('#max-tick').change(loadTable)
 
     loadTable()
 })
@@ -17,7 +19,14 @@ function loadTable() {
         return
     }
 
-    $.getJSON('service-history.json', {'service': serviceSlug}, buildTable)
+    const fromTick = parseInt($('#min-tick').val())
+    const toTick = parseInt($('#max-tick').val()) + 1
+    if (isNaN(fromTick) || isNaN(toTick)) {
+        return
+    }
+
+    $.getJSON('service-history.json', {'service': serviceSlug, 'from-tick': fromTick, 'to-tick': toTick},
+              buildTable)
 
 }
 
@@ -25,6 +34,8 @@ function loadTable() {
 function buildTable(data) {
 
     $('#selected-service').text(data['service-name'])
+    $('#min-tick').val(data['min-tick'])
+    $('#max-tick').val(data['max-tick'])
 
     const statusDescriptions = data['status-descriptions']
     const statusClasses = {
@@ -38,6 +49,12 @@ function buildTable(data) {
     // Extract raw DOM element from jQuery object
     let table = $('#history-table')[0]
 
+    // Over a certain number of columns, do not show every tick number in the table head
+    let tickTextEvery = 1
+    if (data['max-tick'] - data['min-tick'] > 30) {
+        tickTextEvery = 5
+    }
+
     let tableHeadRow = $('#history-table thead tr')[0]
     while (tableHeadRow.firstChild) {
         tableHeadRow.removeChild(tableHeadRow.firstChild)
@@ -46,7 +63,9 @@ function buildTable(data) {
     tableHeadRow.appendChild(document.createElement('th'))
     for (let i = data['min-tick']; i <= data['max-tick']; i++) {
         let col = document.createElement('th')
-        col.textContent = i
+        if (i % tickTextEvery == 0) {
+            col.textContent = i
+        }
         col.classList.add('text-center')
         tableHeadRow.appendChild(col)
     }

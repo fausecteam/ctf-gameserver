@@ -13,15 +13,29 @@
     <h1>{% block title %}{% trans 'Service History' %}{% endblock %}</h1>
 </div>
 
-<div class="dropdown">
-    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-        <span id="selected-service">{% trans 'Select service' %}</span> <span class="caret"></span>
-    </button>
-    <ul class="dropdown-menu">
-        {% for service in services %}
-        <li><a href="#{{ service.slug }}" class="service-option">{{ service.name }}</a></li>
-        {% endfor %}
-    </ul>
+<div class="clearfix">
+    <div class="dropdown pull-left">
+        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+            <span id="selected-service">{% trans 'Select service' %}</span> <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+            {% for service in services %}
+            <li><a href="#{{ service.slug }}" class="service-option">{{ service.name }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <fieldset class="form-inline pull-right">
+        <label>Tick:</label>
+        <div class="input-group">
+            <div class="input-group-addon">{% trans 'Min' %}</div>
+            <input type="number" id="min-tick" class="form-control" min="0" value="{{ initial_min_tick }}" />
+        </div>
+        <div class="input-group">
+            <div class="input-group-addon">{% trans 'Max' %}</div>
+            <input type="number" id="max-tick" class="form-control" min="1" value="{{ initial_max_tick }}" />
+        </div>
+    </fieldset>
 </div>
 
 <div class="table-responsive">

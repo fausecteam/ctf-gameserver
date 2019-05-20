@@ -54,6 +54,11 @@ th.border-right, td.border-right {
     margin-top: 40px;
 }
 
+#history-table td {
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
 #history-table td a {
     /* Make the whole table cell clickable */
     display: block;
