@@ -46,6 +46,7 @@ setup(
             'static/robots.txt',
             'static/*.css',
             'static/*.js',
+            'static/faustctf.svg',
             'static/ext/jquery.min.js',
             'static/ext/bootstrap/css/*',
             'static/ext/bootstrap/fonts/*',

@@ -77,6 +77,16 @@ button#refresh {
     color: #B00D10;
 }
 
+.navbar-brand {
+    padding: 5px 15px;
+}
+
+.navbar-brand img {
+    display: inline;
+    margin-right: 15px;
+    height: 40px;
+}
+
 #supporter-column img {
     margin-top: 10px;
     margin-bottom: 35px;
