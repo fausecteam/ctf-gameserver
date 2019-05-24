@@ -64,6 +64,10 @@ th.border-right, td.border-right {
     display: block;
 }
 
+button#refresh {
+    margin-right: 25px;
+}
+
 #history-table td a:hover {
     text-decoration: none;
 }

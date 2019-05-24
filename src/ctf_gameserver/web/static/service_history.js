@@ -7,12 +7,18 @@ $(document).ready(function() {
     })
     $('#min-tick').change(loadTable)
     $('#max-tick').change(loadTable)
+    $('#refresh').click(loadTable)
+    $('#load-current').click(function(e) {
+        // Even though the current tick is contained in the JSON data, it might be outdated, so load the
+        // table without a "to-tick"
+        loadTable(e, true)
+    })
 
     loadTable()
 })
 
 
-function loadTable() {
+function loadTable(_, ignoreMaxTick=false) {
 
     const serviceSlug = window.location.hash.slice(1)
     if (serviceSlug.length == 0) {
@@ -25,8 +31,11 @@ function loadTable() {
         return
     }
 
-    $.getJSON('service-history.json', {'service': serviceSlug, 'from-tick': fromTick, 'to-tick': toTick},
-              buildTable)
+    let params = {'service': serviceSlug, 'from-tick': fromTick}
+    if (!ignoreMaxTick) {
+        params['to-tick'] = toTick
+    }
+    $.getJSON('service-history.json', params, buildTable)
 
 }
 

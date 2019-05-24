@@ -25,17 +25,26 @@
         </ul>
     </div>
 
-    <fieldset class="form-inline pull-right">
-        <label>Tick:</label>
-        <div class="input-group">
-            <div class="input-group-addon">{% trans 'Min' %}</div>
-            <input type="number" id="min-tick" class="form-control" min="0" value="{{ initial_min_tick }}" />
-        </div>
-        <div class="input-group">
-            <div class="input-group-addon">{% trans 'Max' %}</div>
-            <input type="number" id="max-tick" class="form-control" min="1" value="{{ initial_max_tick }}" />
-        </div>
-    </fieldset>
+    <div class="form-inline pull-right">
+        <button type="button" id="refresh" class="btn btn-default pull-left">
+            <span class="glyphicon glyphicon-refresh"></span>
+        </button>
+
+        <fieldset>
+            <label>Tick:</label>
+            <div class="input-group">
+                <div class="input-group-addon">{% trans 'Min' %}</div>
+                <input type="number" id="min-tick" class="form-control" min="0" value="{{ initial_min_tick }}" />
+            </div>
+            <div class="input-group">
+                <div class="input-group-addon">{% trans 'Max' %}</div>
+                <input type="number" id="max-tick" class="form-control" min="1" value="{{ initial_max_tick }}" />
+                <span class="input-group-btn">
+                    <button type="button" id="load-current" class="btn btn-default">{% trans 'Current' %}</button>
+                </span>
+            </div>
+        </fieldset>
+    </div>
 </div>
 
 <div class="table-responsive">
