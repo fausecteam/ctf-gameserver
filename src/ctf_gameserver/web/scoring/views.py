@@ -159,7 +159,13 @@ def service_history_json(request):
         # Status checks are ordered by team ID, finalize result for a team when it changes
         if current_team['id'] != check.team.user.id:
             append_result(check.team.user.id)
-            current_team = {'id': check.team.user.id, 'name': teams[check.team.user.id].user.username,
+            # TODO: status check for inactive teams causes this key error
+            # (active_objects returns only active objects)
+            try:
+                team_name = teams[check.team.user.id].user.username
+            except KeyError:
+                team_name = '<unknown>'
+            current_team = {'id': check.team.user.id, 'name': team_name,
                             'checks': []}
             current_tick = from_tick
 
