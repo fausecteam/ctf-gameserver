@@ -9,7 +9,10 @@ Build-Depends:
  python3,
  python3-all,
  python3-django,
+ python3-markdown,
+ python3-pil,
  python3-setuptools,
+ python3-tz,
  unzip
 Standards-Version: 4.3.0
 Homepage: http://ctf-gameserver.org
