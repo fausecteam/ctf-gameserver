@@ -1,6 +1,0 @@
-bandit
-pycodestyle
-pylint
-pytest
-pytest-cov
-tox

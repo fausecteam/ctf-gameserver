@@ -19,12 +19,24 @@ setup(
         'Django == 1.11.*, >= 1.11.19',
         'Markdown',
         'Pillow',
-        'psycopg2',
         'pytz',
         'requests',
-        # TODO: Make this platform independent for development
-        #'systemd'
     ],
+    extras_require = {
+        'dev': [
+            'bandit',
+            'psycopg2-binary',
+            'pycodestyle',
+            'pylint',
+            'pytest',
+            'pytest-cov',
+            'tox'
+        ],
+        'prod': [
+            'psycopg2',
+            'systemd'
+        ]
+    },
 
     package_dir = {'': 'src'},
     packages = find_packages('src'),
