@@ -1,5 +1,8 @@
 __pycache__/
 
+# Development venv
+/.venv/
+
 # Python packaging
 /build/
 /dist/
