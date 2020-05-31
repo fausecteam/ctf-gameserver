@@ -20,7 +20,7 @@ keccak = Keccak(100)
 # timestamp + team + service + payload
 datalength = 4 + 1 + 1 + PAYLOADLEN
 
-def generate(team, service, secret, payload=None, timestamp=None):
+def generate(team_id, service_id, secret, payload=None, timestamp=None):
     """Generates a new flag
 
     Arguments:
@@ -35,7 +35,7 @@ def generate(team, service, secret, payload=None, timestamp=None):
         timestamp = time.time() + VALID
 
     protecteddata = struct.pack("!i c c", int(timestamp),
-                                bytes([team]), bytes([service]))
+                                bytes([team_id]), bytes([service_id]))
 
     if payload is None:
         payload = struct.pack("!I I", zlib.crc32(protecteddata), 0)
