@@ -66,7 +66,7 @@ should contain exactly one table:
      service_id INTEGER,
      identifier CHARACTER VARYING (128),
      data BYTEA
-   );
+   ) PRIMARY KEY (team_id, service_id, identifier);
 
 Checker
 -------
@@ -100,7 +100,7 @@ every team.
       "defense" double precision NOT NULL,
       "sla" double precision NOT NULL,
       "total" double precision NOT NULL
-    );
+    ) PRIMARY KEY (team_id, service_id, identifier);
 
 Networking
 ----------
