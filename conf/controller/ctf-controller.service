@@ -10,11 +10,11 @@ Environment=HOME=/tmp
 EnvironmentFile=/etc/ctf-gameserver/controller.env
 ExecStart=/usr/bin/ctf-controller
 Restart=on-failure
+RestartSec=5
 
 # Security options
 CapabilityBoundingSet=
-# REVISIT: Enable after Debian Stretch
-#LockPersonality=yes
+LockPersonality=yes
 MemoryDenyWriteExecute=yes
 NoNewPrivileges=yes
 PrivateDevices=yes
