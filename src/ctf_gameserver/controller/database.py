@@ -5,7 +5,7 @@ from ctf_gameserver.lib.exceptions import DBDataError
 
 def get_control_info(db_conn, prohibit_changes=False):
     """
-    Returns a dictionary contatining relevant information about the competion, as stored in the database.
+    Returns a dictionary containing relevant information about the competion, as stored in the database.
     """
 
     with transaction_cursor(db_conn, prohibit_changes) as cursor:
