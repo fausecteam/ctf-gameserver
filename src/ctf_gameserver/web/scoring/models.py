@@ -71,8 +71,8 @@ class StatusCheck(models.Model):
     # Mapping from human-readable status texts to their integer values in the database
     # For a discussion on the plural form of "status", refer to https://english.stackexchange.com/q/877
     STATUSES = {
-        _('up'): 0,
-        _('down'): 1,
+        _('up'): 0,      # Maps to "OK" from the checkers' perspective
+        _('down'): 1,    # Maps to "TIMEOUT" from the checkers' perspective
         _('faulty'): 2,
         _('flag not found'): 3,
         _('recovering'): 4
@@ -81,6 +81,7 @@ class StatusCheck(models.Model):
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
     tick = models.PositiveSmallIntegerField(db_index=True)
+    # REVISIT: Add check constraint for the values as soon as we have Django >= 2.2
     status = models.PositiveSmallIntegerField(choices=[(i, t) for t, i in STATUSES.items()])
     timestamp = models.DateTimeField(auto_now_add=True)
 
