@@ -65,7 +65,7 @@ should contain exactly one table:
      team_id INTEGER,
      service_id INTEGER,
      identifier CHARACTER VARYING (128),
-     data BYTEA
+     data TEXT
    ) PRIMARY KEY (team_id, service_id, identifier);
 
 Checker

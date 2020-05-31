@@ -1,5 +1,6 @@
 conf/checker/checkermaster.env etc/ctf-gameserver
 conf/checker/ctf-checkermaster@.service lib/systemd/system
+examples/checker/sudoers.d/ctf-checker etc/sudoers.d
 
 conf/controller/controller.env etc/ctf-gameserver
 conf/controller/flagid.env etc/ctf-gameserver

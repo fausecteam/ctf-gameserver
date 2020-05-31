@@ -42,9 +42,7 @@ setup(
     packages = find_packages('src'),
     scripts = [
         'scripts/checker/ctf-checkermaster',
-        'scripts/checker/ctf-checkerslave',
         'scripts/checker/ctf-logviewer',
-        'scripts/checker/ctf-testrunner',
         'scripts/controller/ctf-controller',
         'scripts/controller/ctf-flagid',
         'scripts/submission/ctf-submission'

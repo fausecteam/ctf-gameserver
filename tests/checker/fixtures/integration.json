@@ -1,0 +1,88 @@
+[
+{
+    "model": "auth.user",
+    "pk": 2,
+    "fields": {
+        "password": "pbkdf2_sha256$36000$kHAF2GkRGCyG$qm+7EyJr0b8E9VbQWp3ZtfxaV0A5wIJSV/ABWEML6II=",
+        "last_login": null,
+        "is_superuser": false,
+        "username": "Team2",
+        "first_name": "",
+        "last_name": "",
+        "email": "",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2019-04-03T18:21:28.622Z",
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "auth.user",
+    "pk": 3,
+    "fields": {
+        "password": "pbkdf2_sha256$36000$kHAF2GkRGCyG$qm+7EyJr0b8E9VbQWp3ZtfxaV0A5wIJSV/ABWEML6II=",
+        "last_login": null,
+        "is_superuser": false,
+        "username": "Team3",
+        "first_name": "",
+        "last_name": "",
+        "email": "",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2019-04-03T18:21:28.622Z",
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "registration.team",
+    "pk": 2,
+    "fields": {
+        "informal_email": "team2@example.org",
+        "image": "",
+        "affiliation": "",
+        "country": "World",
+        "nop_team": false
+    }
+},
+{
+    "model": "registration.team",
+    "pk": 3,
+    "fields": {
+        "informal_email": "team3@example.org",
+        "image": "",
+        "affiliation": "",
+        "country": "World",
+        "nop_team": false
+    }
+},
+{
+    "model": "scoring.service",
+    "pk": 1,
+    "fields": {
+        "name": "Service 1",
+        "slug": "service1"
+    }
+},
+{
+    "model": "scoring.service",
+    "pk": 2,
+    "fields": {
+        "name": "Service 2",
+        "slug": "service2"
+    }
+},
+{
+    "model": "scoring.gamecontrol",
+    "pk": 1,
+    "fields": {
+        "start": null,
+        "end": null,
+        "tick_duration": 180,
+        "valid_ticks": 5,
+        "current_tick": -1,
+        "registration_open": false
+    }
+}
+]

@@ -1,0 +1,6 @@
+# Allow user "ctf-checkermaster" to use the `--close-from` argument when running sudo
+Defaults:ctf-checkermaster closefrom_override
+
+# Allow user "ctf-checkermaster" to run any command as user "ctf-checkerrunner" without being prompted for a
+# password
+ctf-checkermaster ALL = (ctf-checkerrunner) NOPASSWD: ALL

@@ -1,5 +1,12 @@
 #!/bin/sh
 
+if ! getent passwd ctf-checkermaster >/dev/null; then
+	adduser --system --group --home /var/lib/ctf-checkermaster --gecos 'CTF Gameserver Checker Master user,,,' ctf-checkermaster
+fi
+if ! getent passwd ctf-checkerrunner >/dev/null; then
+	adduser --system --group --home /var/lib/ctf-checkerrunner --gecos 'CTF Gameserver Checker Script user,,,' ctf-checkerrunner
+fi
+
 # No dh-systemd because we don't want to enable/start any services
 if test -x /bin/systemctl; then
 	systemctl daemon-reload

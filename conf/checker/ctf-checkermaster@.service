@@ -1,20 +1,28 @@
 [Unit]
-Description=CTF Checker Runner
-After=network.target postgresql.service
+Description=CTF Gameserver Checker Master
+After=postgresql.service
 
 [Service]
 Type=notify
-ExecStart=/usr/bin/ctf-checkermaster
-ExecStop=/bin/kill -s usr1 $MAINPID
-WatchdogSec=20
-Restart=on-failure
-TimeoutStopSec=65
+User=ctf-checkermaster
 EnvironmentFile=/etc/ctf-gameserver/checkermaster.env
 EnvironmentFile=-/etc/ctf-gameserver/checker/%i.env
-Environment=PYTHONPATH=/etc/ctf-gameserver/checker/modules/
-User=nobody
-Group=nogroup
-SyslogIdentifier=ctf-checkermaster@%i
+ExecStart=/usr/bin/ctf-checkermaster
+# Allow waiting for Checker Scripts to finish
+TimeoutStopSec=90
+Restart=on-failure
+RestartSec=5
+
+# Security options, less strict to accommodate for Checker Script oddities
+PrivateDevices=yes
+PrivateTmp=yes
+ProtectControlGroups=yes
+ProtectHome=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectSystem=strict
+RestrictNamespaces=yes
+RestrictRealtime=yes
 
 [Install]
 WantedBy=multi-user.target
