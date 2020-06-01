@@ -1,14 +1,13 @@
 import base64
 import binascii
-import codecs
+import hashlib
+from hmac import compare_digest
 import struct
 import time
 import zlib
 
-from .Keccak import Keccak
-
-# Length of the MAC (in bits)
-MAC_LEN = 80
+# Length of the MAC (in bytes)
+MAC_LEN = 10
 # Length of the payload (in bytes)
 PAYLOAD_LEN = 8
 # timestamp + team + service + payload
@@ -17,8 +16,6 @@ DATA_LEN = 4 + 1 + 1 + PAYLOAD_LEN
 PREFIX = "FAUST"
 # Flag validity in seconds
 VALID = 900
-
-keccak = Keccak(100)
 
 
 def generate(team_id, service_id, secret, payload=None, timestamp=None):
@@ -45,12 +42,7 @@ def generate(team_id, service_id, secret, payload=None, timestamp=None):
         raise ValueError('Payload {} must be {:d} bytes long'.format(repr(payload), PAYLOAD_LEN))
 
     protected_data += payload
-
-    # Keccak does not need an HMAC construction, the secret can simply be prepended
-    protected_hex = codecs.encode(secret, 'hex') + codecs.encode(protected_data, 'hex')
-    mac_hex = keccak.Keccak(((len(secret) + len(protected_data))*8, protected_hex.decode('ascii')),
-                            n=MAC_LEN)
-    mac = codecs.decode(mac_hex, 'hex')
+    mac = _gen_mac(secret, protected_data)
 
     return PREFIX + '_' + base64.b64encode(protected_data + mac).decode('ascii')
 
@@ -77,12 +69,8 @@ def verify(flag, secret):
     except IndexError:
         raise InvalidFlagFormat()
 
-    protected_hex = codecs.encode(secret, 'hex') + codecs.encode(protected_data, 'hex')
-    mac_hex = keccak.Keccak(((len(secret) + len(protected_data))*8, protected_hex.decode('ascii')),
-                            n=MAC_LEN)
-    mac = codecs.decode(mac_hex, 'hex')
-
-    if not mac == flag_mac:
+    mac = _gen_mac(secret, protected_data)
+    if not compare_digest(mac, flag_mac):
         raise InvalidFlagMAC()
 
     timestamp, team, service = struct.unpack("!i c c", protected_data[:6])
@@ -91,6 +79,15 @@ def verify(flag, secret):
         raise FlagExpired(time.time() - timestamp)
 
     return (int.from_bytes(team, 'big'), int.from_bytes(service, 'big'), payload, timestamp)
+
+
+def _gen_mac(secret, protected_data):
+
+    # Keccak does not need an HMAC construction, the secret can simply be prepended
+    sha3 = hashlib.sha3_256()
+    sha3.update(secret)
+    sha3.update(protected_data)
+    return sha3.digest()[:MAC_LEN]
 
 
 class FlagVerificationError(Exception):
@@ -115,5 +112,3 @@ class FlagExpired(FlagVerificationError):
     """
     Flag is already expired.
     """
-
-    pass
