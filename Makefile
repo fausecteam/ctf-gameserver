@@ -47,9 +47,13 @@ lint:
 	-pycodestyle $(SOURCE_DIR) $(TESTS_DIR)
 	-bandit --ini bandit.ini -r $(SOURCE_DIR)
 
+docs_site:
+	mkdocs build --strict
+
 
 clean:
 	rm -rf src/ctf_gameserver/web/*/migrations
 	rm -f src/ctf_gameserver/web/dev-db.sqlite3 src/ctf_gameserver/web/registration/countries.csv
 	rm -rf src/ctf_gameserver/web/static/ext
 	rm -rf build dist src/ctf_gameserver.egg-info
+	rm -rf docs_site

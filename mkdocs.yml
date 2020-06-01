@@ -1,0 +1,23 @@
+site_name: CTF Gameserver
+site_description: Documentation for FAUST CTF Gameserver
+site_author: FAUST -- FAU Security Team
+repo_url: https://github.com/fausecteam/ctf-gameserver
+# Disable "Edit in GitHub"
+edit_uri: ''
+
+theme:
+  name: mkdocs
+  nav_style: light
+  # This would load third-party JavaScript, better disable it
+  highlightjs: False
+
+nav:
+  - Home: index.md
+  - Checkers:
+    - General: checkers/index.md
+    - checkers/python-library.md
+
+site_dir: docs_site
+markdown_extensions:
+  - toc:
+      permalink: True

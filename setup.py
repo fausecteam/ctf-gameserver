@@ -25,6 +25,7 @@ setup(
     extras_require = {
         'dev': [
             'bandit',
+            'mkdocs',
             'psycopg2-binary',
             'pycodestyle',
             'pylint',

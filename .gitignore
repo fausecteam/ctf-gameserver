@@ -25,3 +25,6 @@ __pycache__/
 # We don't actually migrate anything and generate migrations files dynamically
 /src/ctf_gameserver/web/*/migrations/__init__.py
 /src/ctf_gameserver/web/*/migrations/0001_initial.py
+
+# MkDocs HTML build
+/docs_site/
