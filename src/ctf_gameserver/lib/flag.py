@@ -41,6 +41,8 @@ def generate(team_id, service_id, secret, payload=None, timestamp=None):
 
     if payload is None:
         payload = struct.pack("!I I", zlib.crc32(protected_data), 0)
+    if len(payload) != PAYLOAD_LEN:
+        raise ValueError('Payload {} must be {:d} bytes long'.format(repr(payload), PAYLOAD_LEN))
 
     protected_data += payload
 
@@ -70,7 +72,11 @@ def verify(flag, secret):
     except binascii.Error:
         raise InvalidFlagFormat()
 
-    protected_data, flag_mac = raw_flag[:DATA_LEN], raw_flag[DATA_LEN:]
+    try:
+        protected_data, flag_mac = raw_flag[:DATA_LEN], raw_flag[DATA_LEN:]
+    except IndexError:
+        raise InvalidFlagFormat()
+
     protected_hex = codecs.encode(secret, 'hex') + codecs.encode(protected_data, 'hex')
     mac_hex = keccak.Keccak(((len(secret) + len(protected_data))*8, protected_hex.decode('ascii')),
                             n=MAC_LEN)
