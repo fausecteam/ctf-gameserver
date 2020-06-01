@@ -1,5 +1,4 @@
 import configargparse
-import shlex
 
 
 def get_arg_parser_with_db(description):

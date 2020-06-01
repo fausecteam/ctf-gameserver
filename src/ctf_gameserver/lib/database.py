@@ -26,7 +26,7 @@ def transaction_cursor(db_conn, always_rollback=False):
 
     try:
         yield cursor
-    except:
+    except:    # noqa
         db_conn.rollback()
         raise
 
