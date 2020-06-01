@@ -1,18 +1,17 @@
+import random
 import time
 import unittest
-import random
-
-from unittest import mock
 
 from ctf_gameserver.lib import flag
 
+
 class FlagTestCase(unittest.TestCase):
+
     def test_deterministic(self):
         tstamp = time.time()
         flag1 = flag.generate(12, 13, b'secret', timestamp=tstamp)
         flag2 = flag.generate(12, 13, b'secret', timestamp=tstamp)
         self.assertEqual(flag1, flag2)
-
 
     def test_valid_flag(self):
         payload = b'\x01\x02\x03\x04\x05\x06\x07\x08'
@@ -26,20 +25,22 @@ class FlagTestCase(unittest.TestCase):
         self.assertEqual(payload, payload_)
         self.assertEqual(timestamp, timestamp_)
 
-
     def test_old_flag(self):
         timestamp = int(time.time() - 12)
-        testflag = flag.generate(12, 13, b'secret', timestamp=timestamp)
-        self.assertRaises(flag.FlagExpired, flag.verify, testflag, b'secret')
-
+        test_flag = flag.generate(12, 13, b'secret', timestamp=timestamp)
+        with self.assertRaises(flag.FlagExpired):
+            flag.verify(test_flag, b'secret')
 
     def test_invalid_mac(self):
-        testflag = flag.generate(12, 13, b'secret')
-        s = set("0123456789")
+        test_flag = flag.generate(12, 13, b'secret')
+
+        # Replace last character of the flag with a differnt one
+        chars = set("0123456789")
         try:
-            s.remove(testflag[-1])
+            chars.remove(test_flag[-1])
         except KeyError:
             pass
+        wrong_flag = test_flag[:-1] + random.choice(list(chars))
 
-        wrongflag = testflag[:-1] + random.choice(list(s))
-        self.assertRaises(flag.InvalidFlagMAC, flag.verify, wrongflag, b'secret')
+        with self.assertRaises(flag.InvalidFlagMAC):
+            flag.verify(wrong_flag, b'secret')
