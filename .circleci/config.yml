@@ -26,6 +26,7 @@ jobs:
     steps:
       - checkout
       - run: pip install tox
+      - run: make build
       - run: tox -e py37 -- --junitxml=.tox/py37/log/test-results/pytest/results.xml
       - store_test_results:
           path: .tox/py37/log/test-results
@@ -72,6 +73,7 @@ jobs:
           args: install --no-install-recommends ./deb-packages/*.deb
       - apt_get:
           args: install python3-pytest python3-pytest-cov
+      - run: make build
       - run: pytest-3 --junitxml=test-results/pytest/results.xml --cov=src --cov-report=term --cov-report=html tests
       - store_test_results:
           path: test-results
