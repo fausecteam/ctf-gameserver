@@ -1,6 +1,7 @@
 import os.path
 from unittest import SkipTest
 from unittest.mock import patch
+import shutil
 import sqlite3
 import tempfile
 import time
@@ -416,8 +417,8 @@ class IntegrationTest(DatabaseTestCase):
 
     @patch('ctf_gameserver.checker.master.get_monotonic_time')
     def test_sudo(self, monotonic_mock):
-        if not os.path.exists('/etc/sudoers.d/ctf-checker'):
-            raise SkipTest('sudo config not available')
+        if shutil.which('sudo') is None or not os.path.exists('/etc/sudoers.d/ctf-checker'):
+            raise SkipTest('sudo or sudo config not available')
 
         checkerscript_path = os.path.join(os.path.dirname(__file__),
                                           'integration_sudo_checkerscript.py')
