@@ -22,7 +22,7 @@ jobs:
   # Test with Tox, a recent Python version and libraries from PyPI
   test_tox_37:
     docker:
-      - image: python:3.7-stretch
+      - image: python:3.7-buster
     steps:
       - checkout
       - run: pip install tox
@@ -38,7 +38,7 @@ jobs:
 
   build_deb_package:
     docker:
-      - image: debian:stretch
+      - image: debian:buster
     steps:
       - checkout
       - prepare_debian
@@ -61,7 +61,7 @@ jobs:
   # Test with Python and libraries from Debian Stable sources
   test_debian:
     docker:
-      - image: debian:stretch
+      - image: debian:buster
     steps:
       - checkout
       - prepare_debian
