@@ -26,6 +26,8 @@ jobs:
     steps:
       - checkout
       - run: pip install tox
+      # Make sure we have our dependencies, which are not required for Tox but for `make build`
+      - run: pip install -e .
       - run: make build
       - run: tox -e py37 -- --junitxml=.tox/py37/log/test-results/pytest/results.xml
       - store_test_results:
