@@ -74,7 +74,7 @@ jobs:
       - apt_get:
           args: install --no-install-recommends ./deb-packages/*.deb
       - apt_get:
-          args: install python3-pytest python3-pytest-cov
+          args: install make curl unzip python3-pytest python3-pytest-cov
       - run: make build
       - run: pytest-3 --junitxml=test-results/pytest/results.xml --cov=src --cov-report=term --cov-report=html tests
       - store_test_results:
