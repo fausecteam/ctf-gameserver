@@ -20,7 +20,7 @@ class TestChecker(checkerlib.BaseChecker):
 
     def check_service(self):
         if self.team == 2 and self._tick == 1:
-            return checkerlib.CheckResult.TIMEOUT
+            return checkerlib.CheckResult.DOWN
         else:
             return checkerlib.CheckResult.OK
 

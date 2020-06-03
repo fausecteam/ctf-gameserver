@@ -43,7 +43,7 @@ Check Results
 Each check reports one of the following results:
 
 * OK: Everything working fine
-* TIMEOUT: Failed to connect to service
+* DOWN: Service not running or another error in the network connection, e.g. a timeout or connection abort
 * FAULTY: Service is available, but not behaving as expected
 * FLAG_NOT_FOUND: Service is behaving as expected, but a flag could not be retrieved
 * RECOVERING: Service is behaving as expected, at least one flag could be retrieved, but one or more from
@@ -56,8 +56,9 @@ stored for the tick (displayed as "Not checked" by the Gameserver frontend). The
 
 Error Handling
 --------------
-Errors while establishing a connection or sending requests should be considered a TIMEOUT. They have to
-be handled by Checker Scripts, but [libraries](#checker-script-libraries) usually assist with that.
+If errors occur while establishing a connection or sending requests, the service should be considered
+DOWN. Theses errors have to be handled by Checker Scripts, but [libraries](#checker-script-libraries)
+usually assist with that.
 
 Issues with the service itself (e.g. unexpected or missing output to requests) must be detected by Checker
 Scripts and lead to a FAULTY result.

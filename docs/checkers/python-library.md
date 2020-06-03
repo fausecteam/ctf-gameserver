@@ -12,7 +12,7 @@ It takes care of:
 * Configuring logging to send messages to the Master
 * Setup of default timeouts for Python sockets, [urllib3](https://urllib3.readthedocs.io) and
   [Requests](https://requests.readthedocs.io)
-* Handling of common timeout exceptions and converting them to a TIMEOUT result
+* Handling of common connection exceptions and converting them to a DOWN result
 
 This means that you do *not* have to catch timeout exceptions and can just let the library take care of
 them.

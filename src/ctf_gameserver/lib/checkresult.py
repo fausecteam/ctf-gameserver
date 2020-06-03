@@ -8,8 +8,8 @@ class CheckResult(enum.Enum):
     """
 
     OK = 0
-    TIMEOUT = 1
-    FAULTY = 2
+    DOWN = 1      # Error in the network connection, e.g. a timeout or connection abort
+    FAULTY = 2    # Service is available, but not behaving as expected
     FLAG_NOT_FOUND = 3
     RECOVERING = 4
 

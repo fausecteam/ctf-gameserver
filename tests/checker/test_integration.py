@@ -132,9 +132,9 @@ class IntegrationTest(DatabaseTestCase):
             self.assertEqual(cursor.fetchone()[0], 0)
 
     @patch('ctf_gameserver.checker.master.get_monotonic_time')
-    def test_timeout(self, monotonic_mock):
+    def test_down(self, monotonic_mock):
         checkerscript_path = os.path.join(os.path.dirname(__file__),
-                                          'integration_timeout_checkerscript.py')
+                                          'integration_down_checkerscript.py')
 
         monotonic_mock.return_value = 10
         master_loop = MasterLoop(self.connection, self.state_db_conn, 'service1', checkerscript_path, None,
@@ -160,7 +160,7 @@ class IntegrationTest(DatabaseTestCase):
             self.assertEqual(cursor.fetchone()[0], 1)
             cursor.execute('SELECT status FROM scoring_statuscheck'
                            '    WHERE service_id=1 AND team_id=2 AND tick=0')
-            self.assertEqual(cursor.fetchone()[0], CheckResult.TIMEOUT.value)
+            self.assertEqual(cursor.fetchone()[0], CheckResult.DOWN.value)
 
     @patch('logging.warning')
     @patch('ctf_gameserver.checker.master.get_monotonic_time')
@@ -285,7 +285,7 @@ class IntegrationTest(DatabaseTestCase):
             self.assertEqual(cursor.fetchone()[0], CheckResult.OK.value)
             cursor.execute('SELECT status FROM scoring_statuscheck'
                            '    WHERE service_id=1 AND team_id=2 AND tick=1')
-            self.assertEqual(cursor.fetchone()[0], CheckResult.TIMEOUT.value)
+            self.assertEqual(cursor.fetchone()[0], CheckResult.DOWN.value)
             cursor.execute('SELECT status FROM scoring_statuscheck'
                            '    WHERE service_id=1 AND team_id=3 AND tick=1')
             self.assertEqual(cursor.fetchone()[0], CheckResult.FAULTY.value)

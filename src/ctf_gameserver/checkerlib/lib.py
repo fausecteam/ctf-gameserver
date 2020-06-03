@@ -2,6 +2,7 @@
 
 import base64
 import errno
+import http.client
 import json
 import logging
 import os
@@ -246,12 +247,9 @@ def _run_check_steps(checker, tick):
         else:
             return CheckResult.OK
     except Exception as e:    # pylint: disable=broad-except
-        if _is_timeout(e):
-            logging.warning('Timeout during check', exc_info=e)
-            return CheckResult.TIMEOUT
-        elif isinstance(e, ssl.SSLError):
-            logging.warning('SSL error during check', exc_info=e)
-            return CheckResult.FAULTY
+        if _is_conn_error(e):
+            logging.warning('Connection error during check', exc_info=e)
+            return CheckResult.DOWN
         else:
             # Just let the Checker Script die, logging will be handled by the Runner
             raise e
@@ -282,48 +280,66 @@ def _send_ctrl_message(message):
     _ctrl_out_lock.release()
 
 
-def _is_timeout(exception):
+def _is_conn_error(exception):
     """
-    Checks if the given exception resembles a timeout/connection error.
+    Checks if the given exception resembles an error in the network connection, e.g. a timeout or connection
+    abort.
     """
 
-    timeout_exceptions = (
+    conn_exceptions = (
+        BrokenPipeError,    # Raised on SIGPIPE
+        ConnectionAbortedError,
+        ConnectionResetError,
+        ConnectionRefusedError,
         EOFError,    # Raised by telnetlib on timeout
+        http.client.BadStatusLine,
+        http.client.ImproperConnectionState,
+        http.client.LineTooLong,
+        http.client.UnknownTransferEncoding,
         socket.timeout,
         ssl.SSLEOFError,
-        ssl.SSLZeroReturnError,
         ssl.SSLWantReadError,
-        ssl.SSLWantWriteError
+        ssl.SSLWantWriteError,
+        ssl.SSLZeroReturnError
     )
     try:
         import urllib3    # pylint: disable=import-outside-toplevel
-        have_urllib3 = True
-        timeout_exceptions += (
+        conn_exceptions += (
             urllib3.exceptions.ConnectionError,
-            urllib3.exceptions.NewConnectionError,
-            urllib3.exceptions.ReadTimeoutError
+            urllib3.exceptions.DecodeError,
+            urllib3.exceptions.IncompleteRead,
+            urllib3.exceptions.ProtocolError,
+            urllib3.exceptions.SSLError,
+            urllib3.exceptions.TimeoutError
         )
     except ImportError:
-        have_urllib3 = False
+        pass
     try:
         import requests    # pylint: disable=import-outside-toplevel
-        have_requests = True
-        timeout_exceptions += (
-            requests.exceptions.ConnectTimeout,
-            requests.exceptions.Timeout,
+        conn_exceptions += (
+            requests.Timeout,
+            requests.ConnectionError,
             requests.packages.urllib3.exceptions.ConnectionError,
-            requests.packages.urllib3.exceptions.NewConnectionError
+            requests.packages.urllib3.exceptions.DecodeError,
+            requests.packages.urllib3.exceptions.IncompleteRead,
+            requests.packages.urllib3.exceptions.ProtocolError,
+            requests.packages.urllib3.exceptions.SSLError,
+            requests.packages.urllib3.exceptions.TimeoutError
         )
     except ImportError:
-        have_requests = False
+        pass
     try:
         import nclib    # pylint: disable=import-outside-toplevel
-        timeout_exceptions += (nclib.NetcatError,)
+        conn_exceptions += (nclib.NetcatError,)
     except ImportError:
         pass
 
-    if isinstance(exception, timeout_exceptions):
+    if isinstance(exception, conn_exceptions):
         return True
+
+    # (At least) urllib and urllib3 wrap other exceptions in a "reason" attribute
+    if hasattr(exception, 'reason') and isinstance(exception.reason, Exception):
+        return _is_conn_error(exception.reason)
 
     if isinstance(exception, OSError):
         return exception.errno in (
@@ -338,18 +354,5 @@ def _is_timeout(exception):
             errno.EPIPE,
             errno.ETIMEDOUT
         )
-
-    if have_urllib3:
-        if isinstance(exception, urllib3.exceptions.MaxRetryError):
-            return _is_timeout(exception.reason)
-        if isinstance(exception, urllib3.exceptions.ProtocolError):
-            return len(exception.args) == 2 and _is_timeout(exception.args[1])
-    if have_requests:
-        if isinstance(exception, requests.exceptions.ConnectionError):
-            return len(exception.args) == 1 and _is_timeout(exception.args[0])
-        if isinstance(exception, requests.packages.urllib3.exceptions.MaxRetryError):
-            return _is_timeout(exception.reason)
-        if isinstance(exception, requests.packages.urllib3.exceptions.ProtocolError):
-            return len(exception.args) == 2 and _is_timeout(exception.args[1])
 
     return False

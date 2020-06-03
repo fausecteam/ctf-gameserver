@@ -103,7 +103,7 @@ class LocalTest(TestCase):
     @patch('sys.stdout', new_callable=io.StringIO)
     def test_run_check_place_fail(self, stdout_io):
         MockChecker.reset_mocks()
-        MockChecker.place_mock.return_value = CheckResult.TIMEOUT
+        MockChecker.place_mock.return_value = CheckResult.DOWN
         MockChecker.service_mock.return_value = CheckResult.OK
         MockChecker.flag_mock.return_value = CheckResult.OK
 
@@ -112,7 +112,7 @@ class LocalTest(TestCase):
         MockChecker.place_mock.assert_called_once_with(10)
         MockChecker.service_mock.assert_not_called()
         MockChecker.flag_mock.assert_not_called()
-        self.assertEqual(stdout_io.getvalue(), 'Check result: TIMEOUT\n')
+        self.assertEqual(stdout_io.getvalue(), 'Check result: DOWN\n')
 
     @patch.object(sys, 'argv', ['argv-0', '0.0.0.0', '42', '10'])
     @patch('sys.stdout', new_callable=io.StringIO)
@@ -195,7 +195,7 @@ class LocalTest(TestCase):
                 raise socket.timeout()
 
         checkerlib.run_check(ExceptionChecker)
-        self.assertEqual(stdout_io.getvalue(), 'Check result: TIMEOUT\n')
+        self.assertEqual(stdout_io.getvalue(), 'Check result: DOWN\n')
 
 
 class MockChecker(checkerlib.BaseChecker):

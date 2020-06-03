@@ -72,7 +72,7 @@ class StatusCheck(models.Model):
     # For a discussion on the plural form of "status", refer to https://english.stackexchange.com/q/877
     STATUSES = {
         _('up'): 0,      # Maps to "OK" from the checkers' perspective
-        _('down'): 1,    # Maps to "TIMEOUT" from the checkers' perspective
+        _('down'): 1,
         _('faulty'): 2,
         _('flag not found'): 3,
         _('recovering'): 4
