@@ -43,11 +43,11 @@ class RunnerSupervisor:
         self.processes = {}
         self.next_identifier = 0
 
-    def start_runner(self, args, info, logging_params):
+    def start_runner(self, args, sudo_user, info, logging_params):
         logging.info('Starting Runner process, args: %s, info: %s', args, info)
         receive, send = multiprocessing.Pipe(False)
-        proc = multiprocessing.Process(target=run_checker_script, args=(args, info, logging_params,
-                                                                        self.next_identifier,
+        proc = multiprocessing.Process(target=run_checker_script, args=(args, sudo_user, info,
+                                                                        logging_params, self.next_identifier,
                                                                         self.work_queue, receive))
         self.processes[self.next_identifier] = (proc, send, info)
 
@@ -98,7 +98,7 @@ class RunnerSupervisor:
         }
 
 
-def run_checker_script(args, info, logging_params, runner_id, queue_to_master, pipe_from_master):
+def run_checker_script(args, sudo_user, info, logging_params, runner_id, queue_to_master, pipe_from_master):
     """
     Checker Script Runner, which is supposed to already be executed in an individual process. The actual
     Checker Script is then launched as another child process (one per Runner).
@@ -160,6 +160,10 @@ def run_checker_script(args, info, logging_params, runner_id, queue_to_master, p
         os.dup2(ctrlout_write, CTRLOUT_FD)
         os.close(ctrlout_write)
 
+    if sudo_user is not None:
+        args = ['sudo', '--user='+sudo_user, '--preserve-env=PATH,CTF_CHECKERSCRIPT,CHECKERSCRIPT_PIDFILE',
+                '--close-from=5', '--'] + args
+
     env = {**os.environ, 'CTF_CHECKERSCRIPT': '1'}
     # Python doesn't specify if preexec_fn gets executed before or after closing file descriptors, thus we
     # specify both variants as pass_fds
@@ -181,7 +185,12 @@ def run_checker_script(args, info, logging_params, runner_id, queue_to_master, p
 
     # Kill all children when this process gets terminated (requires `start_new_session=True` above)
     def sigterm_handler(_, __):
-        os.killpg(proc.pid, signal.SIGKILL)
+        # Yeah kids, this is how Unix works
+        pgid = -1 * proc.pid
+        kill_args = ['kill', '-KILL', str(pgid)]
+        if sudo_user is not None:
+            kill_args = ['sudo', '--user='+sudo_user, '--'] + kill_args
+        subprocess.check_call(kill_args)
         sys.exit(1)
     signal.signal(signal.SIGTERM, sigterm_handler)
 

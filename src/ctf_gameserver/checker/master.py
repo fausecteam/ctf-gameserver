@@ -298,9 +298,6 @@ class MasterLoop:
         for task in tasks:
             ip = self.ip_pattern % task['team_id']
             runner_args = [self.checker_script, ip, str(task['team_id']), str(task['tick'])]
-            if self.sudo_user is not None:
-                runner_args = ['sudo', '--user='+self.sudo_user, '--preserve-env=PATH,CTF_CHECKERSCRIPT',
-                               '--close-from=5', '--'] + runner_args
 
             # Information in task_info should be somewhat human-readable, because it also ends up in Checker
             # Script logs
@@ -308,7 +305,7 @@ class MasterLoop:
                          'team': task['team_id'],
                          'tick': current_tick}
             logging.info('Starting Checker Script for team %d in tick %d', task['team_id'], current_tick)
-            self.supervisor.start_runner(runner_args, task_info, self.logging_params)
+            self.supervisor.start_runner(runner_args, self.sudo_user, task_info, self.logging_params)
 
     def update_launch_params(self):
         """

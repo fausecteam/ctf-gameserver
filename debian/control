@@ -36,6 +36,7 @@ Depends:
  python3-systemd
 Recommends:
  python3-graypy,
+ sudo,
  systemd,
  uwsgi | libapache2-mod-wsgi | httpd-wsgi
 Description: FAUST CTF Gameserver

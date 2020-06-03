@@ -3,6 +3,7 @@ from unittest import SkipTest
 from unittest.mock import patch
 import shutil
 import sqlite3
+import subprocess
 import tempfile
 import time
 
@@ -448,3 +449,74 @@ class IntegrationTest(DatabaseTestCase):
             cursor.execute('SELECT status FROM scoring_statuscheck'
                            '    WHERE service_id=1 AND team_id=2 AND tick=0')
             self.assertEqual(cursor.fetchone()[0], CheckResult.OK.value)
+
+    @patch('logging.warning')
+    @patch('ctf_gameserver.checker.master.get_monotonic_time')
+    def test_sudo_unfinished(self, monotonic_mock, warning_mock):
+        if shutil.which('sudo') is None or not os.path.exists('/etc/sudoers.d/ctf-checker'):
+            raise SkipTest('sudo or sudo config not available')
+
+        checkerscript_path = os.path.join(os.path.dirname(__file__),
+                                          'integration_unfinished_checkerscript.py')
+
+        checkerscript_pidfile = tempfile.NamedTemporaryFile()
+        os.chmod(checkerscript_pidfile.name, 0o666)
+        os.environ['CHECKERSCRIPT_PIDFILE'] = checkerscript_pidfile.name
+
+        monotonic_mock.return_value = 10
+        master_loop = MasterLoop(self.connection, self.state_db_conn, 'service1', checkerscript_path,
+                                 'ctf-checkerrunner', 90, 1, 10, '0.0.%s.1', b'secret', {})
+
+        with transaction_cursor(self.connection) as cursor:
+            cursor.execute('UPDATE scoring_gamecontrol SET current_tick=0')
+            cursor.execute('INSERT INTO scoring_flag (service_id, protecting_team_id, tick)'
+                           '    VALUES (1, 2, 0)')
+        monotonic_mock.return_value = 20
+
+        master_loop.supervisor.queue_timeout = 0.01
+        # Checker Script gets started, will return False because no messages yet
+        self.assertFalse(master_loop.step())
+        master_loop.supervisor.queue_timeout = 10
+        self.assertTrue(master_loop.step())
+
+        checkerscript_pidfile.seek(0)
+        checkerscript_pid = int(checkerscript_pidfile.read())
+
+        def signal_script():
+            subprocess.check_call(['sudo', '--user=ctf-checkerrunner', '--', 'kill', '-0',
+                                   str(checkerscript_pid)])
+
+        # Ensure process is running by sending signal 0
+        signal_script()
+
+        master_loop.supervisor.queue_timeout = 0.01
+        monotonic_mock.return_value = 50
+        self.assertFalse(master_loop.step())
+        # Process should still be running
+        signal_script()
+
+        with transaction_cursor(self.connection) as cursor:
+            cursor.execute('UPDATE scoring_gamecontrol SET current_tick=1')
+        monotonic_mock.return_value = 190
+        self.assertFalse(master_loop.step())
+        # Poll whether the process has been killed
+        for _ in range(100):
+            try:
+                signal_script()
+            except subprocess.CalledProcessError:
+                break
+            time.sleep(0.1)
+        with self.assertRaises(subprocess.CalledProcessError):
+            signal_script()
+
+        with transaction_cursor(self.connection) as cursor:
+            cursor.execute('SELECT COUNT(*) FROM scoring_flag'
+                           '    WHERE placement_start IS NOT NULL AND placement_end IS NULL')
+            self.assertEqual(cursor.fetchone()[0], 1)
+            cursor.execute('SELECT COUNT(*) FROM scoring_statuscheck')
+            self.assertEqual(cursor.fetchone()[0], 0)
+
+        warning_mock.assert_called_with('Terminating all %d Runner processes', 1)
+
+        del os.environ['CHECKERSCRIPT_PIDFILE']
+        checkerscript_pidfile.close()
