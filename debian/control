@@ -26,6 +26,7 @@ Depends:
 # ctf-gameserver brings its own JQuery, but python3-django requires Debian's JQUery (for the admin interface)
 # and it's only a "Recommend" there
  libjs-jquery,
+ procps,
  python3-configargparse,
  python3-django,
  python3-markdown,
