@@ -47,7 +47,7 @@ lint:
 	-pycodestyle $(SOURCE_DIR) $(TESTS_DIR)
 	-bandit --ini bandit.ini -r $(SOURCE_DIR)
 
-docs_site:
+docs_site: $(wildcard docs/* docs/*/*)
 	mkdocs build --strict
 
 
