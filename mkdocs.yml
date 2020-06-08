@@ -1,6 +1,7 @@
 site_name: CTF Gameserver
 site_description: Documentation for FAUST CTF Gameserver
 site_author: FAUST -- FAU Security Team
+site_url: https://ctf-gameserver.org
 repo_url: https://github.com/fausecteam/ctf-gameserver
 # Disable "Edit in GitHub"
 edit_uri: ''
