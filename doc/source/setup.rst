@@ -65,8 +65,9 @@ should contain exactly one table:
      team_id INTEGER,
      service_id INTEGER,
      identifier CHARACTER VARYING (128),
-     data TEXT
-   ) PRIMARY KEY (team_id, service_id, identifier);
+     data TEXT,
+     PRIMARY KEY (team_id, service_id, identifier)
+   );
 
 Checker
 -------
@@ -99,8 +100,9 @@ every team.
       "bonus" integer NOT NULL,
       "defense" double precision NOT NULL,
       "sla" double precision NOT NULL,
-      "total" double precision NOT NULL
-    ) PRIMARY KEY (team_id, service_id, identifier);
+      "total" double precision NOT NULL,
+      PRIMARY KEY (team_id, service_id, identifier)
+    );
 
 Networking
 ----------

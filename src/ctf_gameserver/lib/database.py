@@ -83,8 +83,6 @@ def _translate_operation(operation):
     operation = operation.replace('%s', '?')
     operation = operation.replace('NOW()', "DATETIME('now')")
 
-    operation = re.sub(r'\)( PRIMARY KEY \(.+\))', r',\1)', operation)
-
     # Apart from being a best effort, this also changes the semantics, but SQLite just doesn't support
     # "FOR UPDATE"
     operation = re.sub(r'FOR UPDATE OF \S+', '', operation)

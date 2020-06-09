@@ -24,8 +24,9 @@ class IntegrationTest(DatabaseTestCase):
                            '    team_id INTEGER,'
                            '    service_id INTEGER,'
                            '    identifier CHARACTER VARYING (128),'
-                           '    data TEXT'
-                           ') PRIMARY KEY (team_id, service_id, identifier)')
+                           '    data TEXT, '
+                           '    PRIMARY KEY (team_id, service_id, identifier)'
+                           ')')
 
     @patch('ctf_gameserver.checker.master.get_monotonic_time')
     def test_basic(self, monotonic_mock):
