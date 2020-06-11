@@ -94,3 +94,4 @@ Checker Script libraries
 Libraries in the following languages are currently available to assist you in developing Checker Scripts:
 
 * [Python](python-library.md)
+* [Go](go-library.md)
