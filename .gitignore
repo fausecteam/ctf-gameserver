@@ -17,6 +17,9 @@ __pycache__/
 /.tox/
 /.coverage
 
+# Go examples
+/examples/checker/example_checker_go/example_checker
+
 # Web component
 /src/ctf_gameserver/web/dev-db.sqlite3
 /src/ctf_gameserver/web/uploads/
