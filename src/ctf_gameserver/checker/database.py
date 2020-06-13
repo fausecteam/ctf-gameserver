@@ -29,6 +29,9 @@ def get_service_attributes(db_conn, service_slug, prohibit_changes=False):
         cursor.execute('SELECT id, name FROM scoring_service WHERE slug = %s', (service_slug,))
         result = cursor.fetchone()
 
+    if result is None:
+        raise DBDataError('Service has not been configured')
+
     return {
         'id': result[0],
         'name': result[1]
@@ -43,6 +46,9 @@ def get_current_tick(db_conn, prohibit_changes=False):
     with transaction_cursor(db_conn, prohibit_changes) as cursor:
         cursor.execute('SELECT current_tick FROM scoring_gamecontrol')
         result = cursor.fetchone()
+
+    if result is None:
+        raise DBDataError('Game control information has not been configured')
 
     return result[0]
 

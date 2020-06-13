@@ -122,12 +122,20 @@ def main():
             database.get_control_info(game_db_conn, prohibit_changes=True)
         except DBDataError as e:
             logging.warning('Invalid database state: %s', e)
+        try:
+            service_id = database.get_service_attributes(game_db_conn, args.service,
+                                                         prohibit_changes=True)['id']
+        except DBDataError as e:
+            logging.warning('Invalid database state: %s', e)
+            service_id = 1337    # Use dummy value for subsequent grant checks
+        try:
+            database.get_current_tick(game_db_conn, prohibit_changes=True)
+        except DBDataError as e:
+            logging.warning('Invalid database state: %s', e)
 
-        service_id = database.get_service_attributes(game_db_conn, args.service, prohibit_changes=True)['id']
-        database.get_current_tick(game_db_conn, prohibit_changes=True)
         database.get_task_count(game_db_conn, service_id, prohibit_changes=True)
         database.get_new_tasks(game_db_conn, service_id, 1, prohibit_changes=True)
-        database.commit_result(game_db_conn, service_id, 1, -1, 0, prohibit_changes=True)
+        database.commit_result(game_db_conn, service_id, 1, 0, 0, prohibit_changes=True)
         database.load_state(state_db_conn, service_id, 1, 'identifier', prohibit_changes=True)
         database.store_state(state_db_conn, service_id, 1, 'identifier', 'data', prohibit_changes=True)
     except psycopg2.ProgrammingError as e:
