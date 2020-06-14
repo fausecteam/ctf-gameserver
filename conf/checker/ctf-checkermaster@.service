@@ -12,6 +12,7 @@ ExecStart=/usr/bin/ctf-checkermaster
 TimeoutStopSec=90
 Restart=on-failure
 RestartSec=5
+SyslogIdentifier=ctf-checkermaster@%I
 
 # Security options, less strict to accommodate for Checker Script oddities
 PrivateDevices=yes
