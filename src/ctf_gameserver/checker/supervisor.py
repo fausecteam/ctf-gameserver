@@ -165,6 +165,7 @@ def run_checker_script(args, sudo_user, info, logging_params, runner_id, queue_t
                 '--close-from=5', '--'] + args
 
     env = {**os.environ, 'CTF_CHECKERSCRIPT': '1'}
+    script_logger.info('[RUNNER] Executing Checker Script')
     # Python doesn't specify if preexec_fn gets executed before or after closing file descriptors, thus we
     # specify both variants as pass_fds
     try:
@@ -174,6 +175,7 @@ def run_checker_script(args, sudo_user, info, logging_params, runner_id, queue_t
                                 preexec_fn=dup_ctrl_fds, start_new_session=True)
     except OSError:
         runner_logger.exception('Executing Checker Script failed:')
+        script_logger.exception('[RUNNER] Executing Checker Script failed:')
         # Tell the Supervisor that we are safe to be joined
         queue_to_master.put((runner_id, ACTION_RUNNER_EXIT, None))
         return
@@ -185,7 +187,7 @@ def run_checker_script(args, sudo_user, info, logging_params, runner_id, queue_t
 
     # Kill all children when this process gets terminated (requires `start_new_session=True` above)
     def sigterm_handler(_, __):
-        runner_logger.warning('Terminating Checker Script from Supervisor')
+        script_logger.warning('[RUNNER] Terminating Checker Script')
         # Yeah kids, this is how Unix works
         pgid = -1 * proc.pid
         kill_args = ['kill', '-KILL', str(pgid)]
@@ -255,6 +257,7 @@ def run_checker_script(args, sudo_user, info, logging_params, runner_id, queue_t
     os.close(ctrlout_read)
 
     runner_logger.info('Checker Script exited with code %d', proc.returncode)
+    script_logger.info('[RUNNER] Checker Script exited with code %d', proc.returncode)
     # Tell the Supervisor that our child has exited and we are safe to be joined without blocking
     queue_to_master.put((runner_id, ACTION_RUNNER_EXIT, None))
 
@@ -295,7 +298,8 @@ def handle_script_message(message, ctrlin_fd, runner_id, queue_to_master, pipe_f
             # Ignore malformed message from the Checker Script, will be logged by the Master
             pass
         else:
-            script_logger.info('CHECKER SCRIPT RESULT: %s', result.name, extra={'result': result.value})
+            script_logger.info('[RUNNER] Checker Script result: %s', result.name,
+                               extra={'result': result.value})
 
     queue_to_master.put((runner_id, action, param))
     response = pipe_from_master.recv()
