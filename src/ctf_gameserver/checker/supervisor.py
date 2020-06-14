@@ -137,8 +137,18 @@ def run_checker_script(args, sudo_user, info, logging_params, runner_id, queue_t
         journal_handler = JournalHandler(SYSLOG_IDENTIFIER=syslog_identifier)
         script_logger.addHandler(journal_handler)
     if 'gelf' in logging_params:
-        import graypy    # pylint: disable=import-outside-toplevel,import-error
-        gelf_handler = graypy.GELFHandler(logging_params['gelf']['host'], logging_params['gelf']['port'])
+        # pylint: disable=import-outside-toplevel,import-error
+        import graypy
+        # Work-around for missing IPv6 support in Python's
+        # logging.handlers.DatagramHandler (https://bugs.python.org/issue14855)
+        gelf_class = graypy.GELFHandler
+        if ':' in logging_params['gelf']['host']:
+            import socket
+            class IPv6GELFHandler(graypy.GELFHandler):
+                def makeSocket(self):
+                    return socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
+            gelf_class = IPv6GELFHandler
+        gelf_handler = gelf_class(logging_params['gelf']['host'], logging_params['gelf']['port'])
         script_logger.addHandler(gelf_handler)
 
     stdout_read, stdout_write = os.pipe()

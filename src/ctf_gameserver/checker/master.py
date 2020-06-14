@@ -5,6 +5,7 @@ import math
 import os
 import signal
 import time
+import urllib.parse
 
 import psycopg2
 from psycopg2 import errorcodes as postgres_errors
@@ -86,10 +87,11 @@ def main():
         except ImportError:
             logging.error('graypy module is required for GELF logging')
             return os.EX_USAGE
-        try:
-            gelf_host, gelf_port = args.gelf_server.rsplit(':', 1)
-            gelf_port = int(gelf_port)
-        except ValueError:
+        # Use pseudo URL for splitting, see https://stackoverflow.com/a/53172593
+        gelf_server = urllib.parse.urlsplit('//' + args.gelf_server)
+        gelf_host = gelf_server.hostname
+        gelf_port = gelf_server.port
+        if gelf_host is None or gelf_server is None:
             logging.error('GELF server needs to be specified as "<host>:<port>"')
             return os.EX_USAGE
         logging_params['gelf'] = {'host': gelf_host, 'port': gelf_port}
