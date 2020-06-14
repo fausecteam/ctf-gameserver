@@ -185,6 +185,7 @@ def run_checker_script(args, sudo_user, info, logging_params, runner_id, queue_t
 
     # Kill all children when this process gets terminated (requires `start_new_session=True` above)
     def sigterm_handler(_, __):
+        runner_logger.warning('Terminating Checker Script from Supervisor')
         # Yeah kids, this is how Unix works
         pgid = -1 * proc.pid
         kill_args = ['kill', '-KILL', str(pgid)]
