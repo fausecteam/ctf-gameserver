@@ -121,7 +121,7 @@ func genFlag(team, service, timestamp int, payload, secret []byte) string {
 
 	var b bytes.Buffer
 	binary.Write(&b, binary.BigEndian, int32(timestamp))
-	binary.Write(&b, binary.BigEndian, byte(team))
+	binary.Write(&b, binary.BigEndian, uint16(team))
 	binary.Write(&b, binary.BigEndian, byte(service))
 	if len(payload) == 0 {
 		binary.Write(&b, binary.BigEndian, crc32.ChecksumIEEE(b.Bytes()))
@@ -137,7 +137,7 @@ func genFlag(team, service, timestamp int, payload, secret []byte) string {
 	d.Write(b.Bytes())
 	mac := d.Sum(nil)
 
-	b.Write(mac[:10])
+	b.Write(mac[:9])
 	return "FAUST_" + base64.StdEncoding.EncodeToString(b.Bytes())
 }
 

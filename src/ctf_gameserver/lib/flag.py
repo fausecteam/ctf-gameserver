@@ -7,11 +7,11 @@ import time
 import zlib
 
 # Length of the MAC (in bytes)
-MAC_LEN = 10
+MAC_LEN = 9
 # Length of the payload (in bytes)
 PAYLOAD_LEN = 8
 # timestamp + team + service + payload
-DATA_LEN = 4 + 1 + 1 + PAYLOAD_LEN
+DATA_LEN = 4 + 2 + 1 + PAYLOAD_LEN
 # Flag prefix
 PREFIX = "FAUST"
 # Flag validity in seconds
@@ -34,7 +34,9 @@ def generate(team_id, service_id, secret, payload=None, timestamp=None):
     if timestamp is None:
         timestamp = time.time() + VALID
 
-    protected_data = struct.pack("!i c c", int(timestamp), bytes([team_id]), bytes([service_id]))
+    if team_id > 65535:
+        raise ValueError('Team ID must fit in 16 bits')
+    protected_data = struct.pack("!i H c", int(timestamp), team_id, bytes([service_id]))
 
     if payload is None:
         payload = struct.pack("!I I", zlib.crc32(protected_data), 0)
@@ -73,12 +75,12 @@ def verify(flag, secret):
     if not compare_digest(mac, flag_mac):
         raise InvalidFlagMAC()
 
-    timestamp, team, service = struct.unpack("!i c c", protected_data[:6])
-    payload = protected_data[6:]
+    timestamp, team, service = struct.unpack("!i H c", protected_data[:7])
+    payload = protected_data[7:]
     if time.time() - timestamp > 0:
         raise FlagExpired(time.time() - timestamp)
 
-    return (int.from_bytes(team, 'big'), int.from_bytes(service, 'big'), payload, timestamp)
+    return (int(team), int.from_bytes(service, 'big'), payload, timestamp)
 
 
 def _gen_mac(secret, protected_data):
