@@ -96,6 +96,8 @@ def main():
             return os.EX_USAGE
         logging_params['gelf'] = {'host': gelf_host, 'port': gelf_port}
 
+    flag_secret = base64.b64decode(args.flagsecret)
+
     try:
         game_db_conn = psycopg2.connect(host=args.dbhost, database=args.dbname, user=args.dbuser,
                                         password=args.dbpassword)
@@ -154,7 +156,7 @@ def main():
         try:
             master_loop = MasterLoop(game_db_conn, state_db_conn, args.service, args.checkerscript,
                                      args.sudouser, args.maxcheckduration, args.checkercount, args.interval,
-                                     args.ippattern, args.flagsecret, logging_params)
+                                     args.ippattern, flag_secret, logging_params)
             break
         except DBDataError as e:
             logging.warning('Waiting for valid database state: %s', e)
