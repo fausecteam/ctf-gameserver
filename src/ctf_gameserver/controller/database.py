@@ -31,7 +31,9 @@ def increase_tick(db_conn, prohibit_changes=False):
         # Create flags for every service and team in the new tick
         cursor.execute('INSERT INTO scoring_flag (service_id, protecting_team_id, tick)'
                        '    SELECT service.id, user_id, current_tick'
-                       '    FROM scoring_service service, registration_team, scoring_gamecontrol')
+                       '    FROM scoring_service service, auth_user user, registration_team,'
+                       '         scoring_gamecontrol'
+                       '    WHERE user.id = user_id AND user.is_active;')
 
 
 def update_scoring(db_conn):
