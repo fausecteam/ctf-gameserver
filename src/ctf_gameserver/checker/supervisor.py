@@ -99,6 +99,15 @@ class RunnerSupervisor:
 
 
 def run_checker_script(args, sudo_user, info, logging_params, runner_id, queue_to_master, pipe_from_master):
+    try:
+        _run_checker_script(args, sudo_user, info, logging_params, runner_id, queue_to_master,
+                            pipe_from_master)
+    finally:
+        # Tell the Supervisor that our child has exited and we are safe to be joined without blocking
+        queue_to_master.put((runner_id, ACTION_RUNNER_EXIT, None))
+
+
+def _run_checker_script(args, sudo_user, info, logging_params, runner_id, queue_to_master, pipe_from_master):
     """
     Checker Script Runner, which is supposed to already be executed in an individual process. The actual
     Checker Script is then launched as another child process (one per Runner).
@@ -186,8 +195,6 @@ def run_checker_script(args, sudo_user, info, logging_params, runner_id, queue_t
     except OSError:
         runner_logger.exception('Executing Checker Script failed:')
         script_logger.exception('[RUNNER] Executing Checker Script failed:')
-        # Tell the Supervisor that we are safe to be joined
-        queue_to_master.put((runner_id, ACTION_RUNNER_EXIT, None))
         return
     # Close the child's ends of the pipes on the parent's side
     os.close(stdout_write)
@@ -268,8 +275,6 @@ def run_checker_script(args, sudo_user, info, logging_params, runner_id, queue_t
 
     runner_logger.info('Checker Script exited with code %d', proc.returncode)
     script_logger.info('[RUNNER] Checker Script exited with code %d', proc.returncode)
-    # Tell the Supervisor that our child has exited and we are safe to be joined without blocking
-    queue_to_master.put((runner_id, ACTION_RUNNER_EXIT, None))
 
 
 def handle_script_message(message, ctrlin_fd, runner_id, queue_to_master, pipe_from_master, runner_logger,
