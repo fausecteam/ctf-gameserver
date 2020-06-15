@@ -208,6 +208,7 @@ class MasterLoop:
 
     def refresh_control_info(self):
         control_info = database.get_control_info(self.game_db_conn)
+        self.contest_start = control_info['contest_start']
         self.tick_duration = datetime.timedelta(seconds=control_info['tick_duration'])
         self.flag_valid_ticks = control_info['valid_ticks']
 
@@ -259,14 +260,22 @@ class MasterLoop:
 
     def handle_flag_request(self, task_info, params):
         try:
+            tick = int(params['tick'])
+        except (KeyError, ValueError):
+            return None
+
+        try:
             payload = base64.b64decode(params['payload'])
         except KeyError:
             payload = None
 
         if payload == b'':
             payload = None
-        expiration = datetime.datetime.utcnow() + (self.tick_duration * self.flag_valid_ticks)
 
+        # We need current value for self.contest_start which might have changed
+        self.refresh_control_info()
+
+        expiration = self.contest_start + (self.flag_valid_ticks + tick) * self.tick_duration
         return flag_lib.generate(task_info['team'], self.service['id'], self.flag_secret, payload,
                                  expiration.timestamp())
 

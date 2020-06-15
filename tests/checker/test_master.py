@@ -15,9 +15,9 @@ class MasterTest(DatabaseTestCase):
         self.master_loop = MasterLoop(self.connection, None, 'service1', '/dev/null', None, 90, 8, 10,
                                       '0.0.%s.1', b'secret', {})
 
-    @patch('datetime.datetime')
-    def test_handle_flag_request(self, datetime_mock):
-        datetime_mock.utcnow.return_value = datetime.datetime.utcfromtimestamp(42)
+    def test_handle_flag_request(self):
+        with transaction_cursor(self.connection) as cursor:
+            cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
 
         task_info = {
             'service': 'Service 1',
@@ -25,15 +25,35 @@ class MasterTest(DatabaseTestCase):
             'tick': 1
         }
 
-        params1 = {}
+        params1 = {'tick': 1}
         resp1 = self.master_loop.handle_flag_request(task_info, params1)
-        params2 = {}
+        params2 = {'tick': 1}
         resp2 = self.master_loop.handle_flag_request(task_info, params2)
-        params3 = {'payload': 'TmV2ZXIgZ28='}
+        params3 = {'tick': 1, 'payload': 'TmV2ZXIgZ28='}
         resp3 = self.master_loop.handle_flag_request(task_info, params3)
 
         self.assertEqual(resp1, resp2)
         self.assertNotEqual(resp1, resp3)
+
+        params4 = {'tick': 2}
+        resp4 = self.master_loop.handle_flag_request(task_info, params4)
+        params5 = {'tick': 2}
+        resp5 = self.master_loop.handle_flag_request(task_info, params5)
+
+        self.assertEqual(resp4, resp5)
+        self.assertNotEqual(resp1, resp4)
+
+        params6 = {}
+        self.assertIsNone(self.master_loop.handle_flag_request(task_info, params6))
+
+        # Changing the start time changes all flags
+        with transaction_cursor(self.connection) as cursor:
+            # SQLite syntax for tests
+            cursor.execute('UPDATE scoring_gamecontrol SET start=DATETIME("now", "+1 hour")')
+        resp1_again = self.master_loop.handle_flag_request(task_info, params1)
+        resp4_again = self.master_loop.handle_flag_request(task_info, params4)
+        self.assertNotEqual(resp1, resp1_again)
+        self.assertNotEqual(resp4, resp4_again)
 
     def test_handle_result_request(self):
         task_info = {

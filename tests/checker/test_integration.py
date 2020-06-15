@@ -45,6 +45,7 @@ class IntegrationTest(DatabaseTestCase):
 
         # Start tick
         with transaction_cursor(self.connection) as cursor:
+            cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
             cursor.execute('UPDATE scoring_gamecontrol SET current_tick=0')
             cursor.execute('INSERT INTO scoring_flag (service_id, protecting_team_id, tick)'
                            '    VALUES (1, 2, 0)')
@@ -86,6 +87,7 @@ class IntegrationTest(DatabaseTestCase):
                                  90, 1, 10, '0.0.%s.1', b'secret', {})
 
         with transaction_cursor(self.connection) as cursor:
+            cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
             cursor.execute('UPDATE scoring_gamecontrol SET current_tick=0')
             cursor.execute('INSERT INTO scoring_flag (service_id, protecting_team_id, tick)'
                            '    VALUES (1, 2, 0)')
@@ -115,6 +117,7 @@ class IntegrationTest(DatabaseTestCase):
                                  90, 1, 10, '0.0.%s.1', b'secret', {})
 
         with transaction_cursor(self.connection) as cursor:
+            cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
             cursor.execute('UPDATE scoring_gamecontrol SET current_tick=0')
             cursor.execute('INSERT INTO scoring_flag (service_id, protecting_team_id, tick)'
                            '    VALUES (1, 2, 0)')
@@ -144,6 +147,7 @@ class IntegrationTest(DatabaseTestCase):
                                  90, 1, 10, '0.0.%s.1', b'secret', {})
 
         with transaction_cursor(self.connection) as cursor:
+            cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
             cursor.execute('UPDATE scoring_gamecontrol SET current_tick=0')
             cursor.execute('INSERT INTO scoring_flag (service_id, protecting_team_id, tick)'
                            '    VALUES (1, 2, 0)')
@@ -179,6 +183,7 @@ class IntegrationTest(DatabaseTestCase):
                                  90, 1, 10, '0.0.%s.1', b'secret', {})
 
         with transaction_cursor(self.connection) as cursor:
+            cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
             cursor.execute('UPDATE scoring_gamecontrol SET current_tick=0')
             cursor.execute('INSERT INTO scoring_flag (service_id, protecting_team_id, tick)'
                            '    VALUES (1, 2, 0)')
@@ -238,6 +243,7 @@ class IntegrationTest(DatabaseTestCase):
 
         # Tick 0
         with transaction_cursor(self.connection) as cursor:
+            cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
             cursor.execute('UPDATE scoring_gamecontrol SET current_tick=0')
             # Also add flags for service 2 (which does not get checked) to make sure it won't get touched
             cursor.execute('INSERT INTO scoring_flag (service_id, protecting_team_id, tick)'
@@ -335,6 +341,7 @@ class IntegrationTest(DatabaseTestCase):
 
         # Tick 0
         with transaction_cursor(self.connection) as cursor:
+            cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
             cursor.execute('UPDATE scoring_gamecontrol SET current_tick=0')
             cursor.execute('INSERT INTO scoring_flag (service_id, protecting_team_id, tick)'
                            '    VALUES (1, 2, 0), (1, 3, 0)')
@@ -402,6 +409,7 @@ class IntegrationTest(DatabaseTestCase):
                                  90, 1, 10, '0.0.%s.1', b'secret', {})
 
         with transaction_cursor(self.connection) as cursor:
+            cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
             cursor.execute('UPDATE scoring_gamecontrol SET current_tick=0')
             cursor.execute('INSERT INTO scoring_flag (service_id, protecting_team_id, tick)'
                            '    VALUES (1, 2, 0)')
@@ -430,6 +438,7 @@ class IntegrationTest(DatabaseTestCase):
                                  'ctf-checkerrunner', 90, 1, 10, '0.0.%s.1', b'secret', {})
 
         with transaction_cursor(self.connection) as cursor:
+            cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
             cursor.execute('UPDATE scoring_gamecontrol SET current_tick=0')
             cursor.execute('INSERT INTO scoring_flag (service_id, protecting_team_id, tick)'
                            '    VALUES (1, 2, 0)')
@@ -469,6 +478,7 @@ class IntegrationTest(DatabaseTestCase):
                                  'ctf-checkerrunner', 90, 1, 10, '0.0.%s.1', b'secret', {})
 
         with transaction_cursor(self.connection) as cursor:
+            cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
             cursor.execute('UPDATE scoring_gamecontrol SET current_tick=0')
             cursor.execute('INSERT INTO scoring_flag (service_id, protecting_team_id, tick)'
                            '    VALUES (1, 2, 0)')
