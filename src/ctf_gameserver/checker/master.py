@@ -195,9 +195,7 @@ class MasterLoop:
         self.flag_secret = flag_secret
         self.logging_params = logging_params
 
-        control_info = database.get_control_info(self.game_db_conn)
-        self.tick_duration = datetime.timedelta(seconds=control_info['tick_duration'])
-        self.flag_valid_ticks = control_info['valid_ticks']
+        self.refresh_control_info()
         self.service = database.get_service_attributes(self.game_db_conn, service_slug)
         self.service['slug'] = service_slug
 
@@ -207,6 +205,11 @@ class MasterLoop:
         self.last_launch = get_monotonic_time() - self.interval
         self.tasks_per_launch = None
         self.shutting_down = False
+
+    def refresh_control_info(self):
+        control_info = database.get_control_info(self.game_db_conn)
+        self.tick_duration = datetime.timedelta(seconds=control_info['tick_duration'])
+        self.flag_valid_ticks = control_info['valid_ticks']
 
     def step(self):
         """
