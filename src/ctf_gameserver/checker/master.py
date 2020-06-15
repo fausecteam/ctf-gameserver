@@ -301,8 +301,8 @@ class MasterLoop:
                           task_info['team'], task_info['tick'], result)
             return
 
-        logging.info('Result from Checker Script for team %d in tick %d: %d', task_info['team'],
-                     task_info['tick'], check_result.value)
+        logging.info('Result from Checker Script for team %d in tick %d: %s', task_info['team'],
+                     task_info['tick'], check_result)
         database.commit_result(self.game_db_conn, self.service['id'], task_info['team'], task_info['tick'],
                                result)
 
