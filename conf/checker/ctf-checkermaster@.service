@@ -14,16 +14,12 @@ Restart=on-failure
 RestartSec=5
 SyslogIdentifier=ctf-checkermaster@%I
 
-# Security options, less strict to accommodate for Checker Script oddities
-PrivateDevices=yes
+# Security options, cannot use any which imply `NoNewPrivileges` because Checker Scripts can get executed
+# using sudo
 PrivateTmp=yes
 ProtectControlGroups=yes
 ProtectHome=yes
-ProtectKernelModules=yes
-ProtectKernelTunables=yes
 ProtectSystem=strict
-RestrictNamespaces=yes
-RestrictRealtime=yes
 
 [Install]
 WantedBy=multi-user.target
