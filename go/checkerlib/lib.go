@@ -86,6 +86,9 @@ func init() {
 	}
 
 	log.SetOutput(logger{})
+	// Remove date and time from log messages as the Control Master logger
+	// automatically adds them
+	log.SetFlags(0)
 }
 
 // Interface for individual Checker implementations.
