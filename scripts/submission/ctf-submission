@@ -3,6 +3,8 @@
 import asyncore
 import argparse
 import logging
+import re
+import socket
 
 import psycopg2
 
@@ -22,7 +24,12 @@ def main():
                         help="Port to listen on")
     parser.add_argument('--secret', type=str, required=True,
                         help="base64 random string consistent with checkers")
+    parser.add_argument('--teamregex', type=str, required=True,
+                        help='Python regex to extract the team ID, must '
+                             'contain a match group for the team ID')
     args = parser.parse_args()
+
+    team_regex = re.compile(args.teamregex)
 
     numeric_level = getattr(logging, args.loglevel.upper())
     logging.getLogger().setLevel(numeric_level)
@@ -40,8 +47,18 @@ def main():
             conteststart, contestend, flagvalidity, tickduration = cursor.fetchone()
 
     logging.debug("Starting asyncore")
-    flagserver.FlagServer(args.listen, args.port, dbconnection, args.secret,
-                          conteststart, contestend, flagvalidity, tickduration)
+
+    for family in (socket.AF_INET6, socket.AF_INET):
+        try:
+            flagserver.FlagServer(family, args.listen, args.port,
+                                  dbconnection, args.secret, conteststart,
+                                  contestend, flagvalidity, tickduration,
+                                  team_regex)
+            break
+        except socket.gaierror as e:
+            if e.errno != socket.EAI_ADDRFAMILY:
+                raise
+
     daemon.notify("READY=1")
 
     asyncore.loop()

@@ -11,11 +11,19 @@ from ctf_gameserver.lib import flag
 
 class FlagHandler(asynchat.async_chat):
     def __init__(self, sock, addr, dbconnection, secret,
-                 conteststart, contestend, flagvalidity, tickduration):
+                 conteststart, contestend, flagvalidity, tickduration,
+                 team_regex):
         asynchat.async_chat.__init__(self, sock=sock)
-        ipaddr, port = addr
-        self.team = int(ipaddr.split('.')[2])
-        self._addr = addr
+
+        ipaddr, port = addr[:2]  # IPv4 returns two values, IPv6 four
+        match = team_regex.match(ipaddr)
+        if match is None:
+            logging.warning("IP %s does not match team regex", ipaddr)
+            self.push("Cannot find team for client IP, aborting\n".encode('ascii'))
+            self.close()
+            return
+
+        self.team = int(match.group(1))
         self.set_terminator(b"\n")
         self._logger = logging.getLogger("%13s %5d" % (ipaddr, port))
         self._cursor = None
@@ -145,9 +153,9 @@ class FlagHandler(asynchat.async_chat):
 
 
 class FlagServer(asyncore.dispatcher):
-    def __init__(self, host, port, *args):
+    def __init__(self, family, host, port, *args):
         asyncore.dispatcher.__init__(self)
-        self.create_socket(family=socket.AF_INET)
+        self.create_socket(family=family)
         self.set_reuse_addr()
         self.bind((host, port))
         self.listen(5)
