@@ -8,5 +8,7 @@ If you don't know what this is about, you can just ignore this mail.
 Otherwise, please visit this page to confirm your address:
 {{ protocol }}://{{ domain }}{{ confirm_path }}?user={{ user }}&token={{ token }}
 
+You need to do this, otherwise you will not be able to participate!
+
 Welcome to {{ competition_name }} and best regards,
 The organizing Team{% endblocktrans %}{% endautoescape %}

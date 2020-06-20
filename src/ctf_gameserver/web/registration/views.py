@@ -5,6 +5,7 @@ from django.db import transaction, IntegrityError
 from django.views.generic import ListView
 from django.shortcuts import render, redirect
 from django.conf import settings
+from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 from django.contrib import messages
 from django.contrib.auth import logout, get_user_model, update_session_auth_hash
@@ -40,9 +41,11 @@ def register(request):
             team_form.save(user)
             user_form.send_confirmation_mail(request)
 
-            messages.success(request, _('Successful registration! A confirmation mail has been sent to your '
-                                        'formal email address. Please open the link inside that email in '
-                                        'order to complete your sign-up.'))
+            messages.success(request,
+                             mark_safe(_('Successful registration! A confirmation mail has been sent to '
+                                         'your formal email address. <strong>You must click the link inside '
+                                         'that email to complete your sign-up, otherwise you will not be '
+                                         'able to participate.</strong>')))
 
             return redirect(settings.HOME_URL)
     else:
