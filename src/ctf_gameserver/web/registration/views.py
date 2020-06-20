@@ -37,7 +37,7 @@ def register(request):
             user_form.send_confirmation_mail(request)
 
             messages.success(request, _('Successful registration! A confirmation mail has been sent to your '
-                                        'formal email adress. Please open the link inside that email in '
+                                        'formal email address. Please open the link inside that email in '
                                         'order to complete your sign-up.'))
 
             return redirect(settings.HOME_URL)
@@ -75,7 +75,7 @@ def edit_team(request):
                 logout(request)
 
                 messages.warning(request, _('A confirmation mail has been sent to your new formal email '
-                                            'adress. Please visit the link inside that email. Until then, '
+                                            'address. Please visit the link inside that email. Until then, '
                                             'your team has been deactivated and you have been logged out.'))
                 return redirect(settings.HOME_URL)
 
@@ -100,8 +100,8 @@ def delete_team(request):
     """
     View for deletion of a User and the associated Team.
     This renders the 'edit_team' template with a modal overlay for deletion. The modal is rendered in static
-    HTML instead of showing it dynamically to avoid the need for (custom) JavaScript, espcially when handling
-    form errors in the the modal.
+    HTML instead of showing it dynamically to avoid the need for (custom) JavaScript, especially when
+    handling form errors in the modal.
     """
 
     try:
@@ -186,7 +186,7 @@ def mail_teams(request):
     batches = []
 
     for i in range(0, len(addresses), batch_size):
-        # Comma-seperated recipients for 'mailto' are against the spec, but should work in practice
+        # Comma-separated recipients for 'mailto' are against the spec, but should work in practice
         batches.append(','.join(addresses[i:i+batch_size]))
 
     return render(request, 'mail_teams.html', {'form': form, 'batches': batches})

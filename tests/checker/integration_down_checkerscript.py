@@ -9,7 +9,7 @@ class TestChecker(checkerlib.BaseChecker):
 
     def place_flag(self, tick):
         checkerlib.get_flag(tick)
-        raise OSError(errno.ETIMEDOUT, 'A timeout occured')
+        raise OSError(errno.ETIMEDOUT, 'A timeout occurred')
 
     def check_service(self):
         return checkerlib.CheckResult.OK
