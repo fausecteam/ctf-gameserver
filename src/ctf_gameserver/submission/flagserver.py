@@ -30,7 +30,7 @@ class FlagHandler(asynchat.async_chat):
         self._dbconnection = dbconnection
         self._secret = base64.b64decode(secret)
         self.buffer = b''
-        self._logger.info("Accepted connection from Team %s", self.team)
+        self._logger.info("Accepted connection from Team (Net Number) %s", self.team)
         self._banner()
         self._conteststart = conteststart
         self._contestend = contestend
@@ -102,6 +102,14 @@ class FlagHandler(asynchat.async_chat):
     def _store_capture(self, team, service, timestamp):
         with self._dbconnection:
             with self._dbconnection.cursor() as cursor:
+                cursor.execute("""SELECT user_id FROM registration_team WHERE net_number = %s""",
+                               (team,))
+                data = cursor.fetchone()
+                if data is None:
+                    self._reply(u"Unknown team net".encode("utf-8"))
+                    return False
+                team = data[0]
+
                 cursor.execute("""SELECT nop_team FROM registration_team WHERE user_id = %s""",
                                (team,))
                 nopp, = cursor.fetchone()

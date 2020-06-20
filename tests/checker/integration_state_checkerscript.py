@@ -15,7 +15,7 @@ class TestChecker(checkerlib.BaseChecker):
 
         checkerlib.get_flag(tick)
 
-        if self.team == 2:
+        if self.team == 92:
             if tick == 0:
                 checkerlib.store_state('key1', 'Wir können Zustände speichern 🥳')
             else:
@@ -33,7 +33,7 @@ class TestChecker(checkerlib.BaseChecker):
             elif tick == 2:
                 if checkerlib.load_state('🔑ser') != ['Roger', '"Verbal"', 'Kint']:
                     raise Exception('Did not get stored state back')
-        elif self.team == 3:
+        elif self.team == 93:
             if tick == 1:
                 if checkerlib.load_state('key1') is not None:
                     raise Exception('Got state where there should be none')

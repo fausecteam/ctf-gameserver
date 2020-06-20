@@ -23,6 +23,7 @@ class Team(models.Model):
 
     user = models.OneToOneField(settings.AUTH_USER_MODEL, primary_key=True, on_delete=models.CASCADE)
 
+    net_number = models.PositiveSmallIntegerField(null=True, unique=True)
     informal_email = models.EmailField(_('Informal email address'))
     image = ThumbnailImageField(upload_to=_gen_image_name, blank=True)
     affiliation = models.CharField(max_length=100, blank=True)

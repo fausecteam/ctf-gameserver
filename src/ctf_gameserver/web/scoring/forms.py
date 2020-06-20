@@ -18,7 +18,9 @@ class GameControlAdminForm(forms.ModelForm):
         model = models.GameControl
         exclude = ('current_tick',)
         help_texts = {
-            'valid_ticks': _('Number of ticks a flag is valid for')
+            'valid_ticks': _('Number of ticks a flag is valid for'),
+            'min_net_number': _('If unset, team IDs will be used as net numbers'),
+            'max_net_number': _('(Inclusive) If unset, team IDs will be used as net numbers'),
         }
 
     def clean_tick_duration(self):

@@ -1,4 +1,7 @@
-from django.db import transaction
+import logging
+import random
+
+from django.db import transaction, IntegrityError
 from django.views.generic import ListView
 from django.shortcuts import render, redirect
 from django.conf import settings
@@ -9,6 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 
 from ctf_gameserver.web.scoring.decorators import registration_open_required
+import ctf_gameserver.web.scoring.models as scoring_models
 from . import forms
 from .models import Team
 from .util import email_token_generator
@@ -87,6 +91,7 @@ def edit_team(request):
         team_form = forms.TeamForm(prefix='team', instance=team)
 
     return render(request, 'edit_team.html', {
+        'team': team,
         'user_form': user_form,
         'team_form': team_form,
         'delete_form': None
@@ -151,12 +156,47 @@ def confirm_email(request):
         messages.error(request, error_message)
         return render(request, '400.html', status=400)
 
-    if email_token_generator.check_token(user, token):
-        User._default_manager.filter(pk=user_pk).update(is_active=True)
-        messages.success(request, _('Email address confirmed. Your registration is now complete.'))
-    else:
+    if not email_token_generator.check_token(user, token):
         messages.error(request, error_message)
         return render(request, '400.html', status=400)
+
+    if user.is_active:
+        # Nothing to do, don't generate net number again!
+        return redirect(settings.HOME_URL)
+
+    team = Team.objects.get(user__pk=user_pk)
+
+    game_control = scoring_models.GameControl.get_instance()
+    if game_control.min_net_number is None or game_control.max is None:
+        # Assign team IDs as net numbers when no net number range is configured
+        possible_net_numbers = set([user_pk])
+    else:
+        possible_net_numbers = set(range(game_control.min_net_number, game_control.max_net_number + 1))
+
+    while True:
+        try:
+            # Nested transactions are possible in Django
+            with transaction.atomic():
+                net_numbers = Team.objects.values_list('net_number', flat=True)
+                for number in net_numbers:
+                    possible_net_numbers.discard(number)
+
+                try:
+                    random_net_number = random.choice(list(possible_net_numbers))
+                except IndexError:
+                    logging.error('Net numbers exhausted, could not confirm team (ID) %d', user_pk)
+                    return render(request, '500.html', status=500)
+
+                team.net_number = random_net_number
+                team.save()
+
+                break
+        except IntegrityError:
+            pass
+
+    user.is_active = True
+    user.save()
+    messages.success(request, _('Email address confirmed. Your registration is now complete.'))
 
     return redirect(settings.HOME_URL)
 

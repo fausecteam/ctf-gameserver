@@ -139,7 +139,7 @@ def main():
 
         database.get_task_count(game_db_conn, service_id, prohibit_changes=True)
         database.get_new_tasks(game_db_conn, service_id, 1, prohibit_changes=True)
-        database.commit_result(game_db_conn, service_id, 1, 0, 0, prohibit_changes=True)
+        database.commit_result(game_db_conn, service_id, 1, 0, 0, prohibit_changes=True, fake_team_id=1)
         database.load_state(state_db_conn, service_id, 1, 'identifier', prohibit_changes=True)
         database.store_state(state_db_conn, service_id, 1, 'identifier', 'data', prohibit_changes=True)
     except psycopg2.ProgrammingError as e:
@@ -236,15 +236,16 @@ class MasterLoop:
                 elif req['action'] == ACTION_RESULT:
                     self.handle_result_request(req['info'], req['param'])
                 else:
-                    logging.error('Unknown action received from Checker Script for team %d in tick %d: %s',
-                                  req['info']['team'], req['info']['tick'], req['action'])
+                    logging.error('Unknown action received from Checker Script for team %d (net number %d) '
+                                  'in tick %d: %s', req['info']['_team_id'], req['info']['team'],
+                                  req['info']['tick'], req['action'])
                     # We can't signal an error to the Checker Script (which might be waiting for a response),
                     # so our only option is to kill it
                     self.supervisor.terminate_runner(req['runner_id'])
                     send_resp = False
             except:    # noqa, pylint: disable=bare-except
-                logging.exception('Checker Script communication error for team %d in tick %d:',
-                                  req['info']['team'], req['info']['tick'])
+                logging.exception('Checker Script communication error for team %d (net number %d) in tick '
+                                  '%d:', req['info']['_team_id'], req['info']['team'], req['info']['tick'])
                 self.supervisor.terminate_runner(req['runner_id'])
             else:
                 if send_resp:
@@ -290,19 +291,19 @@ class MasterLoop:
         try:
             result = int(param)
         except ValueError:
-            logging.error('Invalid result from Checker Script for team %d in tick %d: %s',
-                          task_info['team'], task_info['tick'], param)
+            logging.error('Invalid result from Checker Script for team %d (net number %d) in tick %d: %s',
+                          task_info['_team_id'], task_info['team'], task_info['tick'], param)
             return
 
         try:
             check_result = CheckResult(result)
         except ValueError:
-            logging.error('Invalid result from Checker Script for team %d in tick %d: %d',
-                          task_info['team'], task_info['tick'], result)
+            logging.error('Invalid result from Checker Script for team %d (net number %d) in tick %d: %d',
+                          task_info['_team_id'], task_info['team'], task_info['tick'], result)
             return
 
-        logging.info('Result from Checker Script for team %d in tick %d: %s', task_info['team'],
-                     task_info['tick'], check_result)
+        logging.info('Result from Checker Script for team %d (net number %d) in tick %d: %s',
+                     task_info['_team_id'], task_info['team'], task_info['tick'], check_result)
         database.commit_result(self.game_db_conn, self.service['id'], task_info['team'], task_info['tick'],
                                result)
 
@@ -320,15 +321,17 @@ class MasterLoop:
 
         tasks = database.get_new_tasks(self.game_db_conn, self.service['id'], self.tasks_per_launch)
         for task in tasks:
-            ip = self.ip_pattern % task['team_id']
-            runner_args = [self.checker_script, ip, str(task['team_id']), str(task['tick'])]
+            ip = self.ip_pattern % task['team_net_no']
+            runner_args = [self.checker_script, ip, str(task['team_net_no']), str(task['tick'])]
 
             # Information in task_info should be somewhat human-readable, because it also ends up in Checker
             # Script logs
             task_info = {'service': self.service['name'],
-                         'team': task['team_id'],
+                         'team': task['team_net_no'],
+                         '_team_id': task['team_id'],
                          'tick': current_tick}
-            logging.info('Starting Checker Script for team %d in tick %d', task['team_id'], current_tick)
+            logging.info('Starting Checker Script for team %d (net number %d) in tick %d', task['team_id'],
+                         task['team_net_no'], current_tick)
             self.supervisor.start_runner(runner_args, self.sudo_user, task_info, self.logging_params)
 
     def update_launch_params(self):

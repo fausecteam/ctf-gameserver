@@ -7,6 +7,13 @@
     <h1>{% block title %}{% trans 'Edit team' %}{% endblock %}</h1>
 </div>
 
+{% if team and team.net_number %}
+<div class="form-group">
+    <label for="team-number">Team Number:</label>
+    <input type="text" id="team-number" class="form-control" readonly="true" value="{{ team.net_number }}" />
+</div>
+{% endif %}
+
 <form enctype="multipart/form-data" method="post">
     {% csrf_token %}
 

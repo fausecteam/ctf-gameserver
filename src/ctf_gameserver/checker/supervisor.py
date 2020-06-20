@@ -153,6 +153,7 @@ def _run_checker_script(args, sudo_user, info, logging_params, runner_id, queue_
         gelf_class = graypy.GELFHandler
         if ':' in logging_params['gelf']['host']:
             import socket
+
             class IPv6GELFHandler(graypy.GELFHandler):
                 def makeSocket(self):
                     return socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)

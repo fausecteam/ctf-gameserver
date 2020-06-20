@@ -95,7 +95,7 @@ class BaseChecker:
 
     Attributes:
         ip: Vulnbox IP address of the team to be checked
-        team: ID of the team to be checked
+        team: Net number of the team to be checked
     """
 
     def __init__(self, ip: str, team: int) -> None:
@@ -190,7 +190,7 @@ def run_check(checker_cls: Type[BaseChecker]) -> None:
     """
 
     if len(sys.argv) != 4:
-        raise Exception('Invalid arguments, usage: {} <ip> <team> <tick>'.format(sys.argv[0]))
+        raise Exception('Invalid arguments, usage: {} <ip> <team-net-no> <tick>'.format(sys.argv[0]))
 
     ip = sys.argv[1]
     team = int(sys.argv[2])

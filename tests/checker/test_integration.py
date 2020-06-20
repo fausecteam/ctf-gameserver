@@ -21,11 +21,11 @@ class IntegrationTest(DatabaseTestCase):
         self.state_db_conn = sqlite3.connect(':memory:')
         with transaction_cursor(self.state_db_conn) as cursor:
             cursor.execute('CREATE TABLE checkerstate ('
-                           '    team_id INTEGER,'
+                           '    team_net_no INTEGER,'
                            '    service_id INTEGER,'
                            '    identifier CHARACTER VARYING (128),'
                            '    data TEXT, '
-                           '    PRIMARY KEY (team_id, service_id, identifier)'
+                           '    PRIMARY KEY (team_net_no, service_id, identifier)'
                            ')')
 
     @patch('ctf_gameserver.checker.master.get_monotonic_time')
@@ -336,8 +336,8 @@ class IntegrationTest(DatabaseTestCase):
         with transaction_cursor(self.state_db_conn) as cursor:
             # Prepopulate state for the non-checked service to ensure we'll never get this data returned
             data = 'gAN9cQBYAwAAAGZvb3EBWAMAAABiYXJxAnMu'
-            cursor.execute('INSERT INTO checkerstate (team_id, service_id, identifier, data)'
-                           '    VALUES (2, 2, %s, %s), (3, 2, %s, %s)', ('key1', data, 'key2', data))
+            cursor.execute('INSERT INTO checkerstate (team_net_no, service_id, identifier, data)'
+                           '    VALUES (92, 2, %s, %s), (93, 2, %s, %s)', ('key1', data, 'key2', data))
 
         # Tick 0
         with transaction_cursor(self.connection) as cursor:

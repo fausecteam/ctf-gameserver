@@ -39,6 +39,7 @@
     "model": "registration.team",
     "pk": 2,
     "fields": {
+        "net_number": 92,
         "informal_email": "team2@example.org",
         "image": "",
         "affiliation": "",
@@ -50,6 +51,7 @@
     "model": "registration.team",
     "pk": 3,
     "fields": {
+        "net_number": 93,
         "informal_email": "team3@example.org",
         "image": "",
         "affiliation": "",

@@ -6,10 +6,10 @@ from ctf_gameserver import checkerlib
 class TestChecker(checkerlib.BaseChecker):
 
     def place_flag(self, tick):
-        if self.team != 2:
-            raise Exception('Team {} != 2'.format(self.team))
-        if self.ip != '0.0.2.1':
-            raise Exception('IP {} != 0.0.2.1'.format(self.ip))
+        if self.team != 92:
+            raise Exception('Team {} != 92'.format(self.team))
+        if self.ip != '0.0.92.1':
+            raise Exception('IP {} != 0.0.92.1'.format(self.ip))
         if tick != 0:
             raise Exception('Tick {} != 0'.format(tick))
 

@@ -33,6 +33,8 @@ def clean_dict(result):
     return result
 
 
+# TODO: adapt to IPv6
+# TODO: adapt to net_number
 def update_flagids(db, service_names, fname):
     result = dict()
     with db:

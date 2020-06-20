@@ -18,13 +18,13 @@ PREFIX = "FAUST"
 VALID = 900
 
 
-def generate(team_id, service_id, secret, payload=None, timestamp=None):
+def generate(team_net_no, service_id, secret, payload=None, timestamp=None):
     """
     Generates a flag for the given arguments. This is deterministic and should always return the same
     result for the same arguments (and the same time, if no timestamp is explicitly specified).
 
     Args:
-        team_id: ID of the team protecting this flag
+        team_net_no: Net number of the team protecting this flag
         service_id: ID of the service this flag belongs to
         payload: 8 bytes of data to store in the flag, defaults to zero-padded
                  CRC32(timestamp, team, service)
@@ -34,9 +34,9 @@ def generate(team_id, service_id, secret, payload=None, timestamp=None):
     if timestamp is None:
         timestamp = time.time() + VALID
 
-    if team_id > 65535:
-        raise ValueError('Team ID must fit in 16 bits')
-    protected_data = struct.pack("!i H c", int(timestamp), team_id, bytes([service_id]))
+    if team_net_no > 65535:
+        raise ValueError('Team net number must fit in 16 bits')
+    protected_data = struct.pack("!i H c", int(timestamp), team_net_no, bytes([service_id]))
 
     if payload is None:
         payload = struct.pack("!I I", zlib.crc32(protected_data), 0)

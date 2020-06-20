@@ -21,6 +21,7 @@
     "model": "registration.team",
     "pk": 2,
     "fields": {
+        "net_number": 92,
         "informal_email": "team1@example.org",
         "image": "",
         "affiliation": "",

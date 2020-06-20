@@ -1,3 +1,5 @@
+import logging
+
 from ctf_gameserver.lib.database import transaction_cursor
 from ctf_gameserver.lib.exceptions import DBDataError
 
@@ -76,11 +78,12 @@ def get_new_tasks(db_conn, service_id, task_count, prohibit_changes=False):
     """
 
     with transaction_cursor(db_conn, prohibit_changes) as cursor:
-        cursor.execute('SELECT flag.id, flag.protecting_team_id, flag.tick'
-                       '    FROM scoring_flag flag, scoring_gamecontrol control'
+        cursor.execute('SELECT flag.id, flag.protecting_team_id, flag.tick, team.net_number'
+                       '    FROM scoring_flag flag, scoring_gamecontrol control, registration_team team'
                        '    WHERE flag.placement_start is NULL'
                        '        AND flag.tick = control.current_tick'
                        '        AND flag.service_id = %s'
+                       '        AND flag.protecting_team_id = team.user_id'
                        '    ORDER BY RANDOM()'
                        '    LIMIT %s'
                        '    FOR UPDATE OF flag', (service_id, task_count))
@@ -93,16 +96,27 @@ def get_new_tasks(db_conn, service_id, task_count, prohibit_changes=False):
 
     return [{
         'team_id': task[1],
+        'team_net_no': task[3],
         'tick': task[2]
     } for task in tasks]
 
 
-def commit_result(db_conn, service_id, team_id, tick, result, prohibit_changes=False):
+def commit_result(db_conn, service_id, team_net_no, tick, result, prohibit_changes=False, fake_team_id=None):
     """
     Saves the result from a Checker run to game database.
     """
 
     with transaction_cursor(db_conn, prohibit_changes) as cursor:
+        cursor.execute('SELECT user_id FROM registration_team'
+                       '    WHERE net_number = %s', (team_net_no,))
+        data = cursor.fetchone()
+        if data is None:
+            if fake_team_id is None:
+                logging.error('No team found with net number %d, cannot commit result', team_net_no)
+                return
+            data = (fake_team_id,)
+        team_id = data[0]
+
         cursor.execute('INSERT INTO scoring_statuscheck'
                        '    (service_id, team_id, tick, status, timestamp)'
                        '    VALUES (%s, %s, %s, %s, NOW())', (service_id, team_id, tick, result))
@@ -115,7 +129,7 @@ def commit_result(db_conn, service_id, team_id, tick, result, prohibit_changes=F
                                                                                                tick))
 
 
-def load_state(db_conn, service_id, team_id, identifier, prohibit_changes=False):
+def load_state(db_conn, service_id, team_net_no, identifier, prohibit_changes=False):
     """
     Loads Checker data from state database.
     """
@@ -123,8 +137,8 @@ def load_state(db_conn, service_id, team_id, identifier, prohibit_changes=False)
     with transaction_cursor(db_conn, prohibit_changes) as cursor:
         cursor.execute('SELECT data FROM checkerstate'
                        '    WHERE service_id = %s'
-                       '        AND team_id = %s'
-                       '        AND identifier = %s', (service_id, team_id, identifier))
+                       '        AND team_net_no = %s'
+                       '        AND identifier = %s', (service_id, team_net_no, identifier))
         data = cursor.fetchone()
 
     if data is None:
@@ -132,14 +146,15 @@ def load_state(db_conn, service_id, team_id, identifier, prohibit_changes=False)
     return data[0]
 
 
-def store_state(db_conn, service_id, team_id, identifier, data, prohibit_changes=False):
+def store_state(db_conn, service_id, team_net_no, identifier, data, prohibit_changes=False):
     """
     Stores Checker data in state database.
     """
 
     with transaction_cursor(db_conn, prohibit_changes) as cursor:
         # (In case of `prohibit_changes`,) PostgreSQL checks the database grants even if no CONFLICT occurs
-        cursor.execute('INSERT INTO checkerstate (service_id, team_id, identifier, data)'
+        cursor.execute('INSERT INTO checkerstate (service_id, team_net_no, identifier, data)'
                        '    VALUES (%s, %s, %s, %s)'
-                       '    ON CONFLICT (service_id, team_id, identifier)'
-                       '        DO UPDATE SET data = EXCLUDED.data', (service_id, team_id, identifier, data))
+                       '    ON CONFLICT (service_id, team_net_no, identifier)'
+                       '        DO UPDATE SET data = EXCLUDED.data', (service_id, team_net_no, identifier,
+                                                                      data))

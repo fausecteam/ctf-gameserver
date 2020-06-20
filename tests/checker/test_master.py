@@ -21,7 +21,8 @@ class MasterTest(DatabaseTestCase):
 
         task_info = {
             'service': 'Service 1',
-            'team': 2,
+            '_team_id': 2,
+            'team': 92,
             'tick': 1
         }
 
@@ -58,7 +59,8 @@ class MasterTest(DatabaseTestCase):
     def test_handle_result_request(self):
         task_info = {
             'service': 'Service 1',
-            'team': 2,
+            '_team_id': 2,
+            'team': 92,
             'tick': 1
         }
         param = CheckResult.OK.value

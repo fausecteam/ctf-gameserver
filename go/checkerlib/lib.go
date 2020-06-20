@@ -240,13 +240,13 @@ func LoadState(key string) interface{} {
 // Must be called by all Checker Scripts.
 func RunCheck(checker Checker) {
 	if len(os.Args) != 4 {
-		log.Fatalf("usage: %s <ip> <team> <tick>", os.Args[0])
+		log.Fatalf("usage: %s <ip> <team-net-no> <tick>", os.Args[0])
 	}
 
 	ip := os.Args[1]
 	team, err := strconv.Atoi(os.Args[2])
 	if err != nil {
-		log.Fatalf("invalid team id %s", os.Args[2])
+		log.Fatalf("invalid team net number %s", os.Args[2])
 	}
 	tick, err := strconv.Atoi(os.Args[3])
 	if err != nil {
