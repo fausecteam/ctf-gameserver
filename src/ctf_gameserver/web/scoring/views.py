@@ -82,6 +82,9 @@ def service_status(request):
 
 
 @cache_page(60)
+# Don't provide a list of all teams while registration is open to prevent
+# crawling of registered teams and comparing with this list
+@competition_started_required
 def teams_json(_):
 
     teams = registration_models.Team.active_objects.values_list('net_number', flat=True)
