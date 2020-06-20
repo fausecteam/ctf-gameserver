@@ -3,6 +3,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Max
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.views.decorators.cache import cache_page
 
 import ctf_gameserver.web.registration.models as registration_models
 
@@ -78,6 +79,18 @@ def service_status(request):
         'ticks': range(from_tick, to_tick+1),
         'services': models.Service.objects.all().order_by('name')
     })
+
+
+@cache_page(60)
+def teams_json(_):
+
+    teams = registration_models.Team.active_objects.values_list('net_number', flat=True)
+
+    response = {
+        'teams': list(teams)
+    }
+
+    return JsonResponse(response, json_dumps_params={'indent': 2})
 
 
 @staff_member_required

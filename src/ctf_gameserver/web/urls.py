@@ -75,6 +75,10 @@ urlpatterns = [
         registration_views.TeamList.as_view(),
         name='team_list'
     ),
+    url(r'^competition/teams\.json$',
+        scoring_views.teams_json,
+        name='team_json'
+    ),
     url(r'^competition/scoreboard/$',
         scoring_views.scoreboard,
         name='scoreboard'
