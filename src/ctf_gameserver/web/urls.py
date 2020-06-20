@@ -83,7 +83,7 @@ urlpatterns = [
         scoring_views.scoreboard,
         name='scoreboard'
     ),
-    url(r'^competition/scoreboard.json$',
+    url(r'^competition/scoreboard\.json$',
         scoring_views.scoreboard_json,
         name='scoreboard_json'
     ),
@@ -100,7 +100,7 @@ urlpatterns = [
         scoring_views.service_history,
         name='service_history'
     ),
-    url(r'^internal/service-history.json$',
+    url(r'^internal/service-history\.json$',
         scoring_views.service_history_json,
         name='service_history_json'
     ),
