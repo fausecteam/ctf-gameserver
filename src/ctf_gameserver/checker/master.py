@@ -347,10 +347,10 @@ class MasterLoop:
 
         margin_seconds = self.tick_duration.total_seconds() / 6
         launch_timeframe = self.tick_duration.total_seconds() - self.max_check_duration - margin_seconds
-        if launch_timeframe <= 0:
+        if launch_timeframe < 0:
             raise ValueError('Maximum Checker Script duration too long for tick')
 
-        intervals_per_timeframe = math.floor(launch_timeframe / self.interval)
+        intervals_per_timeframe = max(math.floor(launch_timeframe / self.interval), 1)
         self.tasks_per_launch = math.ceil(local_tasks / intervals_per_timeframe)
 
     def get_running_script_count(self):
