@@ -103,7 +103,7 @@ function buildTable(data) {
             } else {
                 let link = document.createElement('a')
                 link.href = encodeURI(data['graylog-search-url'] + '?rangetype=relative&relative=28800&' +
-                                      'q=checker:/' + data['service-slug'] + ':.*/ AND team:' + team['id'] +
+                                      'q=service:' + data['service-slug'] + ' AND team:' + team['id'] +
                                       ' AND tick:' + tick)
                 link.target = '_blank'
                 link.innerHTML = '&nbsp;'

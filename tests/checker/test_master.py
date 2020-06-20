@@ -20,7 +20,7 @@ class MasterTest(DatabaseTestCase):
             cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
 
         task_info = {
-            'service': 'Service 1',
+            'service': 'service1',
             '_team_id': 2,
             'team': 92,
             'tick': 1
@@ -58,7 +58,7 @@ class MasterTest(DatabaseTestCase):
 
     def test_handle_result_request(self):
         task_info = {
-            'service': 'Service 1',
+            'service': 'service1',
             '_team_id': 2,
             'team': 92,
             'tick': 1

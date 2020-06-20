@@ -326,7 +326,7 @@ class MasterLoop:
 
             # Information in task_info should be somewhat human-readable, because it also ends up in Checker
             # Script logs
-            task_info = {'service': self.service['name'],
+            task_info = {'service': self.service['slug'],
                          'team': task['team_net_no'],
                          '_team_id': task['team_id'],
                          'tick': current_tick}
