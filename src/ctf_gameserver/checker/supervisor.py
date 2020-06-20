@@ -7,6 +7,7 @@ import select
 import signal
 import subprocess
 import sys
+import time
 
 from ctf_gameserver.lib.checkresult import CheckResult
 
@@ -117,6 +118,14 @@ def _run_checker_script(args, sudo_user, info, logging_params, runner_id, queue_
 
     runner_logger = logging.getLogger('Checker Runner: {}'.format(args))
 
+    class NanosFilter(logging.Filter):
+        """
+        Log Filter which adds a current timestamp in nanoseconds to Log Records.
+        """
+        def filter(self, record):
+            setattr(record, 'timestamp_nanos', time.time_ns())
+            return True
+
     class InfoFilter(logging.Filter):
         """
         Log Filter which adds all metadata from an "info" dict as attributes to Log Records.
@@ -136,6 +145,7 @@ def _run_checker_script(args, sudo_user, info, logging_params, runner_id, queue_
     script_logger = logging.getLogger('Checker Script')
     script_logger.setLevel(logging.INFO)
     script_logger.propagate = False
+    script_logger.addFilter(NanosFilter())
     if info is not None:
         script_logger.addFilter(InfoFilter(info))
 
