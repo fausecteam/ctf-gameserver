@@ -39,7 +39,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
-SECRET_KEY = 'OnlySuitableForDevelopment'
+SECRET_KEY = 'OnlySuitableForDevelopment'    # nosec
 
 TIME_ZONE = 'UTC'
 FIRST_DAY_OF_WEEK = 1

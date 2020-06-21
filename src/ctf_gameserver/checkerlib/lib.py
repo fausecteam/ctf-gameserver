@@ -6,7 +6,7 @@ import http.client
 import json
 import logging
 import os
-import pickle
+import pickle    # nosec
 import socket
 import ssl
 import sys
@@ -181,7 +181,7 @@ def load_state(key: str) -> Any:
         except KeyError:
             return None
 
-    return pickle.loads(base64.b64decode(data))
+    return pickle.loads(base64.b64decode(data))    # nosec
 
 
 def run_check(checker_cls: Type[BaseChecker]) -> None:

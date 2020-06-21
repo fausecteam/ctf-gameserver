@@ -185,7 +185,7 @@ def confirm_email(request):
                     possible_net_numbers.discard(number)
 
                 try:
-                    random_net_number = random.choice(list(possible_net_numbers))
+                    random_net_number = random.choice(list(possible_net_numbers))    # nosec
                 except IndexError:
                     logging.error('Net numbers exhausted, could not confirm team (ID) %d', user_pk)
                     return render(request, '500.html', status=500)
