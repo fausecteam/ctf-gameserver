@@ -343,7 +343,10 @@ func isConnError(err error) bool {
 	// Returned by package "net/http"
 	urlErr, ok := err.(*url.Error)
 	if ok {
-		err = urlErr.Err // is net.OpError
+		if urlErr.Timeout() {
+			return true
+		}
+		err = urlErr.Err // may be net.OpError
 	}
 	// Returned by package "net"
 	opErr, ok := err.(*net.OpError)
