@@ -29,7 +29,7 @@ def scores():
 
     team_scores = defaultdict(lambda: {'offense': [{}, 0], 'defense': [{}, 0], 'sla': [{}, 0], 'total': 0})
 
-    for score in models.ScoreBoard.objects.all():
+    for score in models.ScoreBoard.objects.select_related('team', 'service').all():
         team_scores[score.team]['offense'][0][score.service] = score.attack
         team_scores[score.team]['offense'][1] += score.attack
         team_scores[score.team]['defense'][0][score.service] = score.defense
@@ -47,13 +47,15 @@ def scores():
 def team_statuses(from_tick, to_tick):
     """
     Returns the statuses of all teams and all services in the specified range of ticks. The result is an
-    OrderedDict sorted by the team's names in this format:
+    OrderedDict sorted by the teams' names in this format:
 
         {'team': {
             'tick': {
                 'service': status
             }
         }}
+
+    If a check did not happen ("Not checked"), no status will be contained in the result.
     """
 
     cache_key = 'team-statuses_{:d}-{:d}'.format(from_tick, to_tick)
@@ -62,21 +64,21 @@ def team_statuses(from_tick, to_tick):
     if cached_statuses is not None:
         return cached_statuses
 
-    statuses = {}
-    status_checks = models.StatusCheck.objects.filter(tick__gte=from_tick, tick__lte=to_tick)
+    statuses = OrderedDict()
+    teams = {}
 
-    for team in Team.active_objects.all():
-        statuses[team] = {}
+    for team in Team.active_objects.all().order_by('user__username'):
+        statuses[team] = defaultdict(lambda: {})
+        teams[team.pk] = team
 
-        for tick in range(from_tick, to_tick+1):
-            statuses[team][tick] = {}
-            for service in models.Service.objects.all():
-                statuses[team][tick][service] = ''
+    status_checks = models.StatusCheck.objects.filter(tick__gte=from_tick, tick__lte=to_tick)\
+        .select_related('service', 'team')
+    for check in status_checks:
+        statuses[teams[check.team.pk]][check.tick][check.service] = check.status
 
-        for check in status_checks.filter(team=team):
-            statuses[team][check.tick][check.service] = check.status
+    # Convert defaultdicts to dicts because serialization in `cache.set()` can't handle them otherwise
+    for key, val in statuses.items():
+        statuses[key] = dict(val)
+    cache.set(cache_key, statuses, 10)
 
-    sorted_statuses = OrderedDict(sorted(statuses.items(), key=lambda s: s[0].user.username))
-    cache.set(cache_key, sorted_statuses, 10)
-
-    return sorted_statuses
+    return statuses
