@@ -74,7 +74,7 @@ def team_statuses(from_tick, to_tick):
                 statuses[team][tick][service] = ''
 
         for check in status_checks.filter(team=team):
-            statuses[team][check.tick][check.service] = check.get_status_display()
+            statuses[team][check.tick][check.service] = check.status
 
     sorted_statuses = OrderedDict(sorted(statuses.items(), key=lambda s: s[0].user.username))
     cache.set(cache_key, sorted_statuses, 10)

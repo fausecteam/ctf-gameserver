@@ -3,64 +3,50 @@
 {% load cache %}
 {% load dict_access %}
 {% load status_css_class %}
+{% load static %}
 
 {% block content %}
+<script src="{% static 'service_util.js' %}" defer="defer"></script>
+<script src="{% static 'service_status.js' %}" defer="defer"></script>
+
+<noscript>
+    <div class="alert alert-danger" role="alert">{% trans 'Please enable JavaScript for this page to work!' %}</div>
+</noscript>
+
 <div class="page-header">
     <h1>{% block title %}{% trans 'Service status' %}{% endblock %}</h1>
 </div>
 
 {% include 'competition_nav.html' with active='service_status' %}
 
-{% get_current_language as LANGUAGE_CODE %}
-{% cache 10 html_status LANGUAGE_CODE %}
 <div class="table-responsive">
-    <table class="table">
+    <table id="status-table" class="table" hidden="hidden">
         <thead>
             <tr>
                 <th class="image-column"><!-- Image --></th>
                 <th class="border-right">{% trans 'Team' %}</th>
-                {% for tick in ticks %}
-                <th>Tick {{ tick }}</th>
-                {% endfor %}
+                <!-- Ticks, copied via JavaScript -->
+                <th>Tick <span><!-- Tick --></span></th>
             </tr>
         </thead>
 
         <tbody>
-            {% for team, tick_statuses in statuses.items %}
-            <tr id="team-{{ team.user.pk }}-row" class="{% if team.nop_team %}active{% endif %}">
+            <!-- Teams, copied via JavaScript -->
+            <tr id="team-template-row" class="active">
                 <td>
-                    {% if team.image %}
-                    <a href="{{ team.image.url }}">
-                        <img class="team-image" src="{{ team.image.get_thumbnail_url }}"
-                         alt="{{ team.user.username }}" />
+                    <!-- Image -->
+                    <a href="">
+                        <img class="team-image" src="" alt="" />
                     </a>
-                    {% endif %}
                 </td>
 
                 <td class="border-right">
-                    <strong>{{ team.user.username }}</strong>
+                    <strong><!-- Name --></strong>
                 </td>
 
-                {% for tick in ticks %}
-                <td>
-                    {% for service in services %}
-                    {{ service.name }}:
-
-                    {% with status=tick_statuses|dict_access:tick|dict_access:service %}
-                    {% if status %}
-                    <span class="text-{{ status|status_css_class }}">{{ status }}</span> <br/>
-                    {% else %}
-                    <span class="text-muted">{% trans 'not checked' %}</span> <br/>
-                    {% endif %}
-                    {% endwith %}
-
-                    {% endfor %}
-                </td>
-                {% endfor %}
+                <!-- JavaScript adds service status for ticks -->
             </tr>
-            {% endfor %}
         </tbody>
     </table>
 </div>
-{% endcache %}
 {% endblock %}

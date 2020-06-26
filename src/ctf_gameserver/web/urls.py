@@ -87,9 +87,17 @@ urlpatterns = [
         scoring_views.scoreboard_json,
         name='scoreboard_json'
     ),
+    url(r'^competition/scoreboard-ctftime\.json$',
+        scoring_views.scoreboard_json_ctftime,
+        name='scoreboard_json_ctftime'
+    ),
     url(r'^competition/status/$',
         scoring_views.service_status,
         name='service_status'
+    ),
+    url(r'^competition/status\.json$',
+        scoring_views.service_status_json,
+        name='service_status_json'
     ),
 
     url(r'^internal/mail-teams/$',

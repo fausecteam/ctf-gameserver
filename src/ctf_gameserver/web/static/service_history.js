@@ -1,3 +1,5 @@
+/* jshint asi: true, sub: true */
+
 'use strict'
 
 

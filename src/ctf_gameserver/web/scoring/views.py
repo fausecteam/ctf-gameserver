@@ -14,6 +14,16 @@ from .decorators import competition_started_required
 @competition_started_required
 def scoreboard(request):
 
+    return render(request, 'scoreboard.html', {
+        'services': models.Service.objects.all()
+    })
+
+
+# Short cache timeout only, because there is already caching going on in calculations
+@cache_page(5)
+@competition_started_required
+def scoreboard_json(_):
+
     game_control = models.GameControl.get_instance()
 
     if game_control.competition_over():
@@ -23,16 +33,55 @@ def scoreboard(request):
 
     scores = calculations.scores()
     statuses = calculations.team_statuses(to_tick, to_tick)
+    services = models.Service.objects.all()
 
-    return render(request, 'scoreboard.html', {
-        'scores': scores,
-        'services': models.Service.objects.all(),
-        'statuses': statuses,
-        'tick': to_tick
-    })
+    response = {
+        'tick': to_tick,
+        'teams': [],
+        'status-descriptions': _get_status_descriptions()
+    }
+
+    for rank, (team, points) in enumerate(scores.items(), start=1):
+        team_entry = {
+            'rank': rank,
+            'id': team.user.pk,
+            'name': team.user.username,
+            'services': [],
+            'offense': points['offense'][1],
+            'defense': points['defense'][1],
+            'sla': points['sla'][1],
+            'total': points['total'],
+        }
+        if team.image:
+            team['image'] = team.image.url
+            team['thumbnail'] = team.image.get_thumbnail_url
+
+        for service in services:
+            try:
+                offense = points['offense'][0][service]
+                defense = points['defense'][0][service]
+                sla = points['sla'][0][service]
+            except KeyError:
+                offense = 0
+                defense = 0
+                sla = 0
+            try:
+                status = statuses[team][to_tick][service]
+            except KeyError:
+                status = ''
+            team_entry['services'].append({
+                'status': status,
+                'offense': offense,
+                'defense': defense,
+                'sla': sla
+            })
+
+        response['teams'].append(team_entry)
+
+    return JsonResponse(response)
 
 
-def scoreboard_json(_):
+def scoreboard_json_ctftime(_):
     """
     View which returns the scoreboard in CTFTime scoreboard feed format,
     see https://ctftime.org/json-scoreboard-feed.
@@ -65,6 +114,14 @@ def scoreboard_json(_):
 @competition_started_required
 def service_status(request):
 
+    return render(request, 'service_status.html')
+
+
+# Short cache timeout only, because there is already caching going on in calculations
+@cache_page(5)
+@competition_started_required
+def service_status_json(_):
+
     game_control = models.GameControl.get_instance()
     to_tick = game_control.current_tick
     from_tick = to_tick - 4
@@ -73,12 +130,41 @@ def service_status(request):
         from_tick = 0
 
     statuses = calculations.team_statuses(from_tick, to_tick)
+    services = models.Service.objects.all().order_by('name')
 
-    return render(request, 'service_status.html', {
-        'statuses': statuses,
-        'ticks': range(from_tick, to_tick+1),
-        'services': models.Service.objects.all().order_by('name')
-    })
+    response = {
+        'ticks': list(range(from_tick, to_tick+1)),
+        'teams': [],
+        'services': [],
+        'status-descriptions': _get_status_descriptions()
+    }
+
+    for team, tick_statuses in statuses.items():
+        team_entry = {
+            'id': team.user.pk,
+            'nop': team.nop_team,
+            'name': team.user.username,
+            'ticks': [],
+        }
+        if team.image:
+            team['image'] = team.image.url
+            team['thumbnail'] = team.image.get_thumbnail_url
+
+        for tick in response['ticks']:
+            tick_services = []
+            for service in services:
+                try:
+                    tick_services.append(tick_statuses[tick][service])
+                except KeyError:
+                    tick_services.append('')
+            team_entry['ticks'].append(tick_services)
+
+        response['teams'].append(team_entry)
+
+    for service in services:
+        response['services'].append(service.name)
+
+    return JsonResponse(response)
 
 
 @cache_page(60)

@@ -3,8 +3,16 @@
 {% load cache %}
 {% load dict_access %}
 {% load status_css_class %}
+{% load static %}
 
 {% block content %}
+<script src="{% static 'service_util.js' %}" defer="defer"></script>
+<script src="{% static 'scoreboard.js' %}" defer="defer"></script>
+
+<noscript>
+    <div class="alert alert-danger" role="alert">{% trans 'Please enable JavaScript for this page to work!' %}</div>
+</noscript>
+
 <div class="page-header">
     <h1>{% block title %}{% trans 'Scoreboard' %}{% endblock %}</h1>
 </div>
@@ -16,13 +24,11 @@
 
     <p class="text-muted pull-right">
         {% blocktrans %}
-        Tick: {{ tick }}
+        Tick: <span id="tick"></span>
         {% endblocktrans %}
     </p>
 </div>
 
-{% get_current_language as LANGUAGE_CODE %}
-{% cache 10 html_scoreboard LANGUAGE_CODE %}
 <div class="table-responsive">
     <table class="table">
         <thead>
@@ -50,52 +56,41 @@
         </thead>
 
         <tbody>
-            {% for team, points in scores.items %}
-            <tr id="team-{{ team.user.pk }}-row">
-                <td><strong>{{ forloop.counter }}.</strong></td>
+            <tr id="team-template-row" hidden="hidden">
+                <td><strong><!-- Position --></strong></td>
 
                 <td>
-                    {% if team.image %}
-                    <a href="{{ team.image.url }}">
-                        <img class="team-image" src="{{ team.image.get_thumbnail_url }}"
-                         alt="{{ team.user.username }}" />
+                    <!-- Image -->
+                    <a href="">
+                        <img class="team-image" src="" alt="" />
                     </a>
-                    {% endif %}
                 </td>
 
                 <td class="border-right">
-                    <strong>{{ team.user.username }}</strong>
+                    <strong><!-- Name --></strong>
                 </td>
 
-                {% for service in services %}
-                {% with status=statuses|dict_access:team|dict_access:tick|dict_access:service %}
-                <td class="{{ status|status_css_class }}">
+                <!-- Services, copied via JavaScript -->
+                <td class="active">
                     <span class="glyphicon glyphicon-fire"></span> <span class="sr-only">Offense</span>
-                    {{ points.offense.0|dict_access:service|floatformat:2 }} <br/>
+                    <span><!-- Offense --></span> <br/>
                     <span class="glyphicon glyphicon-tower"></span> <span class="sr-only">Defense</span>
-                    {{ points.defense.0|dict_access:service|floatformat:2 }} <br/>
+                    <span><!-- Defense --></span> <br/>
                     <span class="glyphicon glyphicon-dashboard"></span> <span class="sr-only">SLA</span>
-                    {{ points.sla.0|dict_access:service|floatformat:2 }} <br/>
+                    <span><!-- SLA --></span> <br/>
 
-                    <a href="{% url 'service_status' %}#team-{{ team.user.id }}-row">
-                    {% if status %}
-                    <span class="text-{{ status|status_css_class }}">{{ status }}</span>
-                    {% else %}
+                    <a href="{% url 'service_status' %}">
+                    <!-- Status -->
                     <span class="text-muted">{% trans 'not checked' %}</span>
-                    {% endif %}
                     </a>
                 </td>
-                {% endwith %}
-                {% endfor %}
 
-                <td class="border-left">{{ points.offense.1|floatformat:2 }}</td>
-                <td>{{ points.defense.1|floatformat:2 }}</td>
-                <td>{{ points.sla.1|floatformat:2 }}</td>
-                <td class="border-left"><strong>{{ points.total|floatformat:2 }}</strong></td>
+                <td class="border-left"><!-- Offense --></td>
+                <td><!-- Defense --></td>
+                <td><!-- SLA --></td>
+                <td class="border-left"><strong><!-- Total --></strong></td>
             </tr>
-            {% endfor %}
         </tbody>
     </table>
 </div>
-{% endcache %}
 {% endblock %}
