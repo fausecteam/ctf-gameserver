@@ -44,9 +44,17 @@ To create a Checker Script, create a subclass of `checkerlib.BaseChecker` implem
 In your `__main__` code, call `checkerlib.run_check()` with your class as argument. The library will take
 care of calling your methods, merging the results and submitting them to the Checker Master.
 
-### Persistent State
+### Functions
+* `get_flag(tick: int) -> str`: Get the flag for the given tick (for the checked team).
 * `store_state(key: str, data: Any) -> None`: Store arbitrary Python data persistently across runs.
 * `load_state(key: str) -> Any`: Retrieve data stored through `store_state()`.
+* `run_check(checker_cls: Type[BaseChecker]) -> None`: Start the check.
+
+### BaseChecker class
+The `checkerlib.BaseChecker` class provides the following attributes:
+
+* `self.ip`: IP address of the checked team (may be IPv4 or IPv6)
+* `self.team`: (Network) number of the checked team
 
 ### Minimal Example
 ```py
