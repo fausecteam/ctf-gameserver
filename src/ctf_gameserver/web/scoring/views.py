@@ -100,11 +100,11 @@ def scoreboard_json_ctftime(_):
         standings.append({
             'pos': rank,
             'team': team.user.username,
-            'score': points['total'],
+            'score': round(points['total'], 4),
             'taskStats': {
-                'Offense': {'points': points['offense'][1]},
-                'Defense': {'points': points['defense'][1]},
-                'SLA': {'points': points['sla'][1]}
+                'Offense': {'points': round(points['offense'][1], 4)},
+                'Defense': {'points': round(points['defense'][1], 4)},
+                'SLA': {'points': round(points['sla'][1], 4)}
             }
         })
 
