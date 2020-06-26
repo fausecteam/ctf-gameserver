@@ -66,7 +66,7 @@ SELECT team_id,
        service_id,
        coalesce(attack, 0)::double precision as attack,
        coalesce(bonus, 0) as bonus,
-       coalesce(defense, 0) as defense,
+       coalesce(defense, 0)::double precision as defense,
        coalesce(sla, 0) as sla,
        coalesce(attack, 0) + coalesce(defense, 0) + coalesce(bonus, 0) + coalesce(sla, 0) as total
 FROM attack
