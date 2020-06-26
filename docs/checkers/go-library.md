@@ -43,6 +43,11 @@ care of calling your methods, merging the results and submitting them to the Che
 ### Constants
 * `Timeout`: Default timeout used when connecting to services. In case you cannot use the standard functions
   of "net/http" (those using `DefaultClient`/`DefaultTransport`) or `checkerlib.Dial()`.
+* Check results, [see general docs](index.md#check-results) for their semantics:
+    * `ResultOk`
+    * `ResultDown`
+    * `ResultFaulty`
+    * `ResultFlagNotFound`
 
 ### Minimal Example
 ```go

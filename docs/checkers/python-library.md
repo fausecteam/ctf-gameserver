@@ -50,11 +50,16 @@ care of calling your methods, merging the results and submitting them to the Che
 * `load_state(key: str) -> Any`: Retrieve data stored through `store_state()`.
 * `run_check(checker_cls: Type[BaseChecker]) -> None`: Start the check.
 
-### BaseChecker class
-The `checkerlib.BaseChecker` class provides the following attributes:
-
-* `self.ip`: IP address of the checked team (may be IPv4 or IPv6)
-* `self.team`: (Network) number of the checked team
+### Classes
+* The `checkerlib.BaseChecker` class provides the following attributes:
+    * `self.ip`: IP address of the checked team (may be IPv4 or IPv6, depending on your CTF)
+    * `self.team`: (Network) number of the checked team
+* `checkerlib.CheckResult` provides the following constants to express check results, [see general
+  docs](index.md#check-results) for their semantics:
+    * `CheckResult.OK`
+    * `CheckResult.DOWN`
+    * `CheckResult.FAULTY`
+    * `CheckResult.FLAG_NOT_FOUND`
 
 ### Minimal Example
 ```py
