@@ -47,13 +47,6 @@ function buildTable(data) {
     $('#max-tick').val(data['max-tick'])
 
     const statusDescriptions = data['status-descriptions']
-    const statusClasses = {
-        '0': 'success',
-        '1': 'danger',
-        '2': 'danger',
-        '3': 'warning',
-        '4': 'info'
-    }
 
     // Extract raw DOM element from jQuery object
     let table = $('#history-table')[0]

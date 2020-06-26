@@ -190,18 +190,23 @@ def service_history_json(request):
     # Add result from last iteration
     append_result(max_team_id+1)
 
-    status_descriptions = {num: desc for desc, num in models.StatusCheck.STATUSES.items()}
-    status_descriptions[-1] = 'not checked'
-
     response = {
         'teams': result,
         'min-tick': from_tick,
         'max-tick': to_tick-1,
         'service-name': service.name,
         'service-slug': service.slug,
-        'status-descriptions': status_descriptions
+        'status-descriptions': _get_status_descriptions()
     }
     if hasattr(settings, 'GRAYLOG_SEARCH_URL'):
         response['graylog-search-url'] = settings.GRAYLOG_SEARCH_URL
 
     return JsonResponse(response)
+
+
+def _get_status_descriptions():
+
+    status_descriptions = {num: desc for desc, num in models.StatusCheck.STATUSES.items()}
+    status_descriptions[-1] = 'not checked'
+
+    return status_descriptions
