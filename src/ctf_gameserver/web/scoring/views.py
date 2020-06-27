@@ -225,7 +225,7 @@ def service_history_json(request):
     status_checks = models.StatusCheck.objects.filter(service=service) \
                                               .filter(tick__gte=from_tick, tick__lt=to_tick) \
                                               .select_related('team') \
-                                              .only('tick', 'status', 'team__user__id') \
+                                              .only('tick', 'status', 'team__user__id', 'team__net_number') \
                                               .order_by('team__user__id', 'tick')
 
     teams = registration_models.Team.active_objects.select_related('user').only('user__username').in_bulk()
@@ -262,7 +262,7 @@ def service_history_json(request):
         if current_team['id'] != check.team.user.id:
             append_result(check.team.user.id)
             current_team = {'id': check.team.user.id, 'name': teams[check.team.user.id].user.username,
-                            'checks': []}
+                            'checks': [], 'net_number': teams[check.team.user.id].net_number}
             current_tick = from_tick
 
         # Fill up missing ticks
