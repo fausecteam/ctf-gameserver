@@ -23,14 +23,14 @@ class FlagHandler(asynchat.async_chat):
             self.close()
             return
 
-        self.team = int(match.group(1))
+        self.capturing_team = int(match.group(1))
         self.set_terminator(b"\n")
         self._logger = logging.getLogger("%13s %5d" % (ipaddr, port))
         self._cursor = None
         self._dbconnection = dbconnection
         self._secret = base64.b64decode(secret)
         self.buffer = b''
-        self._logger.info("Accepted connection from Team (Net Number) %s", self.team)
+        self._logger.info("Accepted connection from Team (Net Number) %s", self.capturing_team)
         self._banner()
         self._conteststart = conteststart
         self._contestend = contestend
@@ -72,7 +72,7 @@ class FlagHandler(asynchat.async_chat):
             return
 
         try:
-            team, service, _, timestamp = flag.verify(curflag, self._secret)
+            protecting_team, service, _, timestamp = flag.verify(curflag, self._secret)
         except flag.InvalidFlagFormat:
             self._reply(b"Flag not recognized")
             return
@@ -83,12 +83,12 @@ class FlagHandler(asynchat.async_chat):
             self._reply((u"Flag expired since %.1f seconds" % e.args).encode('utf-8'))
             return
 
-        if team == self.team:
+        if protecting_team == self.capturing_team:
             self._reply(b"Can't submit a flag for your own team")
             return
 
         try:
-            result = self._store_capture(team, service, timestamp)
+            result = self._store_capture(protecting_team, service, timestamp)
             if result:
                 self._reply(u"Thank you for your submission!".encode('utf-8'))
 
@@ -99,19 +99,27 @@ class FlagHandler(asynchat.async_chat):
             self._reply(u"Something went wrong with your submission!".encode('utf-8'))
 
 
-    def _store_capture(self, team, service, timestamp):
+    def _store_capture(self, protecting_team, service, timestamp):
         with self._dbconnection:
             with self._dbconnection.cursor() as cursor:
                 cursor.execute("""SELECT user_id FROM registration_team WHERE net_number = %s""",
-                               (team,))
+                               (protecting_team,))
                 data = cursor.fetchone()
                 if data is None:
                     self._reply(u"Unknown team net".encode("utf-8"))
                     return False
-                team = data[0]
+                protecting_team_id = data[0]
+
+                cursor.execute("""SELECT user_id FROM registration_team WHERE net_number = %s""",
+                               (self.capturing_team,))
+                data = cursor.fetchone()
+                if data is None:
+                    self._reply(u"Unknown team net".encode("utf-8"))
+                    return False
+                capturing_team_id = data[0]
 
                 cursor.execute("""SELECT nop_team FROM registration_team WHERE user_id = %s""",
-                               (team,))
+                               (protecting_team_id,))
                 nopp, = cursor.fetchone()
                 if nopp:
                     self._reply(u"Can not submit flags for the NOP team".encode("utf-8"))
@@ -122,13 +130,13 @@ class FlagHandler(asynchat.async_chat):
                                   WHERE service_id = %s
                                     AND protecting_team_id = %s
                                     AND tick = %s""",
-                               (service, team, tick))
+                               (service, protecting_team_id, tick))
                 flag_id = cursor.fetchone()[0]
 
                 cursor.execute("""SELECT count(*) FROM scoring_capture
                                   WHERE flag_id = %s
                                     AND capturing_team_id = %s""",
-                               (flag_id, self.team))
+                               (flag_id, capturing_team_id))
                 count = cursor.fetchone()[0]
 
                 if count > 0:
@@ -141,7 +149,7 @@ class FlagHandler(asynchat.async_chat):
                                       (%s, %s, now(),
                                        (SELECT current_tick
                                         FROM scoring_gamecontrol))""",
-                               (flag_id, self.team))
+                               (flag_id, capturing_team_id))
                 return True
 
 
