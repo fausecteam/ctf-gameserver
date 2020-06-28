@@ -346,6 +346,7 @@ def _is_conn_error(exception):
 
     if isinstance(exception, OSError):
         return exception.errno in (
+            errno.EACCES,
             errno.ECONNABORTED,
             errno.ECONNREFUSED,
             errno.ECONNRESET,

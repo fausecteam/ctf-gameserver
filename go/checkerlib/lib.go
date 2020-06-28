@@ -328,6 +328,7 @@ func runCheckSteps(checker Checker, ip string, team int, tick int) (Result, erro
 func isConnError(err error) bool {
 	// From src/ctf_gameserver/checkerlib/lib.py
 	errnos := []syscall.Errno{
+		syscall.EACCES,
 		syscall.ECONNABORTED,
 		syscall.ECONNREFUSED,
 		syscall.ECONNRESET,
