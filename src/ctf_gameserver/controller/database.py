@@ -1,6 +1,28 @@
+import logging
+
+import psycopg2
+
 from ctf_gameserver.lib.database import transaction_cursor
 from ctf_gameserver.lib.date_time import ensure_utc_aware
 from ctf_gameserver.lib.exceptions import DBDataError
+
+
+def connect_to_db(db_host, db_name, db_user, db_password):
+    """
+    Establishes a Psycopg2 connection to the database.
+
+    Returns:
+        The new connection, or None if it could not be establised.
+    """
+
+    try:
+        db_conn = psycopg2.connect(host=db_host, database=db_name, user=db_user, password=db_password)
+    except psycopg2.OperationalError as e:
+        logging.error('Could not establish database connection: %s', e)
+        return None
+    logging.info('Established database connection')
+
+    return db_conn
 
 
 def get_control_info(db_conn, prohibit_changes=False):
