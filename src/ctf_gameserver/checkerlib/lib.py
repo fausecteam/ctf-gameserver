@@ -18,7 +18,8 @@ from ctf_gameserver.lib.checkresult import CheckResult
 
 
 _TIMEOUT_SECONDS = 10.0    # Default timeout for socket operations
-_LOCAL_STATE_PATH = '_{team:d}_state.json'
+_LOCAL_STATE_PATH_TMPL = '_{team:d}_state.json'
+_LOCAL_STATE_PATH = None
 
 _ctrl_in = None    # pylint: disable=invalid-name
 _ctrl_out = None    # pylint: disable=invalid-name
@@ -197,7 +198,7 @@ def run_check(checker_cls: Type[BaseChecker]) -> None:
     tick = int(sys.argv[3])
 
     global _LOCAL_STATE_PATH
-    _LOCAL_STATE_PATH  = _LOCAL_STATE_PATH.format(team=team)
+    _LOCAL_STATE_PATH = _LOCAL_STATE_PATH_TMPL.format(team=team)
 
     if _launched_without_runner():
         # Hack because get_flag() only needs to know the team when launched locally
