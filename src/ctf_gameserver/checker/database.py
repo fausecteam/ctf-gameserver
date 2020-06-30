@@ -1,44 +1,7 @@
 import logging
 
-import psycopg2
-
 from ctf_gameserver.lib.database import transaction_cursor
 from ctf_gameserver.lib.exceptions import DBDataError
-
-
-def connect_to_dbs(game_db_host, game_db_name, game_db_user, game_db_password, state_db_host, state_db_name,
-                   state_db_user, state_db_password):
-    """
-    Establishes Psycopg2 connections to the game and state databases.
-
-    Returns:
-        A tuple of the new connections to game and state database; the connections are None if they could not
-        be established.
-    """
-
-    try:
-        game_db_conn = psycopg2.connect(host=game_db_host, database=game_db_name, user=game_db_user,
-                                        password=game_db_password)
-    except psycopg2.OperationalError as e:
-        logging.error('Could not establish connection to game database: %s', e)
-        return (None, None)
-    logging.info('Established connection to game database')
-
-    try:
-        state_db_conn = psycopg2.connect(host=state_db_host, database=state_db_name, user=state_db_user,
-                                         password=state_db_password)
-    except psycopg2.OperationalError as e:
-        logging.error('Could not establish connection to state database: %s', e)
-        return (None, None)
-    logging.info('Established connection to state database')
-
-    # Keep our mental model easy by always using (timezone-aware) UTC for dates and times
-    with transaction_cursor(game_db_conn) as cursor:
-        cursor.execute('SET TIME ZONE "UTC"')
-    with transaction_cursor(state_db_conn) as cursor:
-        cursor.execute('SET TIME ZONE "UTC"')
-
-    return (game_db_conn, state_db_conn)
 
 
 def get_control_info(db_conn, prohibit_changes=False):

@@ -12,6 +12,7 @@ from psycopg2 import errorcodes as postgres_errors
 
 from ctf_gameserver.lib.args import get_arg_parser_with_db
 from ctf_gameserver.lib import daemon
+from ctf_gameserver.lib.database import transaction_cursor
 from ctf_gameserver.lib.checkresult import CheckResult
 from ctf_gameserver.lib.exceptions import DBDataError
 import ctf_gameserver.lib.flag as flag_lib
@@ -97,12 +98,27 @@ def main():
 
     flag_secret = base64.b64decode(args.flagsecret)
 
-    game_db_conn, state_db_conn = database.connect_to_dbs(args.dbhost, args.dbname, args.dbuser,
-                                                          args.dbpassword, args.statedbhost,
-                                                          args.statedbname, args.statedbuser,
-                                                          args.statedbpassword)
-    if game_db_conn is None or state_db_conn is None:
+    try:
+        game_db_conn = psycopg2.connect(host=args.dbhost, database=args.dbname, user=args.dbuser,
+                                        password=args.dbpassword)
+    except psycopg2.OperationalError as e:
+        logging.error('Could not establish connection to game database: %s', e)
         return os.EX_UNAVAILABLE
+    logging.info('Established connection to game database')
+
+    try:
+        state_db_conn = psycopg2.connect(host=args.statedbhost, database=args.statedbname,
+                                         user=args.statedbuser, password=args.statedbpassword)
+    except psycopg2.OperationalError as e:
+        logging.error('Could not establish connection to state database: %s', e)
+        return os.EX_UNAVAILABLE
+    logging.info('Established connection to state database')
+
+    # Keep our mental model easy by always using (timezone-aware) UTC for dates and times
+    with transaction_cursor(game_db_conn) as cursor:
+        cursor.execute('SET TIME ZONE "UTC"')
+    with transaction_cursor(state_db_conn) as cursor:
+        cursor.execute('SET TIME ZONE "UTC"')
 
     # Check database grants
     try:
@@ -154,31 +170,9 @@ def main():
     signal.signal(signal.SIGTERM, sigterm_handler)
 
     while True:
-        try:
-            master_loop.step()
-            if master_loop.shutting_down and master_loop.get_running_script_count() == 0:
-                break
-        except (psycopg2.OperationalError, psycopg2.InterfaceError) as e:
-            logging.error('Database error: %s', e)
-            while True:
-                logging.info('Trying to reconnect to databases')
-                game_db_conn, state_db_conn = database.connect_to_dbs(args.dbhost, args.dbname, args.dbuser,
-                                                                      args.dbpassword, args.statedbhost,
-                                                                      args.statedbname, args.statedbuser,
-                                                                      args.statedbpassword)
-                if game_db_conn is None or state_db_conn is None:
-                    logging.warning('Could not reconnect to databases, waiting to try again')
-                    time.sleep(60)
-                else:
-                    master_loop.game_db_conn = game_db_conn
-                    master_loop.state_db_conn = state_db_conn
-                    break
-        except:    # noqa, pylint: disable=bare-except
-            logging.exception('Error in main loop:')
-
-    logging.info('Closing database connections')
-    game_db_conn.close()
-    state_db_conn.close()
+        master_loop.step()
+        if master_loop.shutting_down and master_loop.get_running_script_count() == 0:
+            break
 
     return os.EX_OK
 

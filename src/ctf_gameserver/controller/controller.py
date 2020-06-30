@@ -26,9 +26,13 @@ def main():
     numeric_loglevel = getattr(logging, args.loglevel.upper())
     logging.getLogger().setLevel(numeric_loglevel)
 
-    db_conn = database.connect_to_db(args.dbhost, args.dbname, args.dbuser, args.dbpassword)
-    if db_conn is None:
+    try:
+        db_conn = psycopg2.connect(host=args.dbhost, database=args.dbname, user=args.dbuser,
+                                   password=args.dbpassword)
+    except psycopg2.OperationalError as e:
+        logging.error('Could not establish database connection: %s', e)
         return os.EX_UNAVAILABLE
+    logging.info('Established database connection')
 
     # Keep our mental model easy by always using (timezone-aware) UTC for dates and times
     with transaction_cursor(db_conn) as cursor:
@@ -53,21 +57,14 @@ def main():
     daemon.notify('READY=1')
 
     while True:
-        try:
-            main_loop_step(db_conn, args.nonstop)
-        except (psycopg2.OperationalError, psycopg2.InterfaceError) as e:
-            logging.error('Database error: %s', e)
-            while True:
-                logging.info('Trying to reconnect to database')
-                db_conn = database.connect_to_db(args.dbhost, args.dbname, args.dbuser, args.dbpassword)
-                if db_conn is None:
-                    logging.warning('Could not reconnect to database')
-                    sleep(60)
-                else:
-                    break
+        main_loop_step(db_conn, args.nonstop)
 
 
 def main_loop_step(db_conn, nonstop):
+
+    def sleep(duration):
+        logging.info('Sleeping for %d seconds', duration)
+        time.sleep(duration)
 
     try:
         control_info = database.get_control_info(db_conn)
@@ -108,12 +105,6 @@ def main_loop_step(db_conn, nonstop):
         logging.info('After tick %d, increasing tick to the next one', control_info['current_tick'])
         database.increase_tick(db_conn)
         database.update_scoring(db_conn)
-
-
-def sleep(duration):
-
-    logging.info('Sleeping for %d seconds', duration)
-    time.sleep(duration)
 
 
 def get_sleep_seconds(control_info, now=None):
