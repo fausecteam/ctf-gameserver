@@ -311,18 +311,26 @@ class MasterLoop:
                                result)
 
     def launch_tasks(self):
-        current_tick = database.get_current_tick(self.game_db_conn)
+        def change_tick(new_tick):
+            self.supervisor.terminate_runners()
+            self.update_launch_params()
+            self.known_tick = new_tick
 
+        current_tick = database.get_current_tick(self.game_db_conn)
         if current_tick < 0:
             # Competition not running yet
             return
-
         if current_tick != self.known_tick:
-            self.supervisor.terminate_runners()
-            self.update_launch_params()
-            self.known_tick = current_tick
+            change_tick(current_tick)
 
         tasks = database.get_new_tasks(self.game_db_conn, self.service['id'], self.tasks_per_launch)
+
+        # The current tick might have changed since calling `database.get_current_tick()`, so terminate the
+        # old Runners; `database.get_new_tasks()` only returns tasks for one single tick
+        if len(tasks) > 0 and tasks[0]['tick'] != current_tick:
+            current_tick = tasks[0]['tick']
+            change_tick(current_tick)
+
         for task in tasks:
             ip = self.ip_pattern % task['team_net_no']
             runner_args = [self.checker_script, ip, str(task['team_net_no']), str(task['tick'])]
@@ -332,9 +340,9 @@ class MasterLoop:
             task_info = {'service': self.service['slug'],
                          'team': task['team_net_no'],
                          '_team_id': task['team_id'],
-                         'tick': current_tick}
+                         'tick': task['tick']}
             logging.info('Starting Checker Script for team %d (net number %d) in tick %d', task['team_id'],
-                         task['team_net_no'], current_tick)
+                         task['team_net_no'], task['tick'])
             self.supervisor.start_runner(runner_args, self.sudo_user, task_info, self.logging_params)
 
     def update_launch_params(self):
