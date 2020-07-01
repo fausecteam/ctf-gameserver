@@ -30,6 +30,14 @@ class CTFUserAdmin(UserAdmin):
     InlineModelAdmin for the associated team.
     """
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Add email field to user creation form
+        for fieldset in self.add_fieldsets:
+            if fieldset[0] is None:
+                fieldset[1]['fields'] += ('email',)
+
     class TeamListFilter(admin.SimpleListFilter):
         """
         Admin list filter which allows filtering of user lists by whether they are associated with a Team.
