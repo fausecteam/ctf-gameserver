@@ -50,6 +50,10 @@ th.border-right, td.border-right {
     object-fit: contain;
 }
 
+.header-buttons {
+    margin-top: 20px;
+}
+
 #mail-teams-content {
     margin-top: 40px;
 }

@@ -24,20 +24,12 @@ class UserForm(forms.ModelForm):
     work with user models other than django.contrib.auth.models.User out-of-the-box.
     """
 
-    # Don't automatically create the form field from the model field, as the model field's `max_length`
-    # actually applies to the hashed passwords
-    password = forms.CharField(widget=forms.PasswordInput)
-    password_repetition = forms.CharField(widget=forms.PasswordInput)
-
     class Meta:
         model = User
-        fields = ['username', 'password', 'password_repetition', 'email']
+        fields = ['username', 'email']
         labels = {
             'username': _('Name'),
             'email': _('Formal email')
-        }
-        widgets = {
-            'password': forms.PasswordInput
         }
         help_texts = {
             'username': None,
@@ -51,11 +43,13 @@ class UserForm(forms.ModelForm):
         # Make 'Formal email' field required, despite not being required in the User model
         self.fields['email'].required = True
 
-        if self.instance.pk:
+        if not self.instance.pk:
+            # Creating a new user
+            self.fields['password'] = forms.CharField(widget=forms.PasswordInput, required=True)
+            self.fields['password_repetition'] = forms.CharField(widget=forms.PasswordInput, required=True)
+        else:
             # Editing an existing user
             self.fields['username'].widget.attrs['readonly'] = True
-            self.fields['password'].required = False
-            self.fields['password_repetition'].required = False
 
     def clean_username(self):
         if self.instance.pk:
@@ -80,14 +74,8 @@ class UserForm(forms.ModelForm):
         """
         user = super().save(commit=False)
 
-        if self.cleaned_data['password']:
+        if self.cleaned_data.get('password'):
             user.set_password(self.cleaned_data['password'])
-        else:
-            # Provide the correct change status to the view
-            try:
-                self.changed_data.remove('password')
-            except ValueError:
-                pass
 
         if 'email' in self.changed_data:
             user.is_active = False

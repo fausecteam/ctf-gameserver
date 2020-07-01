@@ -8,7 +8,7 @@ from django.conf import settings
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 from django.contrib import messages
-from django.contrib.auth import logout, get_user_model, update_session_auth_hash
+from django.contrib.auth import logout, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 
@@ -72,10 +72,6 @@ def edit_team(request):
         if user_form.is_valid() and team_form.is_valid():
             user = user_form.save()
             team_form.save(user)
-
-            if 'password' in user_form.changed_data:
-                # Keep the current session active although all sessions are invalidated on password change
-                update_session_auth_hash(request, user)
 
             if 'email' in user_form.changed_data:
                 user_form.send_confirmation_mail(request)

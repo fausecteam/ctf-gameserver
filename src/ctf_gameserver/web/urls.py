@@ -2,6 +2,7 @@ from django.conf import settings
 from django.conf.urls import include, url
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
+from django.urls import reverse_lazy
 
 from .registration import views as registration_views
 from .scoring import views as scoring_views
@@ -48,6 +49,11 @@ urlpatterns = [
         auth_views.logout,
         {'next_page': settings.HOME_URL},
         name='logout'
+    ),
+    url(r'^auth/change-password/$',
+        auth_views.PasswordChangeView.as_view(template_name='password_change.html',
+                                              success_url=reverse_lazy('edit_team')),
+        name='password_change'
     ),
     url(r'^auth/reset-password/$',
         auth_views.password_reset,

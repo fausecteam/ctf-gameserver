@@ -3,8 +3,12 @@
 {% load form_as_div %}
 
 {% block content %}
-<div class="page-header">
-    <h1>{% block title %}{% trans 'Edit team' %}{% endblock %}</h1>
+<div class="page-header row">
+    <h1 class="col-xs-6">{% block title %}{% trans 'Edit team' %}{% endblock %}</h1>
+    <div class="header-buttons col-xs-6 text-right">
+        <a href="{% url 'password_change' %}" class="btn btn-default">{% trans 'Change password' %}</a>
+        <a href="{% url 'delete_team' %}" class="btn btn-danger">{% trans 'Delete team' %}</a>
+    </div>
 </div>
 
 {% if team and team.net_number %}
@@ -21,7 +25,6 @@
     {{ team_form|as_div }}
 
     <button type="submit" class="btn btn-primary">{% trans 'Save' %}</button>
-    <a href="{% url 'delete_team' %}" class="btn btn-danger pull-right">{% trans 'Delete team' %}</a>
 </form>
 
 
