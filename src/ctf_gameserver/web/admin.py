@@ -69,7 +69,8 @@ class CTFUserAdmin(UserAdmin):
 
     list_display = ('username', 'is_active', 'is_staff', 'is_superuser', 'user_has_team', 'date_joined')
     list_filter = ('is_active', 'is_staff', 'is_superuser', TeamListFilter, 'date_joined')
-    search_fields = ('username', 'email', 'team__informal_email', 'team__affiliation', 'team__country')
+    search_fields = ('username', 'email', 'team__net_number', 'team__informal_email', 'team__affiliation',
+                     'team__country')
 
     fieldsets = (
         (None, {'fields': ('username', 'password', 'email')}),
