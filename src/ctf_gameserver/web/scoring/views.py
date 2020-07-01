@@ -11,7 +11,7 @@ from . import models, calculations
 from .decorators import competition_started_required
 
 
-@competition_started_required
+@competition_started_required('html')
 def scoreboard(request):
 
     return render(request, 'scoreboard.html', {
@@ -21,7 +21,7 @@ def scoreboard(request):
 
 # Short cache timeout only, because there is already caching going on in calculations
 @cache_page(5)
-@competition_started_required
+@competition_started_required('json')
 def scoreboard_json(_):
 
     game_control = models.GameControl.get_instance()
@@ -81,16 +81,12 @@ def scoreboard_json(_):
     return JsonResponse(response)
 
 
+@competition_started_required('json')
 def scoreboard_json_ctftime(_):
     """
     View which returns the scoreboard in CTFTime scoreboard feed format,
     see https://ctftime.org/json-scoreboard-feed.
     """
-
-    game_control = models.GameControl.get_instance()
-
-    if not game_control.competition_running() and not game_control.competition_over():
-        return JsonResponse({'error': 'Scoreboard is not available yet'}, status=404)
 
     tasks = ['Offense', 'Defense', 'SLA']
     standings = []
@@ -111,7 +107,7 @@ def scoreboard_json_ctftime(_):
     return JsonResponse({'tasks': tasks, 'standings': standings})
 
 
-@competition_started_required
+@competition_started_required('html')
 def service_status(request):
 
     return render(request, 'service_status.html')
@@ -119,7 +115,7 @@ def service_status(request):
 
 # Short cache timeout only, because there is already caching going on in calculations
 @cache_page(5)
-@competition_started_required
+@competition_started_required('json')
 def service_status_json(_):
 
     game_control = models.GameControl.get_instance()
@@ -170,7 +166,7 @@ def service_status_json(_):
 @cache_page(60)
 # Don't provide a list of all teams while registration is open to prevent
 # crawling of registered teams and comparing with this list
-@competition_started_required
+@competition_started_required('json')
 def teams_json(_):
 
     teams = registration_models.Team.active_objects.values_list('net_number', flat=True)
