@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.conf.urls import include, url
+from django.conf.urls import url
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
 from django.urls import reverse_lazy
@@ -11,15 +11,6 @@ from .admin import admin_site
 from .forms import TeamAuthenticationForm, FormalPasswordResetForm
 
 # pylint: disable=invalid-name, bad-continuation
-
-
-# Arguments for the django.contrib.auth.views.password_reset view
-_password_reset_args = {
-    'template_name': 'password_reset.html',
-    'email_template_name': 'password_reset_mail.txt',
-    'subject_template_name': 'password_reset_subject.txt',
-    'password_reset_form': FormalPasswordResetForm,
-}
 
 
 urlpatterns = [
@@ -41,13 +32,11 @@ urlpatterns = [
     ),
 
     url(r'^auth/login/$',
-        auth_views.login,
-        {'template_name': 'login.html', 'authentication_form': TeamAuthenticationForm},
+        auth_views.LoginView.as_view(template_name='login.html', authentication_form=TeamAuthenticationForm),
         name='login'
     ),
     url(r'^auth/logout/$',
-        auth_views.logout,
-        {'next_page': settings.HOME_URL},
+        auth_views.LogoutView.as_view(next_page=settings.HOME_URL),
         name='logout'
     ),
     url(r'^auth/change-password/$',
@@ -56,24 +45,22 @@ urlpatterns = [
         name='password_change'
     ),
     url(r'^auth/reset-password/$',
-        auth_views.password_reset,
-        _password_reset_args,
+        auth_views.PasswordResetView.as_view(template_name='password_reset.html',
+                                             email_template_name='password_reset_mail.txt',
+                                             subject_template_name='password_reset_subject.txt',
+                                             form_class=FormalPasswordResetForm),
         name='password_reset'
     ),
     url(r'^auth/reset-password/done/$',
-        auth_views.password_reset_done,
-        {'template_name': 'password_reset_done.html'},
+        auth_views.PasswordResetDoneView.as_view(template_name='password_reset_done.html'),
         name='password_reset_done'
     ),
     url(r'^auth/reset/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
-        auth_views.password_reset_confirm,
-        {'template_name': 'password_reset_confirm.html'},
+        auth_views.PasswordResetConfirmView.as_view(template_name='password_reset_confirm.html'),
         name='password_reset_confirm'
     ),
-
     url(r'^auth/reset/complete/$',
-        auth_views.password_reset_complete,
-        {'template_name': 'password_reset_complete.html'},
+        auth_views.PasswordResetCompleteView.as_view(template_name='password_reset_complete.html'),
         name='password_reset_complete'
     ),
 
@@ -118,7 +105,7 @@ urlpatterns = [
         scoring_views.service_history_json,
         name='service_history_json'
     ),
-    url(r'^admin/', include(admin_site.urls)),
+    url(r'^admin/', admin_site.urls),
 
     # Multiple seperate URL patterns have to be used to work around
     # https://code.djangoproject.com/ticket/9176
