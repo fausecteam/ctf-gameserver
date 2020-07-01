@@ -75,3 +75,14 @@ button#refresh {
 #history-table td a:hover {
     text-decoration: none;
 }
+
+.jumbotron img.big-logo {
+    margin-right: 30px;
+    width: 30%;
+}
+
+#supporter-column img {
+    margin-top: 10px;
+    margin-bottom: 35px;
+    width: 100%;
+}
