@@ -19,6 +19,8 @@ class GameControlAdminForm(forms.ModelForm):
         exclude = ('current_tick',)
         help_texts = {
             'valid_ticks': _('Number of ticks a flag is valid for'),
+            'registration_confirm_text': _('If set, teams will have to confirm to this text (e.g. a link to'
+                                           'T&C) when signing up. May contain HTML.'),
             'min_net_number': _('If unset, team IDs will be used as net numbers'),
             'max_net_number': _('(Inclusive) If unset, team IDs will be used as net numbers'),
         }

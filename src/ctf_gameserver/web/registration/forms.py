@@ -2,9 +2,12 @@ from django import forms
 from django.core.mail import send_mail
 from django.template import loader
 from django.conf import settings
+from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import User
 from django.contrib.sites.shortcuts import get_current_site
+
+import ctf_gameserver.web.scoring.models as scoring_models
 
 from .models import Team
 from .fields import ClearableThumbnailImageInput
@@ -146,6 +149,10 @@ class TeamForm(forms.ModelForm):
         # Add 'empty' option to the country choices, see https://stackoverflow.com/a/16279536
         # Editing the existing list in place doesn't work since choices are stored in the widget as well
         self.fields['country'].choices = [('', '----------')] + self.fields['country'].choices
+
+        confirm_text = scoring_models.GameControl.get_instance().registration_confirm_text
+        if confirm_text and not self.instance.pk:
+            self.fields['confirm_text'] = forms.BooleanField(label=mark_safe(confirm_text), required=True)
 
     def clean_image(self):
         if self.cleaned_data['image'] and self.cleaned_data['image'].size > FIVE_MB:
