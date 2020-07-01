@@ -68,8 +68,8 @@ WSGI_APPLICATION = 'ctf_gameserver.web.wsgi.application'
 
 STATIC_URL = '/static/'
 MEDIA_URL = '/uploads/'
-LOGIN_URL = '/login/'
-LOGOUT_URL = '/logout/'
+LOGIN_URL = '/auth/login/'
+LOGOUT_URL = '/auth/logout/'
 LOGIN_REDIRECT_URL = HOME_URL
 
 # Make message level tags match the CSS classes from Bootstrap
