@@ -31,10 +31,6 @@ $(EXT_DIR)/bootstrap: bootstrap.zip
 	unzip -n $< -d $(EXT_DIR)
 	mv -v $(EXT_DIR)/bootstrap-3.3.5-dist $(EXT_DIR)/bootstrap
 
-$(WEB_DIR)/registration/countries.csv:
-	# Official download link from http://data.okfn.org/data/core/country-list, under Public Domain
-	curl https://raw.githubusercontent.com/datasets/country-list/master/data.csv -o $@
-
 
 test:
 	pytest --cov $(SOURCE_DIR) $(TESTS_DIR)
@@ -52,7 +48,7 @@ docs_site: mkdocs.yml $(wildcard docs/* docs/*/*)
 
 clean:
 	rm -rf src/ctf_gameserver/web/*/migrations
-	rm -f src/ctf_gameserver/web/dev-db.sqlite3 src/ctf_gameserver/web/registration/countries.csv
+	rm -f src/ctf_gameserver/web/dev-db.sqlite3
 	rm -rf src/ctf_gameserver/web/static/ext
 	rm -rf build dist src/ctf_gameserver.egg-info
 	rm -rf docs_site
