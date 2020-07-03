@@ -166,7 +166,7 @@ def confirm_email(request):
     team = Team.objects.get(user__pk=user_pk)
 
     game_control = scoring_models.GameControl.get_instance()
-    if game_control.min_net_number is None or game_control.max is None:
+    if game_control.min_net_number is None or game_control.max_net_number is None:
         # Assign team IDs as net numbers when no net number range is configured
         possible_net_numbers = set([user_pk])
     else:
