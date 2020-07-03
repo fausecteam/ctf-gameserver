@@ -43,6 +43,22 @@ th.border-right, td.border-right {
     border-right: 2px solid #DDDDDD;
 }
 
+/* See https://martinahonecker.com/youtube-videos-responsive-einbinden/ */
+.video-container {
+    position: relative;
+    margin-bottom: 20px;
+    height: 0;
+    padding-bottom: 56.25%;
+}
+
+.video-container iframe, .video-container object, .video-container embed {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
 .image-column {
     width: 80px;
 }
