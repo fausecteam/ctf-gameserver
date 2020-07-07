@@ -12,7 +12,7 @@ class MasterTest(DatabaseTestCase):
     fixtures = ['tests/checker/fixtures/master.json']
 
     def setUp(self):
-        self.master_loop = MasterLoop(self.connection, None, 'service1', '/dev/null', None, 90, 8, 10,
+        self.master_loop = MasterLoop(self.connection, None, 'service1', '/dev/null', None, 2, 8, 10,
                                       '0.0.%s.1', b'secret', {})
 
     def test_handle_flag_request(self):
@@ -109,13 +109,17 @@ class MasterTest(DatabaseTestCase):
                            '    WHERE service_id = 1 AND protecting_team_id = 2 AND tick = 3')
             self.assertIsNone(cursor.fetchone()[0])
 
-    def test_update_launch_params(self):
-        self.master_loop.update_launch_params()
+    @patch('ctf_gameserver.checker.database.get_check_duration')
+    def test_update_launch_params(self, check_duration_mock):
+        # Very short duration, but should be ignored in tick 1
+        check_duration_mock.return_value = 1
+
+        self.master_loop.update_launch_params(-1)
         self.assertEqual(self.master_loop.tasks_per_launch, 0)
 
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET current_tick=1')
-        self.master_loop.update_launch_params()
+        self.master_loop.update_launch_params(1)
         self.assertEqual(self.master_loop.tasks_per_launch, 1)
 
         with transaction_cursor(self.connection) as cursor:
@@ -131,22 +135,27 @@ class MasterTest(DatabaseTestCase):
                                '    VALUES (%s, %s, %s, %s, %s, false)', (i, email, '', '', 'World'))
                 cursor.execute('INSERT INTO scoring_flag (service_id, protecting_team_id, tick)'
                                '    VALUES (1, %s, 1)', (i,))
-        self.master_loop.update_launch_params()
-        self.assertEqual(self.master_loop.tasks_per_launch, 9)
+        self.master_loop.update_launch_params(1)
+        self.assertEqual(self.master_loop.tasks_per_launch, 49)
 
-        self.master_loop.tick_duration = datetime.timedelta(seconds=360)
-        self.master_loop.update_launch_params()
-        self.assertEqual(self.master_loop.tasks_per_launch, 3)
+        check_duration_mock.return_value = None
+        self.master_loop.update_launch_params(10)
+        self.assertEqual(self.master_loop.tasks_per_launch, 49)
 
-        self.master_loop.tick_duration = datetime.timedelta(seconds=180)
+        check_duration_mock.return_value = 3600
+        self.master_loop.update_launch_params(10)
+        self.assertEqual(self.master_loop.tasks_per_launch, 49)
+
+        check_duration_mock.return_value = 90
+        self.master_loop.update_launch_params(10)
+        self.assertEqual(self.master_loop.tasks_per_launch, 7)
+
         self.master_loop.interval = 5
-        self.master_loop.update_launch_params()
-        self.assertEqual(self.master_loop.tasks_per_launch, 5)
+        self.master_loop.update_launch_params(10)
+        self.assertEqual(self.master_loop.tasks_per_launch, 4)
 
-        self.master_loop.max_check_duration = 30
-        self.master_loop.update_launch_params()
-        self.assertEqual(self.master_loop.tasks_per_launch, 3)
-
-        self.master_loop.max_check_duration = 3600
-        with self.assertRaises(ValueError):
-            self.master_loop.update_launch_params()
+        check_duration_mock.return_value = 10
+        self.master_loop.interval = 10
+        self.master_loop.tick_duration = datetime.timedelta(seconds=90)
+        self.master_loop.update_launch_params(10)
+        self.assertEqual(self.master_loop.tasks_per_launch, 7)

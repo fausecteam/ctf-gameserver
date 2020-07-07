@@ -28,13 +28,20 @@ class IntegrationTest(DatabaseTestCase):
                            '    PRIMARY KEY (team_net_no, service_id, identifier)'
                            ')')
 
+        self.check_duration_patch = patch('ctf_gameserver.checker.database.get_check_duration')
+        check_duration_mock = self.check_duration_patch.start()
+        check_duration_mock.return_value = None
+
+    def tearDown(self):
+        self.check_duration_patch.stop()
+
     @patch('ctf_gameserver.checker.master.get_monotonic_time')
     def test_basic(self, monotonic_mock):
         checkerscript_path = os.path.join(os.path.dirname(__file__), 'integration_basic_checkerscript.py')
 
         monotonic_mock.return_value = 10
         master_loop = MasterLoop(self.connection, self.state_db_conn, 'service1', checkerscript_path, None,
-                                 90, 1, 10, '0.0.%s.1', b'secret', {})
+                                 2, 1, 10, '0.0.%s.1', b'secret', {})
 
         master_loop.supervisor.queue_timeout = 0.01
         # Sanity check before any tick
@@ -84,7 +91,7 @@ class IntegrationTest(DatabaseTestCase):
 
         monotonic_mock.return_value = 10
         master_loop = MasterLoop(self.connection, self.state_db_conn, 'service1', checkerscript_path, None,
-                                 90, 1, 10, '0.0.%s.1', b'secret', {})
+                                 2, 1, 10, '0.0.%s.1', b'secret', {})
 
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
@@ -114,7 +121,7 @@ class IntegrationTest(DatabaseTestCase):
 
         monotonic_mock.return_value = 10
         master_loop = MasterLoop(self.connection, self.state_db_conn, 'service1', checkerscript_path, None,
-                                 90, 1, 10, '0.0.%s.1', b'secret', {})
+                                 2, 1, 10, '0.0.%s.1', b'secret', {})
 
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
@@ -144,7 +151,7 @@ class IntegrationTest(DatabaseTestCase):
 
         monotonic_mock.return_value = 10
         master_loop = MasterLoop(self.connection, self.state_db_conn, 'service1', checkerscript_path, None,
-                                 90, 1, 10, '0.0.%s.1', b'secret', {})
+                                 2, 1, 10, '0.0.%s.1', b'secret', {})
 
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
@@ -180,7 +187,7 @@ class IntegrationTest(DatabaseTestCase):
 
         monotonic_mock.return_value = 10
         master_loop = MasterLoop(self.connection, self.state_db_conn, 'service1', checkerscript_path, None,
-                                 90, 1, 10, '0.0.%s.1', b'secret', {})
+                                 2, 1, 10, '0.0.%s.1', b'secret', {})
 
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
@@ -239,7 +246,7 @@ class IntegrationTest(DatabaseTestCase):
 
         monotonic_mock.return_value = 10
         master_loop = MasterLoop(self.connection, self.state_db_conn, 'service1', checkerscript_path, None,
-                                 90, 1, 10, '0.0.%s.1', b'secret', {})
+                                 2, 1, 10, '0.0.%s.1', b'secret', {})
 
         # Tick 0
         with transaction_cursor(self.connection) as cursor:
@@ -331,7 +338,7 @@ class IntegrationTest(DatabaseTestCase):
 
         monotonic_mock.return_value = 10
         master_loop = MasterLoop(self.connection, self.state_db_conn, 'service1', checkerscript_path, None,
-                                 90, 1, 10, '0.0.%s.1', b'secret', {})
+                                 2, 1, 10, '0.0.%s.1', b'secret', {})
 
         with transaction_cursor(self.state_db_conn) as cursor:
             # Prepopulate state for the non-checked service to ensure we'll never get this data returned
@@ -406,7 +413,7 @@ class IntegrationTest(DatabaseTestCase):
 
         monotonic_mock.return_value = 10
         master_loop = MasterLoop(self.connection, self.state_db_conn, 'service1', checkerscript_path, None,
-                                 90, 1, 10, '0.0.%s.1', b'secret', {})
+                                 2, 1, 10, '0.0.%s.1', b'secret', {})
 
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
@@ -435,7 +442,7 @@ class IntegrationTest(DatabaseTestCase):
 
         monotonic_mock.return_value = 10
         master_loop = MasterLoop(self.connection, self.state_db_conn, 'service1', checkerscript_path,
-                                 'ctf-checkerrunner', 90, 1, 10, '0.0.%s.1', b'secret', {})
+                                 'ctf-checkerrunner', 2, 1, 10, '0.0.%s.1', b'secret', {})
 
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
@@ -475,7 +482,7 @@ class IntegrationTest(DatabaseTestCase):
 
         monotonic_mock.return_value = 10
         master_loop = MasterLoop(self.connection, self.state_db_conn, 'service1', checkerscript_path,
-                                 'ctf-checkerrunner', 90, 1, 10, '0.0.%s.1', b'secret', {})
+                                 'ctf-checkerrunner', 2, 1, 10, '0.0.%s.1', b'secret', {})
 
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')

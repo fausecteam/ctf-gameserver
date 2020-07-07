@@ -47,8 +47,9 @@ def main():
                        help='Path of the Checker Script')
     group.add_argument('--sudouser', type=str, help=' User to excute the Checker Scripts as, will be passed '
                        'to `sudo -u`')
-    group.add_argument('--maxcheckduration', type=float, required=True,
-                       help='Maximum duration of a Checker Script run in seconds')
+    group.add_argument('--stddeviations', type=float, default=2.0,
+                       help='Consider past runtimes within this number of standard deviations when '
+                       'estimating Checker Script runtime (default: 2)')
     group.add_argument('--checkercount', type=int, required=True,
                        help='Number of Checker Masters running for this service')
     group.add_argument('--interval', type=float, required=True,
@@ -155,7 +156,7 @@ def main():
     while True:
         try:
             master_loop = MasterLoop(game_db_conn, state_db_conn, args.service, args.checkerscript,
-                                     args.sudouser, args.maxcheckduration, args.checkercount, args.interval,
+                                     args.sudouser, args.stddeviations, args.checkercount, args.interval,
                                      args.ippattern, flag_secret, logging_params)
             break
         except DBDataError as e:
@@ -179,13 +180,13 @@ def main():
 
 class MasterLoop:
 
-    def __init__(self, game_db_conn, state_db_conn, service_slug, checker_script, sudo_user,
-                 max_check_duration, checker_count, interval, ip_pattern, flag_secret, logging_params):
+    def __init__(self, game_db_conn, state_db_conn, service_slug, checker_script, sudo_user, std_dev_count,
+                 checker_count, interval, ip_pattern, flag_secret, logging_params):
         self.game_db_conn = game_db_conn
         self.state_db_conn = state_db_conn
         self.checker_script = checker_script
         self.sudo_user = sudo_user
-        self.max_check_duration = max_check_duration
+        self.std_dev_count = std_dev_count
         self.checker_count = checker_count
         self.interval = interval
         self.ip_pattern = ip_pattern
@@ -307,7 +308,7 @@ class MasterLoop:
     def launch_tasks(self):
         def change_tick(new_tick):
             self.supervisor.terminate_runners()
-            self.update_launch_params()
+            self.update_launch_params(new_tick)
             self.known_tick = new_tick
 
         current_tick = database.get_current_tick(self.game_db_conn)
@@ -339,24 +340,36 @@ class MasterLoop:
                          task['team_net_no'], task['tick'])
             self.supervisor.start_runner(runner_args, self.sudo_user, task_info, self.logging_params)
 
-    def update_launch_params(self):
+    def update_launch_params(self, tick):
         """
         Determines the number of Checker tasks to start per launch.
         Our goal here is to balance the load over a tick with some smearing (to make Checker fingerprinting
         more difficult), while also ensuring that all teams get checked in every tick.
-        This simple implementation distributes the start of tasks evenly across the available time with some
-        safety margin at the end.
+        This implementation distributes the start of tasks evenly across the available time with some safety
+        margin at the end. The duration of a check is determined from previous ticks after the first 5 ticks,
+        before that the maximum is assumed.
         """
+
+        if tick < 5:
+            # We don't know any bounds on Checker Script Runtime at the beginning
+            check_duration = self.tick_duration.total_seconds()
+        else:
+            check_duration = database.get_check_duration(self.game_db_conn, self.service['id'],
+                                                         self.std_dev_count)
+            if check_duration is None:
+                # No complete flag placements so far
+                check_duration = self.tick_duration.total_seconds()
+
         total_tasks = database.get_task_count(self.game_db_conn, self.service['id'])
         local_tasks = math.ceil(total_tasks / self.checker_count)
 
         margin_seconds = self.tick_duration.total_seconds() / 6
-        launch_timeframe = self.tick_duration.total_seconds() - self.max_check_duration - margin_seconds
-        if launch_timeframe < 0:
-            raise ValueError('Maximum Checker Script duration too long for tick')
+        launch_timeframe = max(self.tick_duration.total_seconds() - check_duration - margin_seconds, 0)
 
-        intervals_per_timeframe = max(math.floor(launch_timeframe / self.interval), 1)
+        intervals_per_timeframe = math.floor(launch_timeframe / self.interval) + 1
         self.tasks_per_launch = math.ceil(local_tasks / intervals_per_timeframe)
+        logging.info('Planning to start %d tasks per interval with a maximum duration of %d seconds',
+                     self.tasks_per_launch, check_duration)
 
     def get_running_script_count(self):
         return len(self.supervisor.processes)

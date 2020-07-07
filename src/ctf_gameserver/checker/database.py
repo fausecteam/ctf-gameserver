@@ -56,6 +56,25 @@ def get_current_tick(db_conn, prohibit_changes=False):
     return result[0]
 
 
+def get_check_duration(db_conn, service_id, std_dev_count, prohibit_changes=False):
+    """
+    Estimates the duration of checks for the given service from the average runtime of previous runs and its
+    standard deviation. We include all previous runs to accomodate to Checker Scripts with varying runtimes.
+    `std_dev_count` is the number of standard deviations to add to the average, i.e. increasing it will lead
+    to a greater result. Assuming a normal distribution, 2 standard deviations will include ~ 95 % of
+    previous results.
+    """
+
+    with transaction_cursor(db_conn, prohibit_changes) as cursor:
+        cursor.execute('SELECT avg(extract(epoch from (placement_end - placement_start))) + %s *'
+                       '       stddev_pop(extract(epoch from (placement_end - placement_start)))'
+                       '    FROM scoring_flag, scoring_gamecontrol'
+                       '    WHERE service_id = %s AND tick < current_tick', (std_dev_count, service_id))
+        result = cursor.fetchone()
+
+    return result[0]
+
+
 def get_task_count(db_conn, service_id, prohibit_changes=False):
     """
     Returns the total number of tasks for the given service in the current tick.
