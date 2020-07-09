@@ -1,4 +1,5 @@
 import multiprocessing
+import socket
 import time
 from unittest import TestCase
 
@@ -44,7 +45,8 @@ class MetricsTest(TestCase):
                                                          args=('test', metrics_factory, self.queue, send))
         self.collector_process.start()
         self.http_server_process = multiprocessing.Process(target=metrics.run_http_server,
-                                                           args=('127.0.0.1', 9002, self.queue, recv))
+                                                           args=('127.0.0.1', 9002, socket.AF_INET,
+                                                                 self.queue, recv))
         self.http_server_process.start()
 
         # Wait for server start-up to avoid race conditions

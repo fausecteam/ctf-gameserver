@@ -1,3 +1,6 @@
+import socket
+import urllib.parse
+
 import configargparse
 
 
@@ -20,3 +23,26 @@ def get_arg_parser_with_db(description):
     db_group.add_argument('--dbpassword', type=str, help='Password for database access if needed')
 
     return parser
+
+
+def parse_host_port(text):
+
+    """
+    Parses a host and port specification from a string in the format `<host>:<port>`.
+
+    Returns:
+        The parsing result as a tuple of (host, port, family). `family` is a constant from Python's socket
+        interface representing an address family, e.g. `socket.AF_INET`.
+    """
+
+    # Use pseudo URL for splitting, see https://stackoverflow.com/a/53172593
+    url_parts = urllib.parse.urlsplit('//' + text)
+    if url_parts.hostname is None or url_parts.port is None:
+        raise ValueError('Invalid host or port')
+
+    try:
+        addrinfo = socket.getaddrinfo(url_parts.hostname, url_parts.port)
+    except socket.gaierror:
+        raise ValueError('Could not determine address family')
+
+    return (url_parts.hostname, url_parts.port, addrinfo[0][0])

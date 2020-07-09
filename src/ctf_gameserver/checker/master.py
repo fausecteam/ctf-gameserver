@@ -6,12 +6,11 @@ import multiprocessing
 import os
 import signal
 import time
-import urllib.parse
 
 import psycopg2
 from psycopg2 import errorcodes as postgres_errors
 
-from ctf_gameserver.lib.args import get_arg_parser_with_db
+from ctf_gameserver.lib.args import get_arg_parser_with_db, parse_host_port
 from ctf_gameserver.lib import daemon
 from ctf_gameserver.lib.database import transaction_cursor
 from ctf_gameserver.lib.checkresult import CheckResult
@@ -92,21 +91,18 @@ def main():
         except ImportError:
             logging.error('graypy module is required for GELF logging')
             return os.EX_USAGE
-        # Use pseudo URL for splitting, see https://stackoverflow.com/a/53172593
-        gelf_server = urllib.parse.urlsplit('//' + args.gelf_server)
-        gelf_host = gelf_server.hostname
-        gelf_port = gelf_server.port
-        if gelf_host is None or gelf_server is None:
+        try:
+            gelf_host, gelf_port, gelf_family = parse_host_port(args.gelf_server)
+        except ValueError:
             logging.error('GELF server needs to be specified as "<host>:<port>"')
             return os.EX_USAGE
-        logging_params['gelf'] = {'host': gelf_host, 'port': gelf_port}
+        logging_params['gelf'] = {'host': gelf_host, 'port': gelf_port, 'family': gelf_family}
 
     # Configure metrics
     if args.metrics_listen is not None:
-        metrics_listen = urllib.parse.urlsplit('//' + args.metrics_listen)
-        metrics_host = metrics_listen.hostname
-        metrics_port = metrics_listen.port
-        if metrics_host is None or metrics_port is None:
+        try:
+            metrics_host, metrics_port, metrics_family = parse_host_port(args.metrics_listen)
+        except ValueError:
             logging.error('Metrics listen address needs to be specified as "<host>:<port>"')
             return os.EX_USAGE
 
@@ -119,7 +115,7 @@ def main():
         metrics_collector_process.start()
         metrics_server_process = multiprocessing.Process(
             target=metrics.run_http_server,
-            args=(metrics_host, metrics_port, metrics_queue, metrics_recv)
+            args=(metrics_host, metrics_port, metrics_family, metrics_queue, metrics_recv)
         )
         metrics_server_process.start()
 

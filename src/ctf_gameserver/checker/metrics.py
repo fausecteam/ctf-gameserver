@@ -144,7 +144,7 @@ def run_collector(service, metrics_factory, in_queue, pipe_to_server):
             logging.error('Received unknown message on collector queue')
 
 
-def run_http_server(host, port, queue_to_collector, pipe_from_collector):
+def run_http_server(host, port, family, queue_to_collector, pipe_from_collector):
     """
     Runs a server exposing Prometheus metrics via HTTP. The metrics are requested through a HTTPGenMessage
     and received over the pipe. Designed to be run as "target" in a multiprocessing.Process in conjunction
@@ -153,6 +153,7 @@ def run_http_server(host, port, queue_to_collector, pipe_from_collector):
     Args:
         host: Host to run the HTTP server on.
         port: Port to run the HTTP server on.
+        family: Address family to run the HTTP server with.
         queue_to_collector: Queue to which HTTPGenMessages are sent.
         pipe_from_collector: Pipe from which text representations of the metrics are received.
     """
@@ -168,13 +169,17 @@ def run_http_server(host, port, queue_to_collector, pipe_from_collector):
         start_response(status, headers)
         return [output]
 
+    class FamilyServer(simple_server.WSGIServer):
+        address_family = family
+
     class SilentHandler(simple_server.WSGIRequestHandler):
         def log_message(self, _, *args):
             """
             Doesn't log anything.
             """
 
-    http_server = simple_server.make_server(host, port, app, handler_class=SilentHandler)
+    http_server = simple_server.make_server(host, port, app, server_class=FamilyServer,
+                                            handler_class=SilentHandler)
     http_server.serve_forever()
 
 
