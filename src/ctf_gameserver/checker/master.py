@@ -2,6 +2,7 @@ import base64
 import datetime
 import logging
 import math
+import multiprocessing
 import os
 import signal
 import time
@@ -17,7 +18,7 @@ from ctf_gameserver.lib.checkresult import CheckResult
 from ctf_gameserver.lib.exceptions import DBDataError
 import ctf_gameserver.lib.flag as flag_lib
 
-from . import database
+from . import database, metrics
 from .supervisor import RunnerSupervisor
 from .supervisor import ACTION_FLAG, ACTION_LOAD, ACTION_STORE, ACTION_RESULT
 
@@ -29,6 +30,8 @@ def main():
                             help='(Old-style) Python formatstring for building the IP to connect to')
     arg_parser.add_argument('--flagsecret', type=str, required=True,
                             help='Base64 string used as secret in flag generation')
+    arg_parser.add_argument('--metrics-listen', type=str, help='Expose Prometheus metrics via HTTP '
+                            '("<host>:<port>")')
 
     group = arg_parser.add_argument_group('statedb', 'Checker state database')
     group.add_argument('--statedbhost', type=str, help='Hostname of the database. If unspecified, the '
@@ -98,6 +101,33 @@ def main():
             return os.EX_USAGE
         logging_params['gelf'] = {'host': gelf_host, 'port': gelf_port}
 
+    # Configure metrics
+    if args.metrics_listen is not None:
+        metrics_listen = urllib.parse.urlsplit('//' + args.metrics_listen)
+        metrics_host = metrics_listen.hostname
+        metrics_port = metrics_listen.port
+        if metrics_host is None or metrics_port is None:
+            logging.error('Metrics listen address needs to be specified as "<host>:<port>"')
+            return os.EX_USAGE
+
+        metrics_queue = multiprocessing.Queue()
+        metrics_recv, metrics_send = multiprocessing.Pipe()
+        metrics_collector_process = multiprocessing.Process(
+            target=metrics.run_collector,
+            args=(args.service, metrics.checker_metrics_factory, metrics_queue, metrics_send)
+        )
+        metrics_collector_process.start()
+        metrics_server_process = multiprocessing.Process(
+            target=metrics.run_http_server,
+            args=(metrics_host, metrics_port, metrics_queue, metrics_recv)
+        )
+        metrics_server_process.start()
+
+        metrics.set(metrics_queue, 'interval_length_seconds', args.interval)
+        metrics.set(metrics_queue, 'start_timestamp', time.time())
+    else:
+        metrics_queue = metrics.DummyQueue()
+
     flag_secret = base64.b64decode(args.flagsecret)
 
     # Connect to databases
@@ -159,7 +189,7 @@ def main():
         try:
             master_loop = MasterLoop(game_db_conn, state_db_conn, args.service, args.checkerscript,
                                      args.sudouser, args.stddeviations, args.checkercount, args.interval,
-                                     args.ippattern, flag_secret, logging_params)
+                                     args.ippattern, flag_secret, logging_params, metrics_queue)
             break
         except DBDataError as e:
             logging.warning('Waiting for valid database state: %s', e)
@@ -177,13 +207,18 @@ def main():
         if master_loop.shutting_down and master_loop.get_running_script_count() == 0:
             break
 
+    metrics_server_process.terminate()
+    metrics_collector_process.terminate()
+    metrics_server_process.join()
+    metrics_collector_process.join()
+
     return os.EX_OK
 
 
 class MasterLoop:
 
     def __init__(self, game_db_conn, state_db_conn, service_slug, checker_script, sudo_user, std_dev_count,
-                 checker_count, interval, ip_pattern, flag_secret, logging_params):
+                 checker_count, interval, ip_pattern, flag_secret, logging_params, metrics_queue):
         self.game_db_conn = game_db_conn
         self.state_db_conn = state_db_conn
         self.checker_script = checker_script
@@ -194,12 +229,13 @@ class MasterLoop:
         self.ip_pattern = ip_pattern
         self.flag_secret = flag_secret
         self.logging_params = logging_params
+        self.metrics_queue = metrics_queue
 
         self.refresh_control_info()
         self.service = database.get_service_attributes(self.game_db_conn, service_slug)
         self.service['slug'] = service_slug
 
-        self.supervisor = RunnerSupervisor()
+        self.supervisor = RunnerSupervisor(metrics_queue)
         self.known_tick = -1
         # Trigger launch of tasks in first step()
         self.last_launch = get_monotonic_time() - self.interval
@@ -254,6 +290,10 @@ class MasterLoop:
         if not self.shutting_down:
             # Launch new tasks and catch up missed intervals
             while get_monotonic_time() - self.last_launch >= self.interval:
+                delay = get_monotonic_time() - self.last_launch - self.interval
+                metrics.observe(self.metrics_queue, 'task_launch_delay_seconds', delay)
+                metrics.set(self.metrics_queue, 'last_launch_timestamp', time.time())
+
                 self.last_launch += self.interval
                 self.launch_tasks()
 
@@ -304,6 +344,7 @@ class MasterLoop:
 
         logging.info('Result from Checker Script for team %d (net number %d) in tick %d: %s',
                      task_info['_team_id'], task_info['team'], task_info['tick'], check_result)
+        metrics.inc(self.metrics_queue, 'completed_tasks', labels={'result': check_result.name})
         database.commit_result(self.game_db_conn, self.service['id'], task_info['team'], task_info['tick'],
                                result)
 
@@ -372,6 +413,8 @@ class MasterLoop:
         self.tasks_per_launch = math.ceil(local_tasks / intervals_per_timeframe)
         logging.info('Planning to start %d tasks per interval with a maximum duration of %d seconds',
                      self.tasks_per_launch, check_duration)
+        metrics.set(self.metrics_queue, 'tasks_per_launch_count', self.tasks_per_launch)
+        metrics.set(self.metrics_queue, 'max_task_duration_seconds', check_duration)
 
     def get_running_script_count(self):
         return len(self.supervisor.processes)

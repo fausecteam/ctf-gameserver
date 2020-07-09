@@ -11,6 +11,8 @@ import time
 
 from ctf_gameserver.lib.checkresult import CheckResult
 
+from . import metrics
+
 
 ACTION_FLAG = 'FLAG'
 ACTION_LOAD = 'LOAD'
@@ -34,7 +36,9 @@ class RunnerSupervisor:
     Launches Checker Script Runners as individual processes and takes care of communicating with them.
     """
 
-    def __init__(self):
+    def __init__(self, metrics_queue):
+        self.metrics_queue = metrics_queue
+
         # Timeout if there are no requests when all Runners are done or blocking
         self.queue_timeout = 1
         self._reset()
@@ -42,6 +46,7 @@ class RunnerSupervisor:
     def _reset(self):
         self.work_queue = multiprocessing.Queue()
         self.processes = {}
+        self.start_times = {}
         self.next_identifier = 0
 
     def start_runner(self, args, sudo_user, info, logging_params):
@@ -51,14 +56,17 @@ class RunnerSupervisor:
                                                                         logging_params, self.next_identifier,
                                                                         self.work_queue, receive))
         self.processes[self.next_identifier] = (proc, send, info)
+        self.start_times[self.next_identifier] = time.monotonic()
 
         proc.start()
         self.next_identifier += 1
+        metrics.inc(self.metrics_queue, 'started_tasks')
 
     def terminate_runner(self, runner_id):
         logging.info('Terminating Runner process, info: %s', self.processes[runner_id][2])
         self.processes[runner_id][0].terminate()
         # Afterwards, get_request() will join the child and remove it from `self.processes`
+        metrics.inc(self.metrics_queue, 'terminated_tasks')
 
     def terminate_runners(self):
         if len(self.processes) > 0:
@@ -82,9 +90,14 @@ class RunnerSupervisor:
 
             # Join all terminated child processes
             if action == ACTION_RUNNER_EXIT:
+                duration = time.monotonic() - self.start_times[runner_id]
+                metrics.observe(self.metrics_queue, 'script_duration_seconds', duration)
+                del self.start_times[runner_id]
+
                 proc = self.processes[runner_id][0]
                 proc.join()
                 del self.processes[runner_id]
+
                 if self.work_queue.empty():
                     return None
             else:

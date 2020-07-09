@@ -8,6 +8,7 @@ import tempfile
 import time
 
 from ctf_gameserver.checker.master import MasterLoop
+from ctf_gameserver.checker.metrics import DummyQueue
 from ctf_gameserver.lib.checkresult import CheckResult
 from ctf_gameserver.lib.database import transaction_cursor
 from ctf_gameserver.lib.test_util import DatabaseTestCase
@@ -41,7 +42,7 @@ class IntegrationTest(DatabaseTestCase):
 
         monotonic_mock.return_value = 10
         master_loop = MasterLoop(self.connection, self.state_db_conn, 'service1', checkerscript_path, None,
-                                 2, 1, 10, '0.0.%s.1', b'secret', {})
+                                 2, 1, 10, '0.0.%s.1', b'secret', {}, DummyQueue())
 
         master_loop.supervisor.queue_timeout = 0.01
         # Sanity check before any tick
@@ -91,7 +92,7 @@ class IntegrationTest(DatabaseTestCase):
 
         monotonic_mock.return_value = 10
         master_loop = MasterLoop(self.connection, self.state_db_conn, 'service1', checkerscript_path, None,
-                                 2, 1, 10, '0.0.%s.1', b'secret', {})
+                                 2, 1, 10, '0.0.%s.1', b'secret', {}, DummyQueue())
 
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
@@ -121,7 +122,7 @@ class IntegrationTest(DatabaseTestCase):
 
         monotonic_mock.return_value = 10
         master_loop = MasterLoop(self.connection, self.state_db_conn, 'service1', checkerscript_path, None,
-                                 2, 1, 10, '0.0.%s.1', b'secret', {})
+                                 2, 1, 10, '0.0.%s.1', b'secret', {}, DummyQueue())
 
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
@@ -151,7 +152,7 @@ class IntegrationTest(DatabaseTestCase):
 
         monotonic_mock.return_value = 10
         master_loop = MasterLoop(self.connection, self.state_db_conn, 'service1', checkerscript_path, None,
-                                 2, 1, 10, '0.0.%s.1', b'secret', {})
+                                 2, 1, 10, '0.0.%s.1', b'secret', {}, DummyQueue())
 
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
@@ -187,7 +188,7 @@ class IntegrationTest(DatabaseTestCase):
 
         monotonic_mock.return_value = 10
         master_loop = MasterLoop(self.connection, self.state_db_conn, 'service1', checkerscript_path, None,
-                                 2, 1, 10, '0.0.%s.1', b'secret', {})
+                                 2, 1, 10, '0.0.%s.1', b'secret', {}, DummyQueue())
 
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
@@ -246,7 +247,7 @@ class IntegrationTest(DatabaseTestCase):
 
         monotonic_mock.return_value = 10
         master_loop = MasterLoop(self.connection, self.state_db_conn, 'service1', checkerscript_path, None,
-                                 2, 1, 10, '0.0.%s.1', b'secret', {})
+                                 2, 1, 10, '0.0.%s.1', b'secret', {}, DummyQueue())
 
         # Tick 0
         with transaction_cursor(self.connection) as cursor:
@@ -338,7 +339,7 @@ class IntegrationTest(DatabaseTestCase):
 
         monotonic_mock.return_value = 10
         master_loop = MasterLoop(self.connection, self.state_db_conn, 'service1', checkerscript_path, None,
-                                 2, 1, 10, '0.0.%s.1', b'secret', {})
+                                 2, 1, 10, '0.0.%s.1', b'secret', {}, DummyQueue())
 
         with transaction_cursor(self.state_db_conn) as cursor:
             # Prepopulate state for the non-checked service to ensure we'll never get this data returned
@@ -413,7 +414,7 @@ class IntegrationTest(DatabaseTestCase):
 
         monotonic_mock.return_value = 10
         master_loop = MasterLoop(self.connection, self.state_db_conn, 'service1', checkerscript_path, None,
-                                 2, 1, 10, '0.0.%s.1', b'secret', {})
+                                 2, 1, 10, '0.0.%s.1', b'secret', {}, DummyQueue())
 
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
@@ -442,7 +443,7 @@ class IntegrationTest(DatabaseTestCase):
 
         monotonic_mock.return_value = 10
         master_loop = MasterLoop(self.connection, self.state_db_conn, 'service1', checkerscript_path,
-                                 'ctf-checkerrunner', 2, 1, 10, '0.0.%s.1', b'secret', {})
+                                 'ctf-checkerrunner', 2, 1, 10, '0.0.%s.1', b'secret', {}, DummyQueue())
 
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
@@ -482,7 +483,7 @@ class IntegrationTest(DatabaseTestCase):
 
         monotonic_mock.return_value = 10
         master_loop = MasterLoop(self.connection, self.state_db_conn, 'service1', checkerscript_path,
-                                 'ctf-checkerrunner', 2, 1, 10, '0.0.%s.1', b'secret', {})
+                                 'ctf-checkerrunner', 2, 1, 10, '0.0.%s.1', b'secret', {}, DummyQueue())
 
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')

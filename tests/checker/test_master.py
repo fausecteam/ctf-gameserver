@@ -2,6 +2,7 @@ import datetime
 from unittest.mock import patch
 
 from ctf_gameserver.checker.master import MasterLoop
+from ctf_gameserver.checker.metrics import DummyQueue
 from ctf_gameserver.lib.checkresult import CheckResult
 from ctf_gameserver.lib.database import transaction_cursor
 from ctf_gameserver.lib.test_util import DatabaseTestCase
@@ -13,7 +14,7 @@ class MasterTest(DatabaseTestCase):
 
     def setUp(self):
         self.master_loop = MasterLoop(self.connection, None, 'service1', '/dev/null', None, 2, 8, 10,
-                                      '0.0.%s.1', b'secret', {})
+                                      '0.0.%s.1', b'secret', {}, DummyQueue())
 
     def test_handle_flag_request(self):
         with transaction_cursor(self.connection) as cursor:

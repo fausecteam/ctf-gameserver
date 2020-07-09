@@ -19,6 +19,7 @@ setup(
         'Django == 1.11.*, >= 1.11.19',
         'Markdown',
         'Pillow',
+        'prometheus_client',
         'pytz',
         'requests',
     ],
