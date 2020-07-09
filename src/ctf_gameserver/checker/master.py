@@ -72,6 +72,7 @@ def main():
 
     logging_params = {}
 
+    # Configure logging
     if args.journald:
         try:
             # pylint: disable=import-outside-toplevel,unused-import,import-error
@@ -99,6 +100,7 @@ def main():
 
     flag_secret = base64.b64decode(args.flagsecret)
 
+    # Connect to databases
     try:
         game_db_conn = psycopg2.connect(host=args.dbhost, database=args.dbname, user=args.dbuser,
                                         password=args.dbpassword)
