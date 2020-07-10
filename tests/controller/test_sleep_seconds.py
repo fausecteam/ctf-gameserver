@@ -1,10 +1,14 @@
+from collections import defaultdict
 import datetime
 from unittest import TestCase
+from unittest.mock import Mock
 
 from ctf_gameserver.controller import controller
 
 
 class SleepSecondsTest(TestCase):
+
+    metrics = defaultdict(Mock)
 
     def test_before(self):
         now = datetime.datetime.now(datetime.timezone.utc)
@@ -15,7 +19,7 @@ class SleepSecondsTest(TestCase):
             'current_tick': -1
         }
 
-        sleep_seconds = controller.get_sleep_seconds(control_info, now)
+        sleep_seconds = controller.get_sleep_seconds(control_info, self.metrics, now)
         self.assertEqual(sleep_seconds, 300)
 
     def test_start(self):
@@ -27,7 +31,7 @@ class SleepSecondsTest(TestCase):
             'current_tick': -1
         }
 
-        sleep_seconds = controller.get_sleep_seconds(control_info, now)
+        sleep_seconds = controller.get_sleep_seconds(control_info, self.metrics, now)
         self.assertEqual(sleep_seconds, 0)
 
     def test_during_1(self):
@@ -39,7 +43,7 @@ class SleepSecondsTest(TestCase):
             'current_tick': 0
         }
 
-        sleep_seconds = controller.get_sleep_seconds(control_info, now)
+        sleep_seconds = controller.get_sleep_seconds(control_info, self.metrics, now)
         self.assertEqual(sleep_seconds, 60)
 
     def test_during_2(self):
@@ -51,7 +55,7 @@ class SleepSecondsTest(TestCase):
             'current_tick': 3
         }
 
-        sleep_seconds = controller.get_sleep_seconds(control_info, now)
+        sleep_seconds = controller.get_sleep_seconds(control_info, self.metrics, now)
         self.assertEqual(sleep_seconds, 40)
 
     def test_late(self):
@@ -64,5 +68,5 @@ class SleepSecondsTest(TestCase):
             'current_tick': 2
         }
 
-        sleep_seconds = controller.get_sleep_seconds(control_info, now)
+        sleep_seconds = controller.get_sleep_seconds(control_info, self.metrics, now)
         self.assertEqual(sleep_seconds, 0)

@@ -4,6 +4,8 @@ from wsgiref import simple_server
 
 import prometheus_client
 
+from ctf_gameserver.lib.metrics import SilentHandler
+
 
 def inc(metrics_queue, name, value=1, labels=None):
 
@@ -171,12 +173,6 @@ def run_http_server(host, port, family, queue_to_collector, pipe_from_collector)
 
     class FamilyServer(simple_server.WSGIServer):
         address_family = family
-
-    class SilentHandler(simple_server.WSGIRequestHandler):
-        def log_message(self, _, *args):
-            """
-            Doesn't log anything.
-            """
 
     http_server = simple_server.make_server(host, port, app, server_class=FamilyServer,
                                             handler_class=SilentHandler)
