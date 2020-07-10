@@ -10,7 +10,7 @@ def start_metrics_server(host, port, family, registry=prometheus_client.REGISTRY
     listen on.
     """
 
-    class FamilyServer(prometheus_client.exposition.ThreadingWSGIServer):
+    class FamilyServer(simple_server.WSGIServer):
         address_family = family
 
     app = prometheus_client.make_wsgi_app(registry)
