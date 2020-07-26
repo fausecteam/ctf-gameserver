@@ -113,11 +113,13 @@ def main():
             args=(args.service, metrics.checker_metrics_factory, metrics_queue, metrics_send)
         )
         metrics_collector_process.start()
+        logging.info('Started metrics collector process')
         metrics_server_process = multiprocessing.Process(
             target=metrics.run_http_server,
             args=(metrics_host, metrics_port, metrics_family, metrics_queue, metrics_recv)
         )
         metrics_server_process.start()
+        logging.info('Started metrics HTTP server process')
 
         metrics.set(metrics_queue, 'interval_length_seconds', args.interval)
         metrics.set(metrics_queue, 'start_timestamp', time.time())
