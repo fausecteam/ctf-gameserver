@@ -8,7 +8,7 @@ from django.views.decorators.cache import cache_page
 import ctf_gameserver.web.registration.models as registration_models
 
 from . import models, calculations
-from .decorators import services_public_required
+from .decorators import registration_closed_required, services_public_required
 
 
 @services_public_required('html')
@@ -166,7 +166,7 @@ def service_status_json(_):
 @cache_page(60)
 # Don't provide a list of all teams while registration is open to prevent
 # crawling of registered teams and comparing with this list
-@services_public_required('json')
+@registration_closed_required
 def teams_json(_):
 
     teams = registration_models.Team.active_objects.values_list('net_number', flat=True)

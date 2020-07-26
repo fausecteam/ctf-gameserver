@@ -26,6 +26,23 @@ def registration_open_required(view):
     return func
 
 
+def registration_closed_required(view):
+    """
+    View decorator which only allows access to the decorated view if registration is closed from the
+    GameControl object.
+    Format of the response is currently always JSON.
+    """
+
+    @wraps(view)
+    def func(request, *args, **kwargs):
+        if GameControl.get_instance().registration_open:
+            return JsonResponse({'error': 'Not available yet'}, status=404)
+
+        return view(request, *args, **kwargs)
+
+    return func
+
+
 def services_public_required(resp_format):
     """
     View decorator which prohibits access to the decorated view if information about the services is not
