@@ -239,7 +239,8 @@ def service_history_json(request):
         while fillup_team_id < next_team_id:
             try:
                 result.append({'id': fillup_team_id, 'name': teams[fillup_team_id].user.username,
-                               'checks': [-1]*(to_tick-from_tick)})
+                               'checks': [-1]*(to_tick-from_tick),
+                               'net_number': teams[fillup_team_id].net_number})
             except KeyError:
                 # No team with this ID
                 pass
