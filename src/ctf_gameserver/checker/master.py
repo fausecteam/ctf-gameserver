@@ -205,10 +205,11 @@ def main():
         if master_loop.shutting_down and master_loop.get_running_script_count() == 0:
             break
 
-    metrics_server_process.terminate()
-    metrics_collector_process.terminate()
-    metrics_server_process.join()
-    metrics_collector_process.join()
+    if args.metrics_listen is not None:
+        metrics_server_process.terminate()
+        metrics_collector_process.terminate()
+        metrics_server_process.join()
+        metrics_collector_process.join()
 
     return os.EX_OK
 
