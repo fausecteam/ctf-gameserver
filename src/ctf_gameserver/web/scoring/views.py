@@ -53,8 +53,8 @@ def scoreboard_json(_):
             'total': points['total'],
         }
         if team.image:
-            team['image'] = team.image.url
-            team['thumbnail'] = team.image.get_thumbnail_url
+            team_entry['image'] = team.image.url
+            team_entry['thumbnail'] = team.image.get_thumbnail_url()
 
         for service in services:
             try:
@@ -143,8 +143,8 @@ def service_status_json(_):
             'ticks': [],
         }
         if team.image:
-            team['image'] = team.image.url
-            team['thumbnail'] = team.image.get_thumbnail_url
+            team_entry['image'] = team.image.url
+            team_entry['thumbnail'] = team.image.get_thumbnail_url()
 
         for tick in response['ticks']:
             tick_services = []
