@@ -21,9 +21,8 @@ def competition_status(_):
     game_control = scoring_models.GameControl.get_instance()
 
     return {
-        'competition_running': game_control.competition_running(),
-        'competition_over': game_control.competition_over(),
-        'registration_open': game_control.registration_open
+        'registration_open': game_control.registration_open,
+        'services_public': game_control.are_services_public()
     }
 
 

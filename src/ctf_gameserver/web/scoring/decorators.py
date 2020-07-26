@@ -11,8 +11,8 @@ from .models import GameControl
 
 def registration_open_required(view):
     """
-    View decorator which prohibts access to the decorated view if registration is closed from the GameControl
-    object.
+    View decorator which prohibits access to the decorated view if registration is closed from the
+    GameControl object.
     """
 
     @wraps(view)
@@ -26,10 +26,10 @@ def registration_open_required(view):
     return func
 
 
-def competition_started_required(resp_format):
+def services_public_required(resp_format):
     """
-    View decorator which prohibts access to the decorated view if the competition has not yet started (i.e.
-    it must be running or over).
+    View decorator which prohibits access to the decorated view if information about the services is not
+    public yet.
 
     Args:
         resp_format: Format of the response when the competition has not yet started. Supported options are
@@ -40,7 +40,7 @@ def competition_started_required(resp_format):
         @wraps(view)
         def func(request, *args, **kwargs):
             game_control = GameControl.get_instance()
-            if game_control.competition_running() or game_control.competition_over():
+            if game_control.are_services_public():
                 return view(request, *args, **kwargs)
 
             if resp_format == 'json':

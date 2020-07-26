@@ -123,7 +123,9 @@ class GameControl(models.Model):
     """
 
     # Start and end times for the whole competition: Make them NULL-able (for the initial state), but not
-    # blank-able (have to be set upon editing)
+    # blank-able (have to be set upon editing); "services_public" is the point at which information about the
+    # services is public, but the actual game has not started yet
+    services_public = models.DateTimeField(null=True)
     start = models.DateTimeField(null=True)
     end = models.DateTimeField(null=True)
     # Tick duration in seconds
@@ -160,14 +162,14 @@ class GameControl(models.Model):
             raise ValidationError(_('Only a single instance of {cls} can be created')
                                   .format(cls=cls.__name__))
 
-    def competition_running(self):
+    def are_services_public(self):
         """
-        Indicates whether the competition is currently active.
+        Indicates whether information about the services is public yet.
         """
-        if self.start is None or self.end is None:
+        if self.services_public is None:
             return False
 
-        return self.start < timezone.now() < self.end
+        return self.services_public <= timezone.now()
 
     def competition_over(self):
         """

@@ -63,7 +63,7 @@
 
                             <ul class="dropdown-menu">
                                 <li><a href="{% url 'team_list' %}">{% trans 'Registered teams' %}</a></li>
-                                {% if competition_running or competition_over %}
+                                {% if services_public %}
                                 <li><a href="{% url 'scoreboard' %}">{% trans 'Scoreboard' %}</a></li>
                                 <li><a href="{% url 'service_status' %}">
                                     {% trans 'Service status' %}

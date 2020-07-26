@@ -6,7 +6,7 @@ It should be used with the `include` template tag. The active page can be highli
 name as 'active' argument using `include with`.
 {% endcomment %}
 
-{% if competition_running or competition_over %}
+{% if services_public %}
 <ul class="nav nav-pills">
     <li class="{% if active == 'team_list' %}active{% endif %}">
         <a href="{% url 'team_list' %}">{% trans 'Registered teams' %}</a>
