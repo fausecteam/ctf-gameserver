@@ -37,3 +37,13 @@ class GameControlAdminForm(forms.ModelForm):
             raise forms.ValidationError(_('The tick duration has to be a multitude of 60!'))
 
         return tick_duration
+
+    def clean(self):
+        services_public = self.cleaned_data['services_public']
+        start = self.cleaned_data['start']
+        end = self.cleaned_data['end']
+
+        if services_public > start:
+            raise forms.ValidationError(_('Services public time must not be after start time'))
+        if end <= start:
+            raise forms.ValidationError(_('End time must be after start time'))
