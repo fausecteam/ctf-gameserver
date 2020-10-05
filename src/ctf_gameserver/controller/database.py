@@ -54,12 +54,12 @@ def update_scoring(db_conn):
 def get_exploiting_teams_counts(db_conn, prohibit_changes=False):
 
     with transaction_cursor(db_conn, prohibit_changes) as cursor:
-        cursor.execute('SELECT service.name, COUNT(DISTINCT capture.capturing_team_id)'
+        cursor.execute('SELECT service.slug, COUNT(DISTINCT capture.capturing_team_id)'
                        '    FROM scoring_service service'
                        '    JOIN scoring_flag flag ON flag.service_id = service.id'
                        '    LEFT JOIN (SELECT * FROM scoring_capture) AS capture'
                        '        ON capture.flag_id = flag.id'
-                       '    GROUP BY service.name')
+                       '    GROUP BY service.slug')
         counts = cursor.fetchall()
 
     return dict(counts)
@@ -96,11 +96,11 @@ def get_incomplete_flags_counts_old(db_conn, prohibit_changes=False):
 def _get_flags_counts(db_conn, flag_where_clause, prohibit_changes):
 
     with transaction_cursor(db_conn, prohibit_changes) as cursor:
-        cursor.execute('SELECT service.name, COUNT(flag.id)'    # nosec
+        cursor.execute('SELECT service.slug, COUNT(flag.id)'    # nosec
                        '    FROM scoring_service service'
                        '    LEFT JOIN (SELECT * FROM scoring_flag WHERE {}) AS flag'
                        '        ON flag.service_id=service.id'
-                       '    GROUP BY service.name'.format(flag_where_clause))
+                       '    GROUP BY service.slug'.format(flag_where_clause))
         counts = cursor.fetchall()
 
     return dict(counts)
