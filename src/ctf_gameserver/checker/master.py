@@ -410,8 +410,8 @@ class MasterLoop:
 
         intervals_per_timeframe = math.floor(launch_timeframe / self.interval) + 1
         self.tasks_per_launch = math.ceil(local_tasks / intervals_per_timeframe)
-        logging.info('Planning to start %d tasks per interval with a maximum duration of %d seconds',
-                     self.tasks_per_launch, check_duration)
+        logging.info('Planning to start %d tasks per interval with a maximum duration of %d seconds (plus '
+                     '%d seconds margin)', self.tasks_per_launch, check_duration, margin_seconds)
         metrics.set(self.metrics_queue, 'tasks_per_launch_count', self.tasks_per_launch)
         metrics.set(self.metrics_queue, 'max_task_duration_seconds', check_duration)
 
