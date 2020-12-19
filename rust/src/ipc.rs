@@ -93,7 +93,13 @@ impl ControlInterface for IpcControlInterface {
 impl From<&::log::Record<'_>> for SendMessageLog {
     fn from(record: &::log::Record) -> Self {
         SendMessageLog {
-            level: 1,
+            level: match record.level() {
+                ::log::Level::Error => 40,
+                ::log::Level::Warn => 30,
+                ::log::Level::Info => 20,
+                ::log::Level::Debug => 10,
+                ::log::Level::Trace => 5,
+            },
             message: format!("{}", record.args()),
             funcName: record.module_path().unwrap_or("").to_string(),
             pathname: record.file().unwrap_or("").to_string(),
