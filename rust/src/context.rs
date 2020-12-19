@@ -1,7 +1,6 @@
 use crate::error::Error;
 use std::net::IpAddr;
-use std::cell::RefCell;
-use std::rc::Rc;
+use std::sync::{Arc, Mutex};
 
 use crate::ipc::ControlInterface;
 
@@ -10,7 +9,7 @@ pub struct Context {
     pub ip: IpAddr,
     pub team: u32,
     pub tick: u32,
-    ctrl: Rc<RefCell<Ctrl>>,
+    ctrl: Arc<Mutex<Ctrl>>,
     pub (crate) local: bool,
 }
 
@@ -27,11 +26,11 @@ impl Context {
 
         let (local, ctrl) = get_interface(format!("_{}_state.json", team));
 
-        Context { ip:ip, team:team, tick:tick, ctrl:Rc::new(RefCell::new(ctrl)), local:local }
+        Context { ip:ip, team:team, tick:tick, ctrl:Arc::new(Mutex::new(ctrl)), local:local }
     }
 
-    pub fn get_flag(&mut self, payload:&Vec<u8>) -> Result<String, Error> {
-        match &mut *self.ctrl.borrow_mut() {
+    pub fn get_flag(&self, payload:&Vec<u8>) -> Result<String, Error> {
+        match &mut *self.ctrl.lock().unwrap() {
             Ctrl::Local(ctrl) =>
                 ctrl.get_flag(self.tick, payload),
             Ctrl::Ipc(ctrl) =>
@@ -40,8 +39,8 @@ impl Context {
     }
 
 
-    pub fn store_data<S: serde::Serialize> (&mut self, key:&str, data:&S) -> Result<(), Error> {
-        match &mut *self.ctrl.borrow_mut() {
+    pub fn store_data<S: serde::Serialize> (&self, key:&str, data:&S) -> Result<(), Error> {
+        match &mut *self.ctrl.lock().unwrap() {
             Ctrl::Local(ctrl) =>
                 ctrl.store_data(key, data),
             Ctrl::Ipc(ctrl) =>
@@ -49,8 +48,8 @@ impl Context {
         }
     }
 
-    pub fn load_data<D: serde::de::DeserializeOwned> (&mut self, key:&str) -> Result<D, Error> {
-        match &mut *self.ctrl.borrow_mut() {
+    pub fn load_data<D: serde::de::DeserializeOwned> (&self, key:&str) -> Result<D, Error> {
+        match &mut *self.ctrl.lock().unwrap() {
             Ctrl::Local(ctrl) =>
                 ctrl.load_data(key),
             Ctrl::Ipc(ctrl) =>
@@ -59,8 +58,8 @@ impl Context {
     }
 
 
-    pub fn send_log(&mut self, record:&log::Record) {
-        match &mut *self.ctrl.borrow_mut() {
+    pub fn send_log(&self, record:&log::Record) {
+        match &mut *self.ctrl.lock().unwrap() {
             Ctrl::Local(ctrl) =>
                 ctrl.send_log(record),
             Ctrl::Ipc(ctrl) =>
@@ -69,8 +68,8 @@ impl Context {
     }
 
 
-    pub fn store_result(&mut self, result:&crate::CheckerResult) -> Result<(), Error> {
-        match &mut *self.ctrl.borrow_mut() {
+    pub fn store_result(&self, result:&crate::CheckerResult) -> Result<(), Error> {
+        match &mut *self.ctrl.lock().unwrap() {
             Ctrl::Local(ctrl) =>
                 ctrl.store_result(result),
             Ctrl::Ipc(ctrl) =>

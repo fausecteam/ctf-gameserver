@@ -14,7 +14,7 @@ pub trait ControlInterface {
     fn get_flag (&mut self, tick:u32, payload:&Vec<u8>) -> Result<String, Error>;
     fn store_data<S: Serialize> (&mut self, key:&str, data:&S) -> Result<(), Error>;
     fn load_data<D: DeserializeOwned> (&mut self, key:&str) -> Result<D, Error>;
-    fn send_log(&self, record:&log::Record);
+    fn send_log(&mut self, record:&log::Record);
     fn store_result(&mut self, result:&crate::CheckerResult) -> Result<(), Error>;
 }
 
@@ -34,16 +34,16 @@ impl IpcControlInterface {
     }
 
     fn send<S: Serialize>(&mut self, key:&str, data:&S) -> Result<(), Error> {
-        let json = SendMessage {action: key.to_string(), param: data };        
+        let json = SendMessage {action: key.to_string(), param: data };
         self.output.write(serde_json::to_string(&json)?.as_bytes())?;
         Ok(())
     }
 
-    
+
     fn communicate<S: Serialize, D: Clone + DeserializeOwned>(&mut self, key:&str, data:&S) -> Result<D, Error> {
         let mut resp = String::new();
         let json = SendMessage {action: key.to_string(), param: data };
-        
+
         self.output.write(serde_json::to_string(&json)?.as_bytes())?;
         self.input.read_line(&mut resp)?;
 
@@ -71,7 +71,7 @@ impl ControlInterface for IpcControlInterface {
         self.send("STORE", &SendMessageStore { key: key.to_string(), data: payload } )?;
         Ok(())
     }
-    
+
 
     fn load_data<D: DeserializeOwned> (&mut self, key:&str) -> Result<D, Error> {
         let response:String = self.communicate("LOAD", &key.to_string())?;
@@ -79,7 +79,9 @@ impl ControlInterface for IpcControlInterface {
     }
 
 
-    fn send_log(&self, _record:&log::Record) {}
+    fn send_log(&mut self, record:&log::Record) {
+        self.send("LOG", &SendMessageLog::from(record)).unwrap()
+    }
 
 
     fn store_result(&mut self, result:&crate::CheckerResult) -> Result<(), Error> {
@@ -88,10 +90,33 @@ impl ControlInterface for IpcControlInterface {
     }
 }
 
+impl From<&::log::Record<'_>> for SendMessageLog {
+    fn from(record: &::log::Record) -> Self {
+        SendMessageLog {
+            level: 1,
+            message: format!("{}", record.args()),
+            funcName: record.module_path().unwrap_or("").to_string(),
+            pathname: record.file().unwrap_or("").to_string(),
+            lineno: record.line().unwrap_or(0)
+        }
+    }
+}
+
+
 #[derive(Debug, Deserialize, Serialize, Clone)]
 struct SendMessageStore {
     key: String,
     data: String
+}
+
+#[allow(non_snake_case)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
+struct SendMessageLog {
+    level: u32,
+    message: String,
+    funcName: String,
+    pathname: String,
+    lineno: u32
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]

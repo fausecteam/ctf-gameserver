@@ -70,7 +70,7 @@ impl ControlInterface for LocalControlInterface {
     }
 
 
-    fn send_log(&self, _record:&log::Record) {}
+    fn send_log(&mut self, _record:&log::Record) {}
 
 
     fn store_result(&mut self, result:&crate::CheckerResult) -> Result<(), Error> {

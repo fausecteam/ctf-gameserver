@@ -10,5 +10,5 @@ homepage = "https://ctf-gameserver.org/"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 base64 = "0.13"
-log = { version = "0.4", features = ["std"] }
+log = { version = "0.4", features = ["std", "serde"] }
 env_logger = "0.8"

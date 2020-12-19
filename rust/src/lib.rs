@@ -3,10 +3,13 @@ pub mod error;
 pub mod context;
 mod local;
 mod ipc;
+mod log;
 
 pub use error::Error;
 pub use context::Context;
 use serde::Serialize;
+
+
 
 #[derive(Debug, Serialize, Clone)]
 pub enum CheckerResult {
@@ -41,14 +44,16 @@ impl From<CheckerResult> for String {
 
 
 pub fn run_check<C: Checker> (gen_checker: fn(Context) -> C) -> () {
-    let mut context = Context::new();
-    let mut checker = gen_checker(context.clone());
-    
+    let context = Context::new();
+    let logger = crate::log::ControlLogger::new(context.clone());
+
     if context.local {
         env_logger::init();
     } else {
-
+        ::log::set_boxed_logger(Box::new(logger)).unwrap();
     }
+
+    let mut checker = gen_checker(context.clone());
 
     let result =
         || -> Result<(), Error> {
@@ -60,7 +65,7 @@ pub fn run_check<C: Checker> (gen_checker: fn(Context) -> C) -> () {
             checker.check_service()?;
             Ok(())
         }();
-    
+
     match result {
         Err(error::Error::CheckerError(c)) =>
             context.store_result(&c).unwrap(),
