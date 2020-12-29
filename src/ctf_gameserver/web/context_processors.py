@@ -4,25 +4,17 @@ from .scoring import models as scoring_models
 from .flatpages import models as flatpages_models
 
 
-def competition_name(_):
+def game_control(_):
     """
-    Context processor that adds the CTF's title to the context.
-    """
-
-    return {'COMPETITION_NAME': settings.COMPETITION_NAME}
-
-
-def competition_status(_):
-    """
-    Context processor which adds information about the competition's status (whether it is running or over
-    and whether registration is open) to the context.
+    Context processor which adds information from the Game Control table to the context.
     """
 
-    game_control = scoring_models.GameControl.get_instance()
+    control_instance = scoring_models.GameControl.get_instance()
 
     return {
-        'registration_open': game_control.registration_open,
-        'services_public': game_control.are_services_public()
+        'competition_name': control_instance.competition_name,
+        'registration_open': control_instance.registration_open,
+        'services_public': control_instance.are_services_public()
     }
 
 

@@ -19,10 +19,10 @@
         <script src="{% static 'ext/jquery.min.js' %}" defer="defer"></script>
         <script src="{% static 'ext/bootstrap/js/bootstrap.min.js' %}" defer="defer"></script>
 
-        <title itemprop="name">{% block title %}{% endblock %} | {{ COMPETITION_NAME }}</title>
+        <title itemprop="name">{% block title %}{% endblock %} | {{ competition_name }}</title>
 
         <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="{{ COMPETITION_NAME }}" />
+        <meta property="og:site_name" content="{{ competition_name }}" />
     </head>
 
 
@@ -37,7 +37,7 @@
                         <span class="icon-bar"></span>
                     </button>
 
-                    <a class="navbar-brand" href="{{ HOME_URL }}">{{ COMPETITION_NAME }}</a>
+                    <a class="navbar-brand" href="{{ HOME_URL }}">{{ competition_name }}</a>
                 </div>
 
                 <div class="collapse navbar-collapse" id="main-menu">

@@ -1,7 +1,8 @@
 from django import forms
-from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
+
+from .scoring.models import GameControl
 
 
 class TeamAuthenticationForm(AuthenticationForm):
@@ -23,7 +24,7 @@ class FormalPasswordResetForm(PasswordResetForm):
 
     def send_mail(self, subject_template_name, email_template_name, context, from_email, to_email,
                   html_email_template_name=None):
-        context['competition_name'] = settings.COMPETITION_NAME
+        context['competition_name'] = GameControl.get_instance().competition_name
 
         return super().send_mail(subject_template_name, email_template_name, context, from_email, to_email,
                                  html_email_template_name)

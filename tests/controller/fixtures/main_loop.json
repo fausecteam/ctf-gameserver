@@ -106,6 +106,8 @@
     "model": "scoring.gamecontrol",
     "pk": 1,
     "fields": {
+        "competition_name": "Test CTF",
+        "services_public": null,
         "start": null,
         "end": null,
         "tick_duration": 180,

@@ -8,9 +8,6 @@ https://docs.djangoproject.com/en/1.8/ref/settings/.
 from ctf_gameserver.web.base_settings import *
 
 
-# The human-readable title of your CTF
-COMPETITION_NAME = ''
-
 # Content Security Policy header in the format `directive: [values]`, see e.g
 # http://www.html5rocks.com/en/tutorials/security/content-security-policy/ for an explanation
 # The initially selected directives should cover most sensitive cases, but still allow YouTube embeds,

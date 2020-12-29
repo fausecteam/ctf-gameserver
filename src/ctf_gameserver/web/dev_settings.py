@@ -8,8 +8,6 @@ options.
 from .base_settings import *
 
 
-COMPETITION_NAME = 'Development CTF'
-
 CSP_POLICIES = {
     # The debug error page uses inline JavaScript and CSS
     'script-src': ["'self'", "'unsafe-inline'"],

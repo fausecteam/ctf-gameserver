@@ -1,11 +1,12 @@
 from django.contrib import admin
-from django.conf import settings
+from django.utils.decorators import classproperty
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin
 
 from .registration.models import Team
 from .registration.admin import InlineTeamAdmin
+from .scoring.models import GameControl
 from .util import format_lazy
 
 
@@ -14,10 +15,18 @@ class CTFAdminSite(admin.AdminSite):
     Custom variant of the AdminSite which replaces the default headers and titles.
     """
 
-    site_header = format_lazy(_('{competition_name} administration'),
-                              competition_name=settings.COMPETITION_NAME)
-    site_title = site_header
     index_title = _('Administration home')
+
+    # Declare this lazily through a classproperty in order to avoid a circular dependency when creating
+    # migrations
+    @classproperty
+    def site_header(cls):    # pylint: disable=no-self-argument
+        return format_lazy(_('{competition_name} administration'),
+                           competition_name=GameControl.get_instance().competition_name)
+
+    @classproperty
+    def site_title(cls):    # pylint: disable=no-self-argument
+        return cls.site_header
 
 
 admin_site = CTFAdminSite()    # pylint: disable=invalid-name

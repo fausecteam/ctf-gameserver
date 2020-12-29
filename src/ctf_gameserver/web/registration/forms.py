@@ -93,8 +93,10 @@ class UserForm(forms.ModelForm):
         Args:
             request: The HttpRequest from which this function is being called
         """
+        competition_name = scoring_models.GameControl.get_instance().competition_name
+
         context = {
-            'competition_name': settings.COMPETITION_NAME,
+            'competition_name': competition_name,
             'protocol': 'https' if request.is_secure() else 'http',
             'domain': get_current_site(request),
             'user': self.instance.pk,
@@ -102,7 +104,7 @@ class UserForm(forms.ModelForm):
         }
         message = loader.render_to_string('confirmation_mail.txt', context)
 
-        send_mail(settings.COMPETITION_NAME+' email confirmation', message, settings.DEFAULT_FROM_EMAIL,
+        send_mail(competition_name+' email confirmation', message, settings.DEFAULT_FROM_EMAIL,
                   [self.instance.email])
 
 

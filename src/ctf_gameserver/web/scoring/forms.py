@@ -18,6 +18,7 @@ class GameControlAdminForm(forms.ModelForm):
         model = models.GameControl
         exclude = ('current_tick',)
         help_texts = {
+            'competition_name': _('Human-readable title of the CTF'),
             'services_public': _('Time at which information about the services is public, but the actual '
                                  'game has not started yet'),
             'valid_ticks': _('Number of ticks a flag is valid for'),

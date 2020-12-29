@@ -122,6 +122,7 @@ class GameControl(models.Model):
     Single-row database table to store control information for the competition.
     """
 
+    competition_name = models.CharField(max_length=100, default='My A/D CTF')
     # Start and end times for the whole competition: Make them NULL-able (for the initial state), but not
     # blank-able (have to be set upon editing); "services_public" is the point at which information about the
     # services is public, but the actual game has not started yet
