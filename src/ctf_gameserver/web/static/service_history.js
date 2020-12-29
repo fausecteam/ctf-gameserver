@@ -63,7 +63,8 @@ function buildTable(data) {
     while (tableHeadRow.firstChild) {
         tableHeadRow.removeChild(tableHeadRow.firstChild)
     }
-    // Leave first column (team names) empty
+    // Leave first two columns (team numbers & names) empty
+    tableHeadRow.appendChild(document.createElement('th'))
     tableHeadRow.appendChild(document.createElement('th'))
     for (let i = data['min-tick']; i <= data['max-tick']; i++) {
         let col = document.createElement('th')
@@ -84,8 +85,13 @@ function buildTable(data) {
         let row = document.createElement('tr')
 
         let firstCol = document.createElement('td')
-        firstCol.textContent = team['name']
+        firstCol.classList.add('text-muted')
+        firstCol.textContent = team['net_number']
         row.appendChild(firstCol)
+
+        let secondCol = document.createElement('td')
+        secondCol.textContent = team['name']
+        row.appendChild(secondCol)
 
         for (let i = 0; i < team['checks'].length; i++) {
             const check = team['checks'][i]
