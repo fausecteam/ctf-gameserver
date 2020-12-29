@@ -114,7 +114,7 @@ class ScoreBoard(models.Model):
         ordering = ('team', '-total', '-attack', '-defense')
 
     def __str__(self):
-        return 'Score for team {:d}'.format(self.team)
+        return 'Score for team {}'.format(self.team)
 
 
 class GameControl(models.Model):
