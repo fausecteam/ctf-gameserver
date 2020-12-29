@@ -4,6 +4,7 @@ import time
 import os
 
 import prometheus_client
+import prometheus_client.core
 import psycopg2
 from psycopg2 import errorcodes as postgres_errors
 
