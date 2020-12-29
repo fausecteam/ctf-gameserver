@@ -43,6 +43,23 @@ def registration_closed_required(view):
     return func
 
 
+def before_competition_required(view):
+    """
+    View decorator which prohibits access to the decorated view if the competition has already begun (i.e.
+    running or over).
+    """
+
+    @wraps(view)
+    def func(request, *args, **kwargs):
+        if GameControl.get_instance().competition_started():
+            messages.error(request, _('Sorry, that is only possible before the competition.'))
+            return redirect(settings.HOME_URL)
+
+        return view(request, *args, **kwargs)
+
+    return func
+
+
 def services_public_required(resp_format):
     """
     View decorator which prohibits access to the decorated view if information about the services is not

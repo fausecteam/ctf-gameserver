@@ -12,7 +12,7 @@ from django.contrib.auth import logout, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 
-from ctf_gameserver.web.scoring.decorators import registration_open_required
+from ctf_gameserver.web.scoring.decorators import before_competition_required, registration_open_required
 import ctf_gameserver.web.scoring.models as scoring_models
 from . import forms
 from .models import Team
@@ -89,15 +89,23 @@ def edit_team(request):
         user_form = forms.UserForm(prefix='user', instance=request.user)
         team_form = forms.TeamForm(prefix='team', instance=team)
 
+    game_control = scoring_models.GameControl.get_instance()
+    # Theoretically, there can be cases where registration is still open (meaning Teams can be edited) after
+    # the competition has begun; this is usually not much of a problem, but deleting a Team in that situation
+    # will break scoring
+    show_delete_button = not game_control.competition_started()
+
     return render(request, 'edit_team.html', {
         'team': team,
         'user_form': user_form,
         'team_form': team_form,
+        'show_delete_button': show_delete_button,
         'delete_form': None
     })
 
 
 @login_required
+@before_competition_required
 @registration_open_required
 @transaction.atomic
 def delete_team(request):

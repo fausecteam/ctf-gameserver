@@ -171,6 +171,15 @@ class GameControl(models.Model):
 
         return self.services_public <= timezone.now()
 
+    def competition_started(self):
+        """
+        Indicates whether the competition has already begun (i.e. running or over).
+        """
+        if self.start is None or self.end is None:
+            return False
+
+        return self.start <= timezone.now()
+
     def competition_over(self):
         """
         Indicates whether the competition is already over.

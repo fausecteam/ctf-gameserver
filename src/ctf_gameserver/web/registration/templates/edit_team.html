@@ -7,7 +7,9 @@
     <h1 class="col-xs-6">{% block title %}{% trans 'Edit team' %}{% endblock %}</h1>
     <div class="header-buttons col-xs-6 text-right">
         <a href="{% url 'password_change' %}" class="btn btn-default">{% trans 'Change password' %}</a>
+        {% if show_delete_button %}
         <a href="{% url 'delete_team' %}" class="btn btn-danger">{% trans 'Delete team' %}</a>
+        {% endif %}
     </div>
 </div>
 
