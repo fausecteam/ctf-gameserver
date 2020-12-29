@@ -141,7 +141,7 @@ func genFlag(team, service, timestamp int, payload, secret []byte) string {
 	mac := d.Sum(nil)
 
 	b.Write(mac[:9])
-	return "FAUST_" + base64.StdEncoding.EncodeToString(b.Bytes())
+	return "FLAG_" + base64.StdEncoding.EncodeToString(b.Bytes())
 }
 
 // StoreState allows a Checker Script to store data (serialized via

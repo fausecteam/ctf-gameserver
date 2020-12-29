@@ -21,6 +21,7 @@ class GameControlAdminForm(forms.ModelForm):
             'services_public': _('Time at which information about the services is public, but the actual '
                                  'game has not started yet'),
             'valid_ticks': _('Number of ticks a flag is valid for'),
+            'flag_prefix': _('Static text prepended to every flag'),
             'registration_confirm_text': _('If set, teams will have to confirm to this text (e.g. a link to '
                                            'T&C) when signing up. May contain HTML.'),
             'min_net_number': _('If unset, team IDs will be used as net numbers'),

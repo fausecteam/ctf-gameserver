@@ -28,9 +28,9 @@ class FlagTestCase(unittest.TestCase):
 
     def test_old_flag(self):
         timestamp = int(time.time() - 12)
-        test_flag = flag.generate(12, 13, b'secret', timestamp=timestamp)
+        test_flag = flag.generate(12, 13, b'secret', 'FLAGPREFIX-', timestamp=timestamp)
         with self.assertRaises(flag.FlagExpired):
-            flag.verify(test_flag, b'secret')
+            flag.verify(test_flag, b'secret', 'FLAGPREFIX-')
 
     def test_invalid_format(self):
         with self.assertRaises(flag.InvalidFlagFormat):
@@ -93,12 +93,12 @@ class FlagTestCase(unittest.TestCase):
                 for secret in (b'secret1', b'secret2'):
                     for payload in (None, b'payload1'):
                         for timestamp in (1591000000, 1592000000):
-                            actual_flag = flag.generate(team, service, secret, payload, timestamp)
+                            actual_flag = flag.generate(team, service, secret, 'FAUST_', payload, timestamp)
                             actual_flags.append(actual_flag)
 
                             time_mock.return_value = timestamp - 5
                             actual_team, actual_service, actual_payload, actual_timestamp = \
-                                flag.verify(actual_flag, secret)
+                                flag.verify(actual_flag, secret, 'FAUST_')
                             self.assertEqual(actual_team, team)
                             self.assertEqual(actual_service, service)
                             if payload is not None:

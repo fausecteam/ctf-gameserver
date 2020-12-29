@@ -127,7 +127,7 @@ def get_flag(tick: int, payload: bytes = b'') -> str:
         # Return dummy flag when launched locally
         if payload == b'':
             payload = None
-        return ctf_gameserver.lib.flag.generate(team, 42, b'TOPSECRET', payload, tick)
+        return ctf_gameserver.lib.flag.generate(team, 42, b'TOPSECRET', payload=payload, timestamp=tick)
 
     payload_b64 = base64.b64encode(payload).decode('ascii')
     _send_ctrl_message({'action': 'FLAG', 'param': {'tick': tick, 'payload': payload_b64}})

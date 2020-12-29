@@ -10,7 +10,7 @@ def get_control_info(db_conn, prohibit_changes=False):
     """
 
     with transaction_cursor(db_conn, prohibit_changes) as cursor:
-        cursor.execute('SELECT start, valid_ticks, tick_duration FROM scoring_gamecontrol')
+        cursor.execute('SELECT start, valid_ticks, tick_duration, flag_prefix FROM scoring_gamecontrol')
         result = cursor.fetchone()
 
     if result is None:
@@ -19,7 +19,8 @@ def get_control_info(db_conn, prohibit_changes=False):
     return {
         'contest_start': result[0],
         'valid_ticks': result[1],
-        'tick_duration': result[2]
+        'tick_duration': result[2],
+        'flag_prefix': result[3]
     }
 
 

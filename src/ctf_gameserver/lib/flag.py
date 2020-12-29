@@ -12,13 +12,11 @@ MAC_LEN = 9
 PAYLOAD_LEN = 8
 # timestamp + team + service + payload
 DATA_LEN = 4 + 2 + 1 + PAYLOAD_LEN
-# Flag prefix
-PREFIX = "FAUST"
 # Flag validity in seconds
 VALID = 900
 
 
-def generate(team_net_no, service_id, secret, payload=None, timestamp=None):
+def generate(team_net_no, service_id, secret, prefix='FLAG_', payload=None, timestamp=None):
     """
     Generates a flag for the given arguments. This is deterministic and should always return the same
     result for the same arguments (and the same time, if no timestamp is explicitly specified).
@@ -46,10 +44,10 @@ def generate(team_net_no, service_id, secret, payload=None, timestamp=None):
     protected_data += payload
     mac = _gen_mac(secret, protected_data)
 
-    return PREFIX + '_' + base64.b64encode(protected_data + mac).decode('ascii')
+    return prefix + base64.b64encode(protected_data + mac).decode('ascii')
 
 
-def verify(flag, secret):
+def verify(flag, secret, prefix='FLAG_'):
     """
     Verfies flag validity and returns data from the flag.
     Will raise an appropriate exception if verification fails.
@@ -58,11 +56,11 @@ def verify(flag, secret):
         Data from the flag as a tuple of (team, service, payload, timestamp)
     """
 
-    if not flag.startswith(PREFIX + '_'):
+    if not flag.startswith(prefix):
         raise InvalidFlagFormat()
 
     try:
-        raw_flag = base64.b64decode(flag.split('_')[1])
+        raw_flag = base64.b64decode(flag[len(prefix):])
     except binascii.Error:
         raise InvalidFlagFormat()
 

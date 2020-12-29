@@ -12,7 +12,7 @@ from ctf_gameserver.lib import flag
 class FlagHandler(asynchat.async_chat):
     def __init__(self, sock, addr, dbconnection, secret,
                  conteststart, contestend, flagvalidity, tickduration,
-                 team_regex):
+                 flagprefix, team_regex):
         asynchat.async_chat.__init__(self, sock=sock)
 
         ipaddr, port = addr[:2]  # IPv4 returns two values, IPv6 four
@@ -36,6 +36,7 @@ class FlagHandler(asynchat.async_chat):
         self._contestend = contestend
         self._flagvalidity = flagvalidity
         self._tickduration = tickduration
+        self._flagprefix = flagprefix
 
     def _reply(self, message):
         self._logger.debug("-> %s", message.decode('utf-8'))
@@ -72,7 +73,7 @@ class FlagHandler(asynchat.async_chat):
             return
 
         try:
-            protecting_team, service, _, timestamp = flag.verify(curflag, self._secret)
+            protecting_team, service, _, timestamp = flag.verify(curflag, self._secret, self._flagprefix)
         except flag.InvalidFlagFormat:
             self._reply(b"Flag not recognized")
             return

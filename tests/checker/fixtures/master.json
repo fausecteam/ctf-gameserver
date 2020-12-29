@@ -82,6 +82,7 @@
         "tick_duration": 180,
         "valid_ticks": 5,
         "current_tick": -1,
+        "flag_prefix": "FLAG_",
         "registration_open": false
     }
 }

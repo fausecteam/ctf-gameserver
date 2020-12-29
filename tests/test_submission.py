@@ -11,7 +11,7 @@ class UserInputTestCase(unittest.TestCase):
         self._handler = FlagHandler(None, ("203.0.113.42", 1337), None, 'c2VjcmV0',
                                     datetime.datetime.now(tz=datetime.timezone.utc),
                                     datetime.datetime.now(tz=datetime.timezone.utc) + datetime.timedelta(minutes=10),
-                                    None, None, re.compile(r'^203\.0\.(\d+)\.\d+$'))
+                                    None, None, 'FLAG_', re.compile(r'^203\.0\.(\d+)\.\d+$'))
 
         
     def test_empty(self):

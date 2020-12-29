@@ -246,6 +246,7 @@ class MasterLoop:
         self.contest_start = control_info['contest_start']
         self.tick_duration = datetime.timedelta(seconds=control_info['tick_duration'])
         self.flag_valid_ticks = control_info['valid_ticks']
+        self.flag_prefix = control_info['flag_prefix']
 
     def step(self):
         """
@@ -316,8 +317,8 @@ class MasterLoop:
         self.refresh_control_info()
 
         expiration = self.contest_start + (self.flag_valid_ticks + tick) * self.tick_duration
-        return flag_lib.generate(task_info['team'], self.service['id'], self.flag_secret, payload,
-                                 expiration.timestamp())
+        return flag_lib.generate(task_info['team'], self.service['id'], self.flag_secret, self.flag_prefix,
+                                 payload, expiration.timestamp())
 
     def handle_load_request(self, task_info, param):
         return database.load_state(self.state_db_conn, self.service['id'], task_info['team'], param)
