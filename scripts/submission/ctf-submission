@@ -42,16 +42,16 @@ def main():
 
     with dbconnection:
         with dbconnection.cursor() as cursor:
-            cursor.execute('''SELECT start, "end", valid_ticks, tick_duration, flag_prefix
+            cursor.execute('''SELECT competition_name, start, "end", valid_ticks, tick_duration, flag_prefix
                               FROM scoring_gamecontrol''')
-            conteststart, contestend, flagvalidity, tickduration, flagprefix = cursor.fetchone()
+            contestname, conteststart, contestend, flagvalidity, tickduration, flagprefix = cursor.fetchone()
 
     logging.debug("Starting asyncore")
 
     for family in (socket.AF_INET6, socket.AF_INET):
         try:
             flagserver.FlagServer(family, args.listen, args.port,
-                                  dbconnection, args.secret, conteststart,
+                                  dbconnection, args.secret, contestname, conteststart,
                                   contestend, flagvalidity, tickduration,
                                   flagprefix, team_regex)
             break

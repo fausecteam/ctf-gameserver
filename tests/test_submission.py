@@ -8,7 +8,7 @@ from ctf_gameserver.lib import flag
 
 class UserInputTestCase(unittest.TestCase):
     def setUp(self):
-        self._handler = FlagHandler(None, ("203.0.113.42", 1337), None, 'c2VjcmV0',
+        self._handler = FlagHandler(None, ("203.0.113.42", 1337), None, 'c2VjcmV0', 'Test CTF',
                                     datetime.datetime.now(tz=datetime.timezone.utc),
                                     datetime.datetime.now(tz=datetime.timezone.utc) + datetime.timedelta(minutes=10),
                                     None, None, 'FLAG_', re.compile(r'^203\.0\.(\d+)\.\d+$'))

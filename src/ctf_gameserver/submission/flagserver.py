@@ -10,7 +10,7 @@ import psycopg2
 from ctf_gameserver.lib import flag
 
 class FlagHandler(asynchat.async_chat):
-    def __init__(self, sock, addr, dbconnection, secret,
+    def __init__(self, sock, addr, dbconnection, secret, contestname,
                  conteststart, contestend, flagvalidity, tickduration,
                  flagprefix, team_regex):
         asynchat.async_chat.__init__(self, sock=sock)
@@ -29,6 +29,7 @@ class FlagHandler(asynchat.async_chat):
         self._cursor = None
         self._dbconnection = dbconnection
         self._secret = base64.b64decode(secret)
+        self._contestname = contestname
         self.buffer = b''
         self._logger.info("Accepted connection from Team (Net Number) %s", self.capturing_team)
         self._banner()
@@ -155,8 +156,8 @@ class FlagHandler(asynchat.async_chat):
 
 
     def _banner(self):
-        self.push(u"Flag submission server\n"
-                  u"One flag per line please!\n".encode('utf-8'))
+        self.push(u"{} flag submission server\n"
+                  u"One flag per line please!\n".format(self._contestname).encode('utf-8'))
 
 
     def collect_incoming_data(self, data):
