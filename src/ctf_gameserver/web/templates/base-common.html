@@ -62,11 +62,11 @@
                             </a>
 
                             <ul class="dropdown-menu">
-                                <li><a href="{% url 'team_list' %}">{% trans 'Registered teams' %}</a></li>
+                                <li><a href="{% url 'team_list' %}">{% trans 'Registered Teams' %}</a></li>
                                 {% if services_public %}
                                 <li><a href="{% url 'scoreboard' %}">{% trans 'Scoreboard' %}</a></li>
                                 <li><a href="{% url 'service_status' %}">
-                                    {% trans 'Service status' %}
+                                    {% trans 'Service Status' %}
                                 </a></li>
                                 {% endif %}
                             </ul>
@@ -96,7 +96,7 @@
                                 {% if user.is_staff %}
                                 <li><a href="{% url 'admin:index' %}">{% trans 'Administration' %}</a></li>
                                 <li><a href="{% url 'service_history' %}">{% trans 'Service History' %}</a></li>
-                                <li><a href="{% url 'mail_teams' %}">{% trans 'Email teams' %}</a></li>
+                                <li><a href="{% url 'mail_teams' %}">{% trans 'Email Teams' %}</a></li>
                                 {% endif %}
                                 <li><a href="{% url 'logout' %}">{% trans 'Logout' %}</a></li>
                             </ul>
