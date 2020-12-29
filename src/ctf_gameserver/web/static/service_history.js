@@ -22,6 +22,9 @@ $(document).ready(function() {
 
 function loadTable(_, ignoreMaxTick=false) {
 
+    makeFieldsEditable(false)
+    $('#load-spinner').attr('hidden', false)
+
     const serviceSlug = window.location.hash.slice(1)
     if (serviceSlug.length == 0) {
         return
@@ -37,7 +40,22 @@ function loadTable(_, ignoreMaxTick=false) {
     if (!ignoreMaxTick) {
         params['to-tick'] = toTick
     }
-    $.getJSON('service-history.json', params, buildTable)
+    $.getJSON('service-history.json', params, function(data) {
+        buildTable(data)
+        $('#load-spinner').attr('hidden', true)
+        makeFieldsEditable(true)
+    })
+
+}
+
+
+function makeFieldsEditable(writeable) {
+
+    $('#service-selector').attr('disabled', !writeable)
+    $('#min-tick').attr('readonly', !writeable)
+    $('#max-tick').attr('readonly', !writeable)
+    $('#refresh').attr('disabled', !writeable)
+    $('#load-current').attr('disabled', !writeable)
 
 }
 

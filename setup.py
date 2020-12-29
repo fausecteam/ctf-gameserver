@@ -57,6 +57,7 @@ setup(
             'templates/*.txt',
             'static/robots.txt',
             'static/*.css',
+            'static/*.gif',
             'static/*.js',
             'static/ext/jquery.min.js',
             'static/ext/bootstrap/css/*',

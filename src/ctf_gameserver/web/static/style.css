@@ -68,8 +68,12 @@ th.border-right, td.border-right {
     display: block;
 }
 
-button#refresh {
-    margin-right: 25px;
+img#load-spinner {
+    width: 1.7em;
+}
+
+img#load-spinner, button#refresh {
+    margin-right: 20px;
 }
 
 #history-table td a:hover {
