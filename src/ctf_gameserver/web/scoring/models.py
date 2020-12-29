@@ -49,7 +49,7 @@ class Capture(models.Model):
     Database representation of a capture, i.e. the (successful) submission of a particular flag by one team.
     """
 
-    flag = models.ForeignKey(Flag, on_delete=models.CASCADE)
+    flag = models.ForeignKey(Flag, on_delete=models.PROTECT)
     capturing_team = models.ForeignKey(Team, on_delete=models.CASCADE)
     tick = models.PositiveSmallIntegerField()
     timestamp = models.DateTimeField(auto_now_add=True)
