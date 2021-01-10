@@ -41,11 +41,16 @@ class GameControlAdminForm(forms.ModelForm):
         return tick_duration
 
     def clean(self):
-        services_public = self.cleaned_data['services_public']
-        start = self.cleaned_data['start']
-        end = self.cleaned_data['end']
+        cleaned_data = super().clean()
 
-        if services_public > start:
-            raise forms.ValidationError(_('Services public time must not be after start time'))
-        if end <= start:
-            raise forms.ValidationError(_('End time must be after start time'))
+        services_public = cleaned_data.get('services_public')
+        start = cleaned_data.get('start')
+        end = cleaned_data.get('end')
+
+        if start is not None:
+            if services_public is not None and services_public > start:
+                raise forms.ValidationError(_('Services public time must not be after start time'))
+            if end is not None and end <= start:
+                raise forms.ValidationError(_('End time must be after start time'))
+
+        return cleaned_data
