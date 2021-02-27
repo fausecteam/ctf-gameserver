@@ -112,12 +112,15 @@ def main():
             target=metrics.run_collector,
             args=(args.service, metrics.checker_metrics_factory, metrics_queue, metrics_send)
         )
+        # Terminate the process when the parent process exits
+        metrics_collector_process.daemon = True
         metrics_collector_process.start()
         logging.info('Started metrics collector process')
         metrics_server_process = multiprocessing.Process(
             target=metrics.run_http_server,
             args=(metrics_host, metrics_port, metrics_family, metrics_queue, metrics_recv)
         )
+        metrics_server_process.daemon = True
         metrics_server_process.start()
         logging.info('Started metrics HTTP server process')
 
@@ -204,12 +207,6 @@ def main():
         master_loop.step()
         if master_loop.shutting_down and master_loop.get_running_script_count() == 0:
             break
-
-    if args.metrics_listen is not None:
-        metrics_server_process.terminate()
-        metrics_collector_process.terminate()
-        metrics_server_process.join()
-        metrics_collector_process.join()
 
     return os.EX_OK
 
