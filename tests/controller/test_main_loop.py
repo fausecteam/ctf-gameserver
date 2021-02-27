@@ -143,7 +143,7 @@ class MainLoopTest(DatabaseTestCase):
     def test_shortly_after_game(self, sleep_mock, _):
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET start = datetime("now", "-1441 minutes"), '
-                           '                               end = datetime("now", "-1 minutes"), '
+                           '                               end = datetime("now"), '
                            '                               current_tick=479')
 
         controller.main_loop_step(self.connection, self.metrics, False)
