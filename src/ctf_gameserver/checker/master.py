@@ -203,10 +203,15 @@ def main():
         master_loop.shutting_down = True
     signal.signal(signal.SIGTERM, sigterm_handler)
 
-    while True:
-        master_loop.step()
-        if master_loop.shutting_down and master_loop.get_running_script_count() == 0:
-            break
+    try:
+        while True:
+            master_loop.step()
+            if master_loop.shutting_down and master_loop.get_running_script_count() == 0:
+                break
+    except:    # noqa, pylint: disable=bare-except
+        logging.exception('Aborting due to unexpected error:')
+        master_loop.supervisor.terminate_runners()
+        return os.EX_SOFTWARE
 
     return os.EX_OK
 
