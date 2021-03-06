@@ -98,6 +98,11 @@ def get_new_tasks(db_conn, service_id, task_count, prohibit_changes=False):
     """
 
     with transaction_cursor(db_conn, prohibit_changes) as cursor:
+        # We need a lock on the whole table to prevent deadlocks because of `ORDER BY RANDOM`
+        # See https://github.com/fausecteam/ctf-gameserver/issues/62
+        # "There is no UNLOCK TABLE command; locks are always released at transaction end"
+        cursor.execute('LOCK TABLE scoring_flag IN EXCLUSIVE MODE')
+
         cursor.execute('SELECT flag.id, flag.protecting_team_id, flag.tick, team.net_number'
                        '    FROM scoring_flag flag, scoring_gamecontrol control, registration_team team'
                        '    WHERE flag.placement_start is NULL'
@@ -105,8 +110,7 @@ def get_new_tasks(db_conn, service_id, task_count, prohibit_changes=False):
                        '        AND flag.service_id = %s'
                        '        AND flag.protecting_team_id = team.user_id'
                        '    ORDER BY RANDOM()'
-                       '    LIMIT %s'
-                       '    FOR UPDATE OF flag', (service_id, task_count))
+                       '    LIMIT %s', (service_id, task_count))
         tasks = cursor.fetchall()
 
         # Mark placement as in progress

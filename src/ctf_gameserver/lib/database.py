@@ -1,5 +1,4 @@
 from contextlib import contextmanager
-import re
 import sqlite3
 
 
@@ -78,13 +77,14 @@ def _translate_operation(operation):
     Translates Psycopg2 features to their SQLite counterparts on a best-effort base.
     """
 
+    # Apart from being a best effort, this also changes the semantics, but SQLite just doesn't support
+    # "LOCK TABLE"
+    if operation.startswith('LOCK TABLE'):
+        return ''
+
     # The placeholder is always "%s" in Psycopg2, "even if a different placeholder (such as a %d for
     # integers or %f for floats) may look more appropriate"
     operation = operation.replace('%s', '?')
     operation = operation.replace('NOW()', "DATETIME('now')")
-
-    # Apart from being a best effort, this also changes the semantics, but SQLite just doesn't support
-    # "FOR UPDATE"
-    operation = re.sub(r'FOR UPDATE OF \S+', '', operation)
 
     return operation
