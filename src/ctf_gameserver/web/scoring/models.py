@@ -26,7 +26,7 @@ class Flag(models.Model):
 
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
     protecting_team = models.ForeignKey(Team, on_delete=models.CASCADE)
-    tick = models.PositiveSmallIntegerField()
+    tick = models.PositiveIntegerField()
     # NULL means the flag has been generated, but not yet placed
     placement_start = models.DateTimeField(null=True, blank=True, default=None)
     placement_end = models.DateTimeField(null=True, blank=True, default=None)
@@ -51,7 +51,7 @@ class Capture(models.Model):
 
     flag = models.ForeignKey(Flag, on_delete=models.PROTECT)
     capturing_team = models.ForeignKey(Team, on_delete=models.CASCADE)
-    tick = models.PositiveSmallIntegerField()
+    tick = models.PositiveIntegerField()
     timestamp = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -80,7 +80,7 @@ class StatusCheck(models.Model):
 
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
-    tick = models.PositiveSmallIntegerField(db_index=True)
+    tick = models.PositiveIntegerField(db_index=True)
     # REVISIT: Add check constraint for the values as soon as we have Django >= 2.2
     status = models.PositiveSmallIntegerField(choices=[(i, t) for t, i in STATUSES.items()])
     timestamp = models.DateTimeField(auto_now_add=True)
@@ -133,7 +133,7 @@ class GameControl(models.Model):
     tick_duration = models.PositiveSmallIntegerField(default=180)
     # Number of ticks a flag is valid for including the one it was generated in
     valid_ticks = models.PositiveSmallIntegerField(default=5)
-    current_tick = models.SmallIntegerField(default=-1)
+    current_tick = models.IntegerField(default=-1)
     flag_prefix = models.CharField(max_length=20, default='FLAG_')
     registration_open = models.BooleanField(default=True)
     registration_confirm_text = models.TextField(blank=True)
