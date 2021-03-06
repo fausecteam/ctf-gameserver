@@ -173,7 +173,8 @@ def main():
 
         database.get_task_count(game_db_conn, service_id, prohibit_changes=True)
         database.get_new_tasks(game_db_conn, service_id, 1, prohibit_changes=True)
-        database.commit_result(game_db_conn, service_id, 1, 0, 0, prohibit_changes=True, fake_team_id=1)
+        database.commit_result(game_db_conn, service_id, 1, 2147483647, 0, prohibit_changes=True,
+                               fake_team_id=1)
         database.load_state(state_db_conn, service_id, 1, 'identifier', prohibit_changes=True)
         database.store_state(state_db_conn, service_id, 1, 'identifier', 'data', prohibit_changes=True)
     except psycopg2.ProgrammingError as e:
