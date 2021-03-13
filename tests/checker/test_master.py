@@ -13,8 +13,8 @@ class MasterTest(DatabaseTestCase):
     fixtures = ['tests/checker/fixtures/master.json']
 
     def setUp(self):
-        self.master_loop = MasterLoop(self.connection, None, 'service1', '/dev/null', None, 2, 8, 10,
-                                      '0.0.%s.1', b'secret', {}, DummyQueue())
+        self.master_loop = MasterLoop(self.connection, 'service1', '/dev/null', None, 2, 8, 10, '0.0.%s.1',
+                                      b'secret', {}, DummyQueue())
 
     def test_handle_flag_request(self):
         with transaction_cursor(self.connection) as cursor:

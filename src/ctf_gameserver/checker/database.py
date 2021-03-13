@@ -153,16 +153,17 @@ def commit_result(db_conn, service_id, team_net_no, tick, result, prohibit_chang
                                                                                                tick))
 
 
-def load_state(db_conn, service_id, team_net_no, identifier, prohibit_changes=False):
+def load_state(db_conn, service_id, team_net_no, key, prohibit_changes=False):
     """
-    Loads Checker data from state database.
+    Loads Checker state data from database.
     """
 
     with transaction_cursor(db_conn, prohibit_changes) as cursor:
-        cursor.execute('SELECT data FROM checkerstate'
-                       '    WHERE service_id = %s'
-                       '        AND team_net_no = %s'
-                       '        AND identifier = %s', (service_id, team_net_no, identifier))
+        cursor.execute('SELECT data FROM scoring_checkerstate state, registration_team team'
+                       '    WHERE state.service_id = %s'
+                       '        AND state.key = %s'
+                       '        AND team.net_number = %s'
+                       '        AND state.team_id = team.user_id', (service_id, key, team_net_no))
         data = cursor.fetchone()
 
     if data is None:
@@ -170,15 +171,16 @@ def load_state(db_conn, service_id, team_net_no, identifier, prohibit_changes=Fa
     return data[0]
 
 
-def store_state(db_conn, service_id, team_net_no, identifier, data, prohibit_changes=False):
+def store_state(db_conn, service_id, team_net_no, key, data, prohibit_changes=False):
     """
-    Stores Checker data in state database.
+    Stores Checker state data in database.
     """
 
     with transaction_cursor(db_conn, prohibit_changes) as cursor:
         # (In case of `prohibit_changes`,) PostgreSQL checks the database grants even if no CONFLICT occurs
-        cursor.execute('INSERT INTO checkerstate (service_id, team_net_no, identifier, data)'
-                       '    VALUES (%s, %s, %s, %s)'
-                       '    ON CONFLICT (service_id, team_net_no, identifier)'
-                       '        DO UPDATE SET data = EXCLUDED.data', (service_id, team_net_no, identifier,
-                                                                      data))
+        cursor.execute('INSERT INTO scoring_checkerstate (service_id, team_id, key, data)'
+                       '    VALUES ('
+                       '        %s, (SELECT user_id FROM registration_team WHERE net_number = %s), %s, %s'
+                       '    )'
+                       '    ON CONFLICT (service_id, team_id, key)'
+                       '        DO UPDATE SET data = EXCLUDED.data', (service_id, team_net_no, key, data))

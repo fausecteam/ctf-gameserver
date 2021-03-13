@@ -117,6 +117,24 @@ class ScoreBoard(models.Model):
         return 'Score for team {}'.format(self.team)
 
 
+class CheckerState(models.Model):
+    """
+    Persistent state from Checker Scripts.
+    """
+
+    service = models.ForeignKey(Service, on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    key = models.CharField(max_length=100)
+    data = models.TextField()
+
+    class Meta:
+        unique_together = ('service', 'team', 'key')
+        index_together = ('service', 'team', 'key')
+
+    def __str__(self):
+        return 'Checker state "{}" for service {} and team {}'.format(self.key, self.service, self.team)
+
+
 class GameControl(models.Model):
     """
     Single-row database table to store control information for the competition.

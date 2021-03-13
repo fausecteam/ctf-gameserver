@@ -32,16 +32,6 @@ def main():
     arg_parser.add_argument('--metrics-listen', type=str, help='Expose Prometheus metrics via HTTP '
                             '("<host>:<port>")')
 
-    group = arg_parser.add_argument_group('statedb', 'Checker state database')
-    group.add_argument('--statedbhost', type=str, help='Hostname of the database. If unspecified, the '
-                       'default Unix socket will be used.')
-    group.add_argument('--statedbname', type=str, required=True,
-                       help='Name of the used database')
-    group.add_argument('--statedbuser', type=str, required=True,
-                       help='User name for database access')
-    group.add_argument('--statedbpassword', type=str,
-                       help='Password for database access if needed')
-
     group = arg_parser.add_argument_group('check', 'Check parameters')
     group.add_argument('--service', type=str, required=True,
                        help='Slug of the service')
@@ -133,50 +123,39 @@ def main():
 
     # Connect to databases
     try:
-        game_db_conn = psycopg2.connect(host=args.dbhost, database=args.dbname, user=args.dbuser,
-                                        password=args.dbpassword)
+        db_conn = psycopg2.connect(host=args.dbhost, database=args.dbname, user=args.dbuser,
+                                   password=args.dbpassword)
     except psycopg2.OperationalError as e:
-        logging.error('Could not establish connection to game database: %s', e)
+        logging.error('Could not establish connection to database: %s', e)
         return os.EX_UNAVAILABLE
-    logging.info('Established connection to game database')
-
-    try:
-        state_db_conn = psycopg2.connect(host=args.statedbhost, database=args.statedbname,
-                                         user=args.statedbuser, password=args.statedbpassword)
-    except psycopg2.OperationalError as e:
-        logging.error('Could not establish connection to state database: %s', e)
-        return os.EX_UNAVAILABLE
-    logging.info('Established connection to state database')
+    logging.info('Established connection to database')
 
     # Keep our mental model easy by always using (timezone-aware) UTC for dates and times
-    with transaction_cursor(game_db_conn) as cursor:
-        cursor.execute('SET TIME ZONE "UTC"')
-    with transaction_cursor(state_db_conn) as cursor:
+    with transaction_cursor(db_conn) as cursor:
         cursor.execute('SET TIME ZONE "UTC"')
 
     # Check database grants
     try:
         try:
-            database.get_control_info(game_db_conn, prohibit_changes=True)
+            database.get_control_info(db_conn, prohibit_changes=True)
         except DBDataError as e:
             logging.warning('Invalid database state: %s', e)
         try:
-            service_id = database.get_service_attributes(game_db_conn, args.service,
+            service_id = database.get_service_attributes(db_conn, args.service,
                                                          prohibit_changes=True)['id']
         except DBDataError as e:
             logging.warning('Invalid database state: %s', e)
             service_id = 1337    # Use dummy value for subsequent grant checks
         try:
-            database.get_current_tick(game_db_conn, prohibit_changes=True)
+            database.get_current_tick(db_conn, prohibit_changes=True)
         except DBDataError as e:
             logging.warning('Invalid database state: %s', e)
 
-        database.get_task_count(game_db_conn, service_id, prohibit_changes=True)
-        database.get_new_tasks(game_db_conn, service_id, 1, prohibit_changes=True)
-        database.commit_result(game_db_conn, service_id, 1, 2147483647, 0, prohibit_changes=True,
-                               fake_team_id=1)
-        database.load_state(state_db_conn, service_id, 1, 'identifier', prohibit_changes=True)
-        database.store_state(state_db_conn, service_id, 1, 'identifier', 'data', prohibit_changes=True)
+        database.get_task_count(db_conn, service_id, prohibit_changes=True)
+        database.get_new_tasks(db_conn, service_id, 1, prohibit_changes=True)
+        database.commit_result(db_conn, service_id, 1, 2147483647, 0, prohibit_changes=True, fake_team_id=1)
+        database.load_state(db_conn, service_id, 1, 'key', prohibit_changes=True)
+        database.store_state(db_conn, service_id, 1, 'key', 'data', prohibit_changes=True)
     except psycopg2.ProgrammingError as e:
         if e.pgcode == postgres_errors.INSUFFICIENT_PRIVILEGE:
             # Log full exception because only the backtrace will tell which kind of permission is missing
@@ -189,9 +168,9 @@ def main():
 
     while True:
         try:
-            master_loop = MasterLoop(game_db_conn, state_db_conn, args.service, args.checkerscript,
-                                     args.sudouser, args.stddeviations, args.checkercount, args.interval,
-                                     args.ippattern, flag_secret, logging_params, metrics_queue)
+            master_loop = MasterLoop(db_conn, args.service, args.checkerscript, args.sudouser,
+                                     args.stddeviations, args.checkercount, args.interval, args.ippattern,
+                                     flag_secret, logging_params, metrics_queue)
             break
         except DBDataError as e:
             logging.warning('Waiting for valid database state: %s', e)
@@ -219,10 +198,9 @@ def main():
 
 class MasterLoop:
 
-    def __init__(self, game_db_conn, state_db_conn, service_slug, checker_script, sudo_user, std_dev_count,
-                 checker_count, interval, ip_pattern, flag_secret, logging_params, metrics_queue):
-        self.game_db_conn = game_db_conn
-        self.state_db_conn = state_db_conn
+    def __init__(self, db_conn, service_slug, checker_script, sudo_user, std_dev_count, checker_count,
+                 interval, ip_pattern, flag_secret, logging_params, metrics_queue):
+        self.db_conn = db_conn
         self.checker_script = checker_script
         self.sudo_user = sudo_user
         self.std_dev_count = std_dev_count
@@ -234,7 +212,7 @@ class MasterLoop:
         self.metrics_queue = metrics_queue
 
         self.refresh_control_info()
-        self.service = database.get_service_attributes(self.game_db_conn, service_slug)
+        self.service = database.get_service_attributes(self.db_conn, service_slug)
         self.service['slug'] = service_slug
 
         self.supervisor = RunnerSupervisor(metrics_queue)
@@ -245,7 +223,7 @@ class MasterLoop:
         self.shutting_down = False
 
     def refresh_control_info(self):
-        control_info = database.get_control_info(self.game_db_conn)
+        control_info = database.get_control_info(self.db_conn)
         self.contest_start = control_info['contest_start']
         self.tick_duration = datetime.timedelta(seconds=control_info['tick_duration'])
         self.flag_valid_ticks = control_info['valid_ticks']
@@ -324,10 +302,10 @@ class MasterLoop:
                                  payload, expiration.timestamp())
 
     def handle_load_request(self, task_info, param):
-        return database.load_state(self.state_db_conn, self.service['id'], task_info['team'], param)
+        return database.load_state(self.db_conn, self.service['id'], task_info['team'], param)
 
     def handle_store_request(self, task_info, params):
-        database.store_state(self.state_db_conn, self.service['id'], task_info['team'], params['key'],
+        database.store_state(self.db_conn, self.service['id'], task_info['team'], params['key'],
                              params['data'])
 
     def handle_result_request(self, task_info, param):
@@ -348,7 +326,7 @@ class MasterLoop:
         logging.info('Result from Checker Script for team %d (net number %d) in tick %d: %s',
                      task_info['_team_id'], task_info['team'], task_info['tick'], check_result)
         metrics.inc(self.metrics_queue, 'completed_tasks', labels={'result': check_result.name})
-        database.commit_result(self.game_db_conn, self.service['id'], task_info['team'], task_info['tick'],
+        database.commit_result(self.db_conn, self.service['id'], task_info['team'], task_info['tick'],
                                result)
 
     def launch_tasks(self):
@@ -357,14 +335,14 @@ class MasterLoop:
             self.update_launch_params(new_tick)
             self.known_tick = new_tick
 
-        current_tick = database.get_current_tick(self.game_db_conn)
+        current_tick = database.get_current_tick(self.db_conn)
         if current_tick < 0:
             # Competition not running yet
             return
         if current_tick != self.known_tick:
             change_tick(current_tick)
 
-        tasks = database.get_new_tasks(self.game_db_conn, self.service['id'], self.tasks_per_launch)
+        tasks = database.get_new_tasks(self.db_conn, self.service['id'], self.tasks_per_launch)
 
         # The current tick might have changed since calling `database.get_current_tick()`, so terminate the
         # old Runners; `database.get_new_tasks()` only returns tasks for one single tick
@@ -400,13 +378,13 @@ class MasterLoop:
             # We don't know any bounds on Checker Script Runtime at the beginning
             check_duration = self.tick_duration.total_seconds()
         else:
-            check_duration = database.get_check_duration(self.game_db_conn, self.service['id'],
+            check_duration = database.get_check_duration(self.db_conn, self.service['id'],
                                                          self.std_dev_count)
             if check_duration is None:
                 # No complete flag placements so far
                 check_duration = self.tick_duration.total_seconds()
 
-        total_tasks = database.get_task_count(self.game_db_conn, self.service['id'])
+        total_tasks = database.get_task_count(self.db_conn, self.service['id'])
         local_tasks = math.ceil(total_tasks / self.checker_count)
 
         margin_seconds = self.tick_duration.total_seconds() / 6
