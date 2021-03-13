@@ -362,7 +362,7 @@ class IntegrationTest(DatabaseTestCase):
             self.assertEqual(cursor.fetchone()[0], 2)
             cursor.execute('SELECT flagid FROM scoring_flag'
                            '    WHERE service_id=1 AND protecting_team_id=3 AND tick=0')
-            self.assertEqual(cursor.fetchone()[0], None)
+            self.assertIsNone(cursor.fetchone()[0])
 
         # Tick 1
         with transaction_cursor(self.connection) as cursor:
@@ -408,7 +408,7 @@ class IntegrationTest(DatabaseTestCase):
             self.assertEqual(cursor.fetchone()[0], 6)
             cursor.execute('SELECT flagid FROM scoring_flag'
                            '    WHERE service_id=1 AND protecting_team_id=3 AND tick=2')
-            self.assertEqual(cursor.fetchone()[0], None)
+            self.assertIsNone(cursor.fetchone()[0])
 
     @patch('ctf_gameserver.checker.master.get_monotonic_time')
     def test_shutdown(self, monotonic_mock):
