@@ -46,6 +46,7 @@ care of calling your methods, merging the results and submitting them to the Che
 
 ### Functions
 * `get_flag(tick: int) -> str`: Get the flag for the given tick (for the checked team).
+* `set_flagid(data: str) -> None`: Store the Flag ID for the current tick.
 * `store_state(key: str, data: Any) -> None`: Store arbitrary Python data persistently across runs.
 * `load_state(key: str) -> Any`: Retrieve data stored through `store_state()`.
 * `run_check(checker_cls: Type[BaseChecker]) -> None`: Start the check.

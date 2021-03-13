@@ -39,6 +39,7 @@ class TestChecker(checkerlib.BaseChecker):
                     raise Exception('Got state where there should be none')
                 data = [{'number': 42}, {'number': 1337}]
                 checkerlib.store_state('key1', data)
+                checkerlib.set_flagid('value identifier')
             elif tick >= 2:
                 if checkerlib.load_state('key1') != [{'number': 42}, {'number': 1337}]:
                     raise Exception('Did not get stored state back')

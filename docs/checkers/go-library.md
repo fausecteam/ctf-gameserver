@@ -23,7 +23,8 @@ API
 To create a Checker Script, implement the `checkerlib.Checker` interface with the following methods:
 
 * `PlaceFlag(ip string, team int, tick int) (checkerlib.Result, error)`: Called once per Script execution to
-  place a flag for the current tick. Use `checkerlib.GetFlag(tick, nil)` to get the flag.
+  place a flag for the current tick. Use `checkerlib.GetFlag(tick, nil)` to get the flag and (optionally)
+  `SetFlagID(data string)` to store the flag ID.
 * `CheckService(ip string, team int) (Result, error)`: Called once per Script execution to determine general
   service health.
 * `CheckFlag(ip string, team int, tick int) (checkerlib.Result, error)`: Determine if the flag for the given

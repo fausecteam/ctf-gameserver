@@ -14,6 +14,7 @@ class TestChecker(checkerlib.BaseChecker):
             raise Exception('Tick {} != 0'.format(tick))
 
         checkerlib.get_flag(tick)
+        checkerlib.set_flagid('value identifier')
         return checkerlib.CheckResult.OK
 
     def check_service(self):

@@ -19,7 +19,7 @@ import ctf_gameserver.lib.flag as flag_lib
 
 from . import database, metrics
 from .supervisor import RunnerSupervisor
-from .supervisor import ACTION_FLAG, ACTION_LOAD, ACTION_STORE, ACTION_RESULT
+from .supervisor import ACTION_FLAG, ACTION_FLAGID, ACTION_LOAD, ACTION_STORE, ACTION_RESULT
 
 
 def main():
@@ -154,6 +154,7 @@ def main():
         database.get_task_count(db_conn, service_id, prohibit_changes=True)
         database.get_new_tasks(db_conn, service_id, 1, prohibit_changes=True)
         database.commit_result(db_conn, service_id, 1, 2147483647, 0, prohibit_changes=True, fake_team_id=1)
+        database.set_flagid(db_conn, service_id, 1, 0, 'id', prohibit_changes=True, fake_team_id=1)
         database.load_state(db_conn, service_id, 1, 'key', prohibit_changes=True)
         database.store_state(db_conn, service_id, 1, 'key', 'data', prohibit_changes=True)
     except psycopg2.ProgrammingError as e:
@@ -246,6 +247,8 @@ class MasterLoop:
             try:
                 if req['action'] == ACTION_FLAG:
                     resp = self.handle_flag_request(req['info'], req['param'])
+                elif req['action'] == ACTION_FLAGID:
+                    self.handle_flagid_request(req['info'], req['param'])
                 elif req['action'] == ACTION_LOAD:
                     resp = self.handle_load_request(req['info'], req['param'])
                 elif req['action'] == ACTION_STORE:
@@ -300,6 +303,9 @@ class MasterLoop:
         expiration = self.contest_start + (self.flag_valid_ticks + tick) * self.tick_duration
         return flag_lib.generate(task_info['team'], self.service['id'], self.flag_secret, self.flag_prefix,
                                  payload, expiration.timestamp())
+
+    def handle_flagid_request(self, task_info, param):
+        database.set_flagid(self.db_conn, self.service['id'], task_info['team'], task_info['tick'], param)
 
     def handle_load_request(self, task_info, param):
         return database.load_state(self.db_conn, self.service['id'], task_info['team'], param)

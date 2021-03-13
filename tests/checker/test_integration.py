@@ -75,6 +75,9 @@ class IntegrationTest(DatabaseTestCase):
             cursor.execute('SELECT status FROM scoring_statuscheck'
                            '    WHERE service_id=1 AND team_id=2 AND tick=0')
             self.assertEqual(cursor.fetchone()[0], CheckResult.OK.value)
+            cursor.execute('SELECT flagid FROM scoring_flag'
+                           '    WHERE service_id=1 AND protecting_team_id=2 AND tick=0')
+            self.assertEqual(cursor.fetchone()[0], 'value identifier')
 
     @patch('ctf_gameserver.checker.master.get_monotonic_time')
     def test_missing_checkerscript(self, monotonic_mock):
@@ -357,6 +360,9 @@ class IntegrationTest(DatabaseTestCase):
             cursor.execute('SELECT COUNT(*) FROM scoring_statuscheck WHERE status=%s',
                            (CheckResult.OK.value,))
             self.assertEqual(cursor.fetchone()[0], 2)
+            cursor.execute('SELECT flagid FROM scoring_flag'
+                           '    WHERE service_id=1 AND protecting_team_id=3 AND tick=0')
+            self.assertEqual(cursor.fetchone()[0], None)
 
         # Tick 1
         with transaction_cursor(self.connection) as cursor:
@@ -377,6 +383,9 @@ class IntegrationTest(DatabaseTestCase):
             cursor.execute('SELECT COUNT(*) FROM scoring_statuscheck WHERE status=%s',
                            (CheckResult.OK.value,))
             self.assertEqual(cursor.fetchone()[0], 4)
+            cursor.execute('SELECT flagid FROM scoring_flag'
+                           '    WHERE service_id=1 AND protecting_team_id=3 AND tick=1')
+            self.assertEqual(cursor.fetchone()[0], 'value identifier')
 
         # Tick 2
         with transaction_cursor(self.connection) as cursor:
@@ -397,6 +406,9 @@ class IntegrationTest(DatabaseTestCase):
             cursor.execute('SELECT COUNT(*) FROM scoring_statuscheck WHERE status=%s',
                            (CheckResult.OK.value,))
             self.assertEqual(cursor.fetchone()[0], 6)
+            cursor.execute('SELECT flagid FROM scoring_flag'
+                           '    WHERE service_id=1 AND protecting_team_id=3 AND tick=2')
+            self.assertEqual(cursor.fetchone()[0], None)
 
     @patch('ctf_gameserver.checker.master.get_monotonic_time')
     def test_shutdown(self, monotonic_mock):

@@ -144,6 +144,16 @@ func genFlag(team, service, timestamp int, payload, secret []byte) string {
 	return "FLAG_" + base64.StdEncoding.EncodeToString(b.Bytes())
 }
 
+// SetFlagID stores the Flag ID for the current team and tick.
+func SetFlagID(data string) {
+	if ipc.in != nil {
+		ipc.SendRecv("FLAGID", data)
+		// Wait for acknowledgement, result is ignored
+	} else {
+		log.Printf("Storing Flag ID: %q", data)
+	}
+}
+
 // StoreState allows a Checker Script to store data (serialized via
 // encoding/json) persistently across runs. Data is stored per service and
 // team with the given key as an additional identifier.

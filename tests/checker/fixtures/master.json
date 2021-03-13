@@ -46,6 +46,7 @@
         "tick": 1,
         "placement_start": null,
         "placement_end": null,
+        "flagid": null,
         "bonus": null
     }
 },
@@ -58,6 +59,7 @@
         "tick": 2,
         "placement_start": null,
         "placement_end": null,
+        "flagid": null,
         "bonus": null
     }
 },
@@ -70,6 +72,7 @@
         "tick": 3,
         "placement_start": null,
         "placement_end": null,
+        "flagid": null,
         "bonus": null
     }
 },

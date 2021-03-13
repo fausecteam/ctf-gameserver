@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Max
@@ -171,8 +173,22 @@ def teams_json(_):
 
     teams = registration_models.Team.active_objects.values_list('net_number', flat=True)
 
+    game_control = models.GameControl.get_instance()
+    # Only publish Flag IDs after the respective Tick is over
+    flagid_max_tick = game_control.current_tick - 1
+    flagid_min_tick = flagid_max_tick - game_control.valid_ticks
+
+    flag_ids = defaultdict(lambda: defaultdict(lambda: []))
+    for flag in models.Flag.objects.exclude(flagid=None) \
+                                   .exclude(flagid='') \
+                                   .filter(tick__gte=flagid_min_tick, tick__lte=flagid_max_tick) \
+                                   .select_related('service', 'protecting_team') \
+                                   .only('service__name', 'protecting_team__net_number', 'flagid'):
+        flag_ids[flag.service.name][flag.protecting_team.net_number].append(flag.flagid)
+
     response = {
-        'teams': list(teams)
+        'teams': list(teams),
+        'flag_ids': flag_ids
     }
 
     return JsonResponse(response, json_dumps_params={'indent': 2})

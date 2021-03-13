@@ -46,7 +46,6 @@ setup(
         'scripts/checker/ctf-checkermaster',
         'scripts/checker/ctf-logviewer',
         'scripts/controller/ctf-controller',
-        'scripts/controller/ctf-flagid',
         'scripts/submission/ctf-submission'
     ],
     package_data = {

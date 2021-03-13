@@ -76,9 +76,21 @@ source code line.
 Persistent State
 ----------------
 Through special load and store commands to the Master, Checker Scripts can keep persistent state cross
-ticks. State is identified by a string key and may consist of arbitrary binary data. State is kept
-separately per team (and service), but not separated by tick. The Master makes sure that state stored in
+ticks. State is identified by a string key and must consist of valid UTF-8 data. However, [Checker Script
+libraries](#checker-script-libraries) may allow to store arbitrary data and handle serialization. State is
+kept separately per team (and service), but not separated by tick. The Master makes sure that state stored in
 one tick can be loaded in subsequent ones, regardless of the Master instances involved.
+
+Flag IDs
+--------
+In some cases, you want to provide teams with an identifier which helps retrieving an individual Flag. For
+example, consider a case where an exploit allows read access to a key/value store. To get Flag data, teams
+still have to know the keys under which valid Flags are stored. This can also help to reduce load on your
+service, because keys don't have to be brute-forced and a listing is not necessary.
+
+For this purpose, we provide the concept of **Flag IDs**. One ID can be stored per Flag by the Checker
+Script. It is provided to teams as JSON by the CTF Gameserver web component. Flag IDs must be UTF-8 strings
+with a maximum length of 100 characters. They are purely optional, not every service needs to provide them.
 
 IPC Protocol
 ------------

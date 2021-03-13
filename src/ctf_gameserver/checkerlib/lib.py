@@ -135,6 +135,19 @@ def get_flag(tick: int, payload: bytes = b'') -> str:
     return result['response']
 
 
+def set_flagid(data: str) -> None:
+    """
+    Stores the Flag ID for the current team and tick.
+    """
+
+    if not _launched_without_runner():
+        _send_ctrl_message({'action': 'FLAGID', 'param': data})
+        # Wait for acknowledgement
+        _recv_ctrl_message()
+    else:
+        print('Storing Flag ID: {}'.format(data))
+
+
 def store_state(key: str, data: Any) -> None:
     """
     Allows a Checker Script to store arbitrary Python data persistently across runs. Data is stored per

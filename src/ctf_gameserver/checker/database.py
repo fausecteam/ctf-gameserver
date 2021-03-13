@@ -125,21 +125,30 @@ def get_new_tasks(db_conn, service_id, task_count, prohibit_changes=False):
     } for task in tasks]
 
 
+def _net_no_to_team_id(cursor, team_net_no, fake_team_id):
+
+    cursor.execute('SELECT user_id FROM registration_team WHERE net_number = %s', (team_net_no,))
+    data = cursor.fetchone()
+
+    # Only do this after executing the SQL query, because we want to ensure the query works
+    if fake_team_id is not None:
+        return fake_team_id
+    elif data is None:
+        return None
+
+    return data[0]
+
+
 def commit_result(db_conn, service_id, team_net_no, tick, result, prohibit_changes=False, fake_team_id=None):
     """
     Saves the result from a Checker run to game database.
     """
 
     with transaction_cursor(db_conn, prohibit_changes) as cursor:
-        cursor.execute('SELECT user_id FROM registration_team'
-                       '    WHERE net_number = %s', (team_net_no,))
-        data = cursor.fetchone()
-        if fake_team_id is not None:
-            data = (fake_team_id,)
-        elif data is None:
+        team_id = _net_no_to_team_id(cursor, team_net_no, fake_team_id)
+        if team_id is None:
             logging.error('No team found with net number %d, cannot commit result', team_net_no)
             return
-        team_id = data[0]
 
         cursor.execute('INSERT INTO scoring_statuscheck'
                        '    (service_id, team_id, tick, status, timestamp)'
@@ -149,6 +158,28 @@ def commit_result(db_conn, service_id, team_net_no, tick, result, prohibit_chang
         cursor.execute('UPDATE scoring_flag'
                        '    SET placement_end = NOW()'
                        '    WHERE service_id = %s AND protecting_team_id = %s AND tick = %s', (service_id,
+                                                                                               team_id,
+                                                                                               tick))
+
+
+def set_flagid(db_conn, service_id, team_net_no, tick, flagid, prohibit_changes=False, fake_team_id=None):
+    """
+    Stores a Flag ID in database.
+    In case of conflict, the previous Flag ID gets overwritten.
+    """
+
+    with transaction_cursor(db_conn, prohibit_changes) as cursor:
+        team_id = _net_no_to_team_id(cursor, team_net_no, fake_team_id)
+        if team_id is None:
+            logging.error('No team found with net number %d, cannot commit result', team_net_no)
+            return
+
+        # (In case of `prohibit_changes`,) PostgreSQL checks the database grants even if nothing is matched
+        # by `WHERE`
+        cursor.execute('UPDATE scoring_flag'
+                       '    SET flagid = %s'
+                       '    WHERE service_id = %s AND protecting_team_id = %s AND tick = %s', (flagid,
+                                                                                               service_id,
                                                                                                team_id,
                                                                                                tick))
 
