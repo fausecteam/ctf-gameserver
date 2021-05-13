@@ -156,7 +156,7 @@ def main():
         database.commit_result(db_conn, service_id, 1, 2147483647, 0, prohibit_changes=True, fake_team_id=1)
         database.set_flagid(db_conn, service_id, 1, 0, 'id', prohibit_changes=True, fake_team_id=1)
         database.load_state(db_conn, service_id, 1, 'key', prohibit_changes=True)
-        database.store_state(db_conn, service_id, 1, 'key', 'data', prohibit_changes=True)
+        database.store_state(db_conn, service_id, 1, 'key', 'data', prohibit_changes=True, fake_team_id=1)
     except psycopg2.ProgrammingError as e:
         if e.pgcode == postgres_errors.INSUFFICIENT_PRIVILEGE:
             # Log full exception because only the backtrace will tell which kind of permission is missing

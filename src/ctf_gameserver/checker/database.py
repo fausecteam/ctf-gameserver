@@ -202,16 +202,19 @@ def load_state(db_conn, service_id, team_net_no, key, prohibit_changes=False):
     return data[0]
 
 
-def store_state(db_conn, service_id, team_net_no, key, data, prohibit_changes=False):
+def store_state(db_conn, service_id, team_net_no, key, data, prohibit_changes=False, fake_team_id=None):
     """
     Stores Checker state data in database.
     """
 
     with transaction_cursor(db_conn, prohibit_changes) as cursor:
+        team_id = _net_no_to_team_id(cursor, team_net_no, fake_team_id)
+        if team_id is None:
+            logging.error('No team found with net number %d, cannot store state', team_net_no)
+            return
+
         # (In case of `prohibit_changes`,) PostgreSQL checks the database grants even if no CONFLICT occurs
         cursor.execute('INSERT INTO scoring_checkerstate (service_id, team_id, key, data)'
-                       '    VALUES ('
-                       '        %s, (SELECT user_id FROM registration_team WHERE net_number = %s), %s, %s'
-                       '    )'
+                       '    VALUES (%s, %s, %s, %s)'
                        '    ON CONFLICT (service_id, team_id, key)'
-                       '        DO UPDATE SET data = EXCLUDED.data', (service_id, team_net_no, key, data))
+                       '        DO UPDATE SET data = EXCLUDED.data', (service_id, team_id, key, data))
