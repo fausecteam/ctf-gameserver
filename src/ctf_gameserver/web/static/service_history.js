@@ -27,6 +27,8 @@ function loadTable(_, ignoreMaxTick=false) {
 
     const serviceSlug = window.location.hash.slice(1)
     if (serviceSlug.length == 0) {
+        $('#load-spinner').attr('hidden', true)
+        makeFieldsEditable(true)
         return
     }
 
