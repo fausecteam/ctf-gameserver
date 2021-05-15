@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load form_as_div %}
+
+{% block content %}
+<div class="page-header row">
+    <h1 class="col-xs-6">{% block title %}{% trans 'Files' %}{% endblock %}</h1>
+</div>
+
+<p>
+    {% blocktrans %}
+    Team specific files provided for the competition.
+    {% endblocktrans %}
+</p>
+
+{% if files %}
+<ul>
+    {% for file in files %}
+    <li>
+        <a href="{% url 'team_files_download' file.id %}">{{ file.name }}</a>
+        {% if file.description %}
+        ({{ file.description }})
+        {% endif %}
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>
+    {% blocktrans %}
+    No files available at the moment.
+    {% endblocktrans %}
+</p>
+{% endif %}
+{% endblock %}

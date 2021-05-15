@@ -5,6 +5,7 @@ from django.db import transaction, IntegrityError
 from django.views.generic import ListView
 from django.shortcuts import render, redirect
 from django.conf import settings
+from django.http import HttpResponse
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 from django.contrib import messages
@@ -15,7 +16,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from ctf_gameserver.web.scoring.decorators import before_competition_required, registration_open_required
 import ctf_gameserver.web.scoring.models as scoring_models
 from . import forms
-from .models import Team
+from .models import File, Team
 from .util import email_token_generator
 
 User = get_user_model()    # pylint: disable=invalid-name
@@ -237,3 +238,34 @@ def mail_teams(request):
         batches.append(','.join(addresses[i:i+batch_size]))
 
     return render(request, 'mail_teams.html', {'form': form, 'batches': batches})
+
+
+@login_required
+def team_files(request):
+
+    try:
+        team = request.user.team
+        files = team.file_set.all()
+    except Team.DoesNotExist:
+        files = None
+
+    return render(request, 'team_files.html', {
+        'files': files,
+    })
+
+
+@login_required
+def team_files_download(request, id):
+
+    try:
+        team = request.user.team
+    except Team.DoesNotExist:
+        return render(request, '400.html', status=400)
+    try:
+        file = team.file_set.get(pk=id)
+    except File.DoesNotExist:
+        return render(request, '404.html', status=404)
+
+    response = HttpResponse(file.data, content_type='application/octet-stream')
+    response['Content-Disposition'] = 'inline; filename=' + file.name
+    return response

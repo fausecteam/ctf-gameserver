@@ -103,6 +103,7 @@
                                 {% if registration_open %}
                                 <li><a href="{% url 'edit_team' %}">{% trans 'Edit' %}</a></li>
                                 {% endif %}
+                                <li><a href="{% url 'team_files' %}">{% trans 'Files' %}</a></li>
                                 {% if user.is_staff %}
                                 <li><a href="{% url 'admin:index' %}">{% trans 'Administration' %}</a></li>
                                 <li><a href="{% url 'service_history' %}">{% trans 'Service History' %}</a></li>
