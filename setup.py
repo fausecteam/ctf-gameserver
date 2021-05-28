@@ -58,6 +58,7 @@ setup(
             'static/*.css',
             'static/*.gif',
             'static/*.js',
+            'static/faustctf.svg',
             'static/ext/jquery.min.js',
             'static/ext/bootstrap/css/*',
             'static/ext/bootstrap/fonts/*',
