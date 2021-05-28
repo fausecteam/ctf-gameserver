@@ -59,5 +59,5 @@ class File(models.Model):
 
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
     name = models.CharField(max_length=32)
-    description = models.CharField(max_length=100)
+    description = models.TextField()
     data = models.BinaryField()
