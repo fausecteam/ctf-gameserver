@@ -155,7 +155,7 @@ class GameControl(models.Model):
     valid_ticks = models.PositiveSmallIntegerField(default=5)
     current_tick = models.IntegerField(default=-1)
     flag_prefix = models.CharField(max_length=20, default='FLAG_')
-    registration_open = models.BooleanField(default=True)
+    registration_open = models.BooleanField(default=False)
     registration_confirm_text = models.TextField(blank=True)
     min_net_number = models.PositiveIntegerField(null=True, blank=True)
     max_net_number = models.PositiveIntegerField(null=True, blank=True)
