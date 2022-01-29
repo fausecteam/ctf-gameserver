@@ -29,7 +29,7 @@ HTTPS = False
 # See https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.db.backends.postgresql',
         'HOST': '',
         'PORT': '',
         'NAME': '',

@@ -1,8 +1,7 @@
 from django.conf import settings
-from django.conf.urls import url
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
-from django.urls import reverse_lazy
+from django.urls import re_path as url, reverse_lazy
 
 from .registration import views as registration_views
 from .scoring import views as scoring_views

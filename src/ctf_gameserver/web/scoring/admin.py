@@ -1,5 +1,5 @@
 from django.shortcuts import redirect
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.contrib import admin
 
 from ctf_gameserver.web.admin import admin_site

@@ -17,6 +17,8 @@ HOME_URL = reverse_lazy('home_flatpage')
 THUMBNAIL_SIZE = (100, 100)
 
 
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -51,6 +53,7 @@ TEMPLATES = [{
         'context_processors': [
             'django.contrib.auth.context_processors.auth',
             'django.contrib.messages.context_processors.messages',
+            'django.template.context_processors.request',
             'django.template.context_processors.i18n',
             'django.template.context_processors.static',
             'django.template.context_processors.media',
@@ -93,8 +96,10 @@ SHORT_DATE_FORMAT = 'Y-m-d'
 DATETIME_FORMAT = DATE_FORMAT + ' ' + TIME_FORMAT
 SHORT_DATETIME_FORMAT = SHORT_DATE_FORMAT + ' ' + TIME_FORMAT
 
-PASSWORD_RESET_TIMEOUT_DAYS = 1
+PASSWORD_RESET_TIMEOUT = 86400
 CSRF_COOKIE_HTTPONLY = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
 X_FRAME_OPTIONS = 'DENY'
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'Lax'
