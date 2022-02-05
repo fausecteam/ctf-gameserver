@@ -176,6 +176,10 @@ def main_loop_step(db_conn, metrics, nonstop):
     if ((control_info['end'] - control_info['start']).total_seconds() % control_info['tick_duration']) != 0:
         logging.warning('Competition duration not divisible by tick duration, strange things might happen')
 
+    if now < control_info['start']:
+        logging.info('Competition has not started yet')
+        return
+
     if (not nonstop) and (now >= control_info['end']):
         # Do not stop the program because a daemon might get restarted if it exits
         # Prevent a busy loop in case we have not slept above as the hypothetic next tick would be overdue
