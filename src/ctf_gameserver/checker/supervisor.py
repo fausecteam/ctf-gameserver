@@ -44,9 +44,26 @@ class RunnerSupervisor:
 
         # Timeout if there are no requests when all Runners are done or blocking
         self.queue_timeout = 1
+        # Currently active processes by custom identifier (getting reset periodically)
+        self.processes = {}
+        # Runner processes from before any resets, which are waiting to be joined, by PID
+        # Cannot use a Python set because multiprocessing.Processes are not hashable
+        self.remaining_processes = {}
         self._reset()
 
     def _reset(self):
+        for proc, _, _ in self.processes.values():
+            self.remaining_processes[proc.pid] = proc
+
+        # Prevent zombies from accumulating without blocking
+        still_remaining_processes = {}
+        for proc in self.remaining_processes.values():
+            if proc.is_alive():
+                still_remaining_processes[proc.pid] = proc
+            else:
+                proc.join()
+        self.remaining_processes = still_remaining_processes
+
         self.work_queue = multiprocessing.Queue()
         self.processes = {}
         self.start_times = {}
