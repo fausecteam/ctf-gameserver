@@ -70,16 +70,21 @@ class MetricsTest(TestCase):
 
     def test_gauge(self):
         metrics.set(self.queue, 'plain_gauge', 42)
+        # "If multiple processes are enqueuing objects, it is possible for the objects to be received at the
+        # other end out-of-order"
+        time.sleep(0.1)
         resp = requests.get(self.metrics_url)
         self.assertEqual(resp.status_code, 200)
         self.assertIn('plain_gauge 42.0', resp.text)
 
         metrics.inc(self.queue, 'plain_gauge')
+        time.sleep(0.1)
         resp = requests.get(self.metrics_url)
         self.assertEqual(resp.status_code, 200)
         self.assertIn('plain_gauge 43.0', resp.text)
 
         metrics.dec(self.queue, 'plain_gauge', 1.5)
+        time.sleep(0.1)
         resp = requests.get(self.metrics_url)
         self.assertEqual(resp.status_code, 200)
         self.assertIn('plain_gauge 41.5', resp.text)
@@ -88,6 +93,7 @@ class MetricsTest(TestCase):
         metrics.set(self.queue, 'instance_gauge', 42, {'instance': 1})
         metrics.set(self.queue, 'instance_gauge', 13.37, {'instance': 2})
 
+        time.sleep(0.1)
         resp = requests.get(self.metrics_url)
         self.assertEqual(resp.status_code, 200)
         self.assertIn('instance_gauge{instance="1"} 42.0', resp.text)
@@ -96,22 +102,26 @@ class MetricsTest(TestCase):
     def test_service_label(self):
         metrics.set(self.queue, 'service_gauge', 23)
 
+        time.sleep(0.1)
         resp = requests.get(self.metrics_url)
         self.assertEqual(resp.status_code, 200)
         self.assertIn('service_gauge{service="test"} 23.0', resp.text)
 
     def test_counter(self):
         metrics.inc(self.queue, 'counter')
+        time.sleep(0.1)
         resp = requests.get(self.metrics_url)
         self.assertEqual(resp.status_code, 200)
         self.assertIn('counter_total 1.0', resp.text)
 
         metrics.inc(self.queue, 'counter')
+        time.sleep(0.1)
         resp = requests.get(self.metrics_url)
         self.assertEqual(resp.status_code, 200)
         self.assertIn('counter_total 2.0', resp.text)
 
         metrics.inc(self.queue, 'counter', 0)
+        time.sleep(0.1)
         resp = requests.get(self.metrics_url)
         self.assertEqual(resp.status_code, 200)
         self.assertIn('counter_total 2.0', resp.text)
@@ -122,6 +132,7 @@ class MetricsTest(TestCase):
         metrics.set(self.queue, 'service_gauge', 42)
         metrics.inc(self.queue, 'counter')
 
+        time.sleep(0.1)
         resp = requests.get(self.metrics_url)
         self.assertEqual(resp.status_code, 200)
         self.assertIn('plain_gauge 1337.0', resp.text)
@@ -131,12 +142,14 @@ class MetricsTest(TestCase):
 
     def test_summary(self):
         metrics.observe(self.queue, 'summary', 10)
+        time.sleep(0.1)
         resp = requests.get(self.metrics_url)
         self.assertEqual(resp.status_code, 200)
         self.assertIn('summary_count 1.0', resp.text)
         self.assertIn('summary_sum 10.0', resp.text)
 
         metrics.observe(self.queue, 'summary', 20)
+        time.sleep(0.1)
         resp = requests.get(self.metrics_url)
         self.assertEqual(resp.status_code, 200)
         self.assertIn('summary_count 2.0', resp.text)
@@ -144,6 +157,7 @@ class MetricsTest(TestCase):
 
     def test_histogram(self):
         metrics.observe(self.queue, 'histogram', 0.02, {'instance': 3})
+        time.sleep(0.1)
         resp = requests.get(self.metrics_url)
         self.assertEqual(resp.status_code, 200)
         self.assertIn('histogram_bucket{instance="3",le="0.01",service="test"} 0.0', resp.text)
@@ -151,6 +165,7 @@ class MetricsTest(TestCase):
         self.assertIn('histogram_bucket{instance="3",le="10.0",service="test"} 1.0', resp.text)
 
         metrics.observe(self.queue, 'histogram', 0.5, {'instance': 3})
+        time.sleep(0.1)
         resp = requests.get(self.metrics_url)
         self.assertEqual(resp.status_code, 200)
         self.assertIn('histogram_bucket{instance="3",le="0.25",service="test"} 1.0', resp.text)
