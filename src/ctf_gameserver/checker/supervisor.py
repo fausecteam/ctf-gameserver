@@ -235,6 +235,16 @@ def _run_checker_script(args, sudo_user, info, logging_params, runner_id, queue_
         if sudo_user is not None:
             kill_args = ['sudo', '--user='+sudo_user, '--'] + kill_args
         subprocess.check_call(kill_args)
+        # Best-effort attempt to join zombies, primarily for CI runs without an init process
+        # Use a timeout to guarantee the Runner itself will always exit within a reasonable time frame
+        # This will not work if the timeout expires or if our child fork()ed again; those zombies will be
+        # handled by the init process during regular execution
+        try:
+            proc.wait(5)
+        except subprocess.TimeoutExpired:
+            pass
+        # Raises a SystemExit exception, so that the `finally` clause from run_checker_script() will be
+        # executed
         sys.exit(1)
     signal.signal(signal.SIGTERM, sigterm_handler)
 
