@@ -1,0 +1,102 @@
+name: CI
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  # Test with Tox, a recent Python version and libraries from PyPI
+  test_tox:
+    name: Test with Tox
+    runs-on: ubuntu-latest
+    container: python:3.10-bullseye
+    permissions:
+      # Required for "EnricoMi/publish-unit-test-result-action"
+      checks: write
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup dependencies
+        run: |
+          pip install tox
+          # Make sure we have our dependencies, which are not required for Tox but for `make build`
+          pip install -e .
+      - run: make build
+      - run: tox -e py310 -- --junitxml=.tox/py310/log/results.xml
+      - run: find .
+      - name: Publish unit test results
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        if: always()
+        with:
+          files: .tox/py*/log/results.xml
+          comment_mode: "off"
+      - name: Archive unit test results
+        uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: tox-test-results
+          path: .tox/py*/log/results.xml
+          if-no-files-found: error
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: tox-code-coverage-report
+          path: .tox/py*/log/htmlcov
+          if-no-files-found: error
+
+  build_deb_package:
+    name: Build Debian package
+    runs-on: ubuntu-latest
+    container: debian:bullseye
+    steps:
+      - uses: actions/checkout@v2
+      - run: echo 'deb http://deb.debian.org/debian/ bullseye-backports main' >> /etc/apt/sources.list
+      - run: apt-get --yes update
+      - run: apt-get --yes install --no-install-recommends devscripts dpkg-dev equivs
+      # It's a bit ugly to do this explicitly, but we really need Django from backports
+      - run: apt-get --yes install -t bullseye-backports python3-django
+      # Add `--yes` to mk-build-deps' default options for apt-get
+      - run: mk-build-deps --install --tool 'apt-get --yes -o Debug::pkgProblemResolver=yes --no-install-recommends' debian/control
+      - run: dpkg-buildpackage --unsigned-changes --unsigned-buildinfo
+      - run: mv ../ctf-gameserver_*.deb .
+      - name: Store Debian package
+        uses: actions/upload-artifact@v2
+        with:
+          name: deb-package
+          path: ctf-gameserver_*.deb
+          if-no-files-found: error
+
+  # Test with Python and libraries from Debian Stable sources
+  test_debian:
+    name: Test with Debian
+    runs-on: ubuntu-latest
+    container: debian:bullseye
+    needs: build_deb_package
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/download-artifact@v2
+        with:
+          name: deb-package
+      - run: echo 'deb http://deb.debian.org/debian/ bullseye-backports main' >> /etc/apt/sources.list
+      - run: apt-get --yes update
+      # It's a bit ugly to do this explicitly, but we really need Django from backports
+      - run: apt-get --yes install -t bullseye-backports python3-django
+      # Install our package in order to install its dependencies
+      - run: apt-get --yes install --no-install-recommends ./ctf-gameserver_*.deb
+      - run: apt-get --yes install make curl unzip python3-pytest python3-pytest-cov
+      - run: make build
+      - run: pytest-3 --junitxml=results.xml --cov=src --cov-report=term --cov-report=html tests
+      - name: Archive unit test results
+        uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: debian-test-results
+          path: results.xml
+          if-no-files-found: error
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: debian-code-coverage-report
+          path: htmlcov
+          if-no-files-found: error
