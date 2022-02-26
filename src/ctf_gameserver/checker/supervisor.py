@@ -248,7 +248,8 @@ def _run_checker_script(args, sudo_user, info, logging_params, runner_id, queue_
         script_logger.warning('[RUNNER] Terminating Checker Script')
         # Yeah kids, this is how Unix works
         pgid = -1 * proc.pid
-        kill_args = ['kill', '-KILL', str(pgid)]
+        # Avoid using kill(1) because of https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1005376
+        kill_args = ['python3', '-c', f'import os; import signal; os.kill({pgid}, signal.SIGKILL)']
         if sudo_user is not None:
             kill_args = ['sudo', '--user='+sudo_user, '--'] + kill_args
         subprocess.check_call(kill_args)
