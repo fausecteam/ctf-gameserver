@@ -1,47 +1,38 @@
 import base64
 import binascii
+import datetime
 import hashlib
 from hmac import compare_digest
 import struct
-import time
-import zlib
 
 # Length of the MAC (in bytes)
-MAC_LEN = 9
-# Length of the payload (in bytes)
-PAYLOAD_LEN = 8
-# timestamp + team + service + payload
-DATA_LEN = 4 + 2 + 1 + PAYLOAD_LEN
-# Flag validity in seconds
-VALID = 900
+MAC_LEN = 10
+# expiration_timestamp + flag.id + protecting_team.net_no
+DATA_LEN = 8 + 4 + 2
+# Static string with which flags get XOR-ed to make them look more random (just for the looks)
+XOR_STRING = b'CTF-GAMESERVER'
 
 
-def generate(team_net_no, service_id, secret, prefix='FLAG_', payload=None, timestamp=None):
+def generate(expiration_time, flag_id, team_net_no, secret, prefix='FLAG_'):
     """
-    Generates a flag for the given arguments. This is deterministic and should always return the same
-    result for the same arguments (and the same time, if no timestamp is explicitly specified).
+    Generates a flag for the given arguments, i.e. the MAC-protected string that gets placed in services and
+    captured by teams. This is deterministic and should always return the same result for the same arguments.
 
     Args:
+        expiration_time: Datetime object (preferably timezone-aware) at which the flag expires
+        flag_id: ID (primary key) of the flag's associated database entry
         team_net_no: Net number of the team protecting this flag
-        service_id: ID of the service this flag belongs to
-        payload: 8 bytes of data to store in the flag, defaults to zero-padded
-                 CRC32(timestamp, team, service)
-        timestamp: Timestamp at which the flag expires, defaults to 15 minutes in the future
+        secret: Secret used for the MAC
+        prefix: String to prepend to the generated flag
     """
 
-    if timestamp is None:
-        timestamp = time.time() + VALID
+    if flag_id < 0 or flag_id > 2**32 - 1:
+        raise ValueError('Flag ID must fit in unsigned 32 bits')
+    if team_net_no < 0 or team_net_no > 2**16 - 1:
+        raise ValueError('Team net number must fit in unsigned 16 bits')
 
-    if team_net_no > 65535:
-        raise ValueError('Team net number must fit in 16 bits')
-    protected_data = struct.pack("!i H c", int(timestamp), team_net_no, bytes([service_id]))
-
-    if payload is None:
-        payload = struct.pack("!I I", zlib.crc32(protected_data), 0)
-    if len(payload) != PAYLOAD_LEN:
-        raise ValueError('Payload {} must be {:d} bytes long'.format(repr(payload), PAYLOAD_LEN))
-
-    protected_data += payload
+    protected_data = struct.pack('! Q I H', int(expiration_time.timestamp()), flag_id, team_net_no)
+    protected_data = bytes([c ^ d for c, d in zip(protected_data, XOR_STRING)])
     mac = _gen_mac(secret, protected_data)
 
     return prefix + base64.b64encode(protected_data + mac).decode('ascii')
@@ -49,11 +40,16 @@ def generate(team_net_no, service_id, secret, prefix='FLAG_', payload=None, time
 
 def verify(flag, secret, prefix='FLAG_'):
     """
-    Verfies flag validity and returns data from the flag.
+    Verifies flag validity and returns data from the flag.
     Will raise an appropriate exception if verification fails.
 
+    Args:
+        flag: MAC-protected flag string
+        secret: Secret used for the MAC
+        prefix: String to prepend to the generated flag
+
     Returns:
-        Data from the flag as a tuple of (team, service, payload, timestamp)
+        Data from the flag as a tuple of (flag_id, team_net_no)
     """
 
     if not flag.startswith(prefix):
@@ -61,7 +57,7 @@ def verify(flag, secret, prefix='FLAG_'):
 
     try:
         raw_flag = base64.b64decode(flag[len(prefix):])
-    except binascii.Error:
+    except (ValueError, binascii.Error):
         raise InvalidFlagFormat()
 
     try:
@@ -73,12 +69,13 @@ def verify(flag, secret, prefix='FLAG_'):
     if not compare_digest(mac, flag_mac):
         raise InvalidFlagMAC()
 
-    timestamp, team, service = struct.unpack("!i H c", protected_data[:7])
-    payload = protected_data[7:]
-    if time.time() - timestamp > 0:
-        raise FlagExpired(time.time() - timestamp)
+    protected_data = bytes([c ^ d for c, d in zip(protected_data, XOR_STRING)])
+    expiration_timestamp, flag_id, team_net_no = struct.unpack('! Q I H', protected_data)
+    expiration_time = datetime.datetime.fromtimestamp(expiration_timestamp, datetime.timezone.utc)
+    if expiration_time < _now():
+        raise FlagExpired(expiration_time)
 
-    return (int(team), int.from_bytes(service, 'big'), payload, timestamp)
+    return (flag_id, team_net_no)
 
 
 def _gen_mac(secret, protected_data):
@@ -88,6 +85,14 @@ def _gen_mac(secret, protected_data):
     sha3.update(secret)
     sha3.update(protected_data)
     return sha3.digest()[:MAC_LEN]
+
+
+def _now():
+    """
+    Wrapper around datetime.datetime.now() to enable mocking in test cases.
+    """
+
+    return datetime.datetime.now(datetime.timezone.utc)
 
 
 class FlagVerificationError(Exception):
@@ -112,3 +117,7 @@ class FlagExpired(FlagVerificationError):
     """
     Flag is already expired.
     """
+
+    def __init__(self, expiration_time):
+        super().__init__(f'Flag expired since {expiration_time}')
+        self.expiration_time = expiration_time

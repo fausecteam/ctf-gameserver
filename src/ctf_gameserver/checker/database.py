@@ -119,6 +119,7 @@ def get_new_tasks(db_conn, service_id, task_count, prohibit_changes=False):
                            '    WHERE id = %s', [(task[0],) for task in tasks])
 
     return [{
+        'flag': task[0],
         'team_id': task[1],
         'team_net_no': task[3],
         'tick': task[2]

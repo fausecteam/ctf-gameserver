@@ -21,6 +21,7 @@ class MasterTest(DatabaseTestCase):
             cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
 
         task_info = {
+            'flag': 1,
             'service': 'service1',
             '_team_id': 2,
             'team': 92,
@@ -31,11 +32,9 @@ class MasterTest(DatabaseTestCase):
         resp1 = self.master_loop.handle_flag_request(task_info, params1)
         params2 = {'tick': 1}
         resp2 = self.master_loop.handle_flag_request(task_info, params2)
-        params3 = {'tick': 1, 'payload': 'TmV2ZXIgZ28='}
-        resp3 = self.master_loop.handle_flag_request(task_info, params3)
+        # "params3" and "resp3" don't exist anymore
 
         self.assertEqual(resp1, resp2)
-        self.assertNotEqual(resp1, resp3)
 
         params4 = {'tick': 2}
         resp4 = self.master_loop.handle_flag_request(task_info, params4)
@@ -59,6 +58,7 @@ class MasterTest(DatabaseTestCase):
 
     def test_handle_result_request(self):
         task_info = {
+            'flag': 1,
             'service': 'service1',
             '_team_id': 2,
             'team': 92,
@@ -77,6 +77,7 @@ class MasterTest(DatabaseTestCase):
                            '    WHERE service_id = 1 AND protecting_team_id = 2 AND tick = 1')
             self.assertGreaterEqual(cursor.fetchone()[0], start_time)
 
+        task_info['flag'] = 2
         task_info['tick'] = 2
         param = CheckResult.FAULTY.value
         start_time = datetime.datetime.utcnow().replace(microsecond=0)
@@ -89,6 +90,7 @@ class MasterTest(DatabaseTestCase):
                            '    WHERE service_id = 1 AND protecting_team_id = 2 AND tick = 2')
             self.assertGreaterEqual(cursor.fetchone()[0], start_time)
 
+        task_info['flag'] = 3
         task_info['tick'] = 3
         param = 'Not an int'
         self.assertIsNone(self.master_loop.handle_result_request(task_info, param))

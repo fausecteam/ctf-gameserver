@@ -289,20 +289,12 @@ class MasterLoop:
         except (KeyError, ValueError):
             return None
 
-        try:
-            payload = base64.b64decode(params['payload'])
-        except KeyError:
-            payload = None
-
-        if payload == b'':
-            payload = None
-
         # We need current value for self.contest_start which might have changed
         self.refresh_control_info()
 
         expiration = self.contest_start + (self.flag_valid_ticks + tick) * self.tick_duration
-        return flag_lib.generate(task_info['team'], self.service['id'], self.flag_secret, self.flag_prefix,
-                                 payload, expiration.timestamp())
+        return flag_lib.generate(expiration, task_info['flag'], task_info['team'], self.flag_secret,
+                                 self.flag_prefix)
 
     def handle_flagid_request(self, task_info, param):
         database.set_flagid(self.db_conn, self.service['id'], task_info['team'], task_info['tick'], param)
@@ -362,7 +354,8 @@ class MasterLoop:
 
             # Information in task_info should be somewhat human-readable, because it also ends up in Checker
             # Script logs
-            task_info = {'service': self.service['slug'],
+            task_info = {'flag': task['flag'],
+                         'service': self.service['slug'],
                          'team': task['team_net_no'],
                          '_team_id': task['team_id'],
                          'tick': task['tick']}

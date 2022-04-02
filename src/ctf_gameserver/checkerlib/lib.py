@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import base64
+import datetime
 import errno
 import http.client
 import json
@@ -113,24 +114,23 @@ class BaseChecker:
         raise NotImplementedError('check_flag() must be implemented by the subclass')
 
 
-def get_flag(tick: int, payload: bytes = b'') -> str:
+def get_flag(tick: int) -> str:
     """
     May be called by Checker Scripts to get the flag for a given tick, for the team and service of the
     current run. The returned flag can be used for both placement and checks.
     """
 
+    # Return dummy flag when launched locally
     if _launched_without_runner():
         try:
             team = get_flag._team    # pylint: disable=protected-access
         except AttributeError:
             raise Exception('get_flag() must be called through run_check()')
-        # Return dummy flag when launched locally
-        if payload == b'':
-            payload = None
-        return ctf_gameserver.lib.flag.generate(team, 42, b'TOPSECRET', payload=payload, timestamp=tick)
+        expiration = datetime.datetime(1970, 1, 1, 0, 0, tzinfo=datetime.timezone.utc)
+        expiration += datetime.timedelta(minutes=tick)
+        return ctf_gameserver.lib.flag.generate(expiration, 42, team, b'TOPSECRET')
 
-    payload_b64 = base64.b64encode(payload).decode('ascii')
-    _send_ctrl_message({'action': 'FLAG', 'param': {'tick': tick, 'payload': payload_b64}})
+    _send_ctrl_message({'action': 'FLAG', 'param': {'tick': tick}})
     result = _recv_ctrl_message()
     return result['response']
 

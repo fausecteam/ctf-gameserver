@@ -26,17 +26,15 @@ class LocalTest(TestCase):
 
     def test_get_flag(self):
         checkerlib.get_flag._team = 1    # pylint: disable=protected-access
-        team1_tick1_flag1 = checkerlib.get_flag(1, b'fooobaar')
-        team1_tick2_flag1 = checkerlib.get_flag(2, b'fooobaar')
-        team1_tick1_flag2 = checkerlib.get_flag(1, b'fooobaar')
-        team1_tick2_flag2 = checkerlib.get_flag(2)
+        team1_tick1_flag1 = checkerlib.get_flag(1)
+        team1_tick1_flag2 = checkerlib.get_flag(1)
+        team1_tick2_flag = checkerlib.get_flag(2)
         checkerlib.get_flag._team = 2    # pylint: disable=protected-access
-        team2_tick1_flag1 = checkerlib.get_flag(1, b'fooobaar')
+        team2_tick1_flag = checkerlib.get_flag(1)
 
         self.assertEqual(team1_tick1_flag1, team1_tick1_flag2)
-        self.assertNotEqual(team1_tick1_flag1, team1_tick2_flag1)
-        self.assertNotEqual(team1_tick2_flag1, team1_tick2_flag2)
-        self.assertNotEqual(team1_tick1_flag1, team2_tick1_flag1)
+        self.assertNotEqual(team1_tick1_flag1, team1_tick2_flag)
+        self.assertNotEqual(team1_tick1_flag1, team2_tick1_flag)
 
     def test_state_primitive(self):
         self.assertIsNone(checkerlib.load_state('primitive'))

@@ -8,7 +8,6 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/json"
-	"hash/crc32"
 	"io/ioutil"
 	"log"
 	"net"
@@ -103,11 +102,10 @@ var teamId int // for local runner only
 // GetFlag may be called by Checker Scripts to get the flag for a given tick,
 // for the team and service of the current run. The returned flag can be used
 // for both placement and checks.
-func GetFlag(tick int, payload []byte) string {
+func GetFlag(tick int) string {
 	if ipc.in != nil {
 		x := ipc.SendRecv("FLAG", map[string]interface{}{
-			"tick":    tick,
-			"payload": base64.StdEncoding.EncodeToString(payload),
+			"tick": tick,
 		})
 		return x.(string)
 	}
@@ -116,31 +114,23 @@ func GetFlag(tick int, payload []byte) string {
 	if teamId == 0 {
 		panic("GetFlag() must be called through RunCheck()")
 	}
-	return genFlag(teamId, 42, tick, payload, []byte("TOPSECRET"))
+	return genFlag(tick, 42, teamId, []byte("TOPSECRET"))
 }
 
-func genFlag(team, service, timestamp int, payload, secret []byte) string {
+func genFlag(timestamp, flag, team int, secret []byte) string {
 	// From src/ctf_gameserver/lib/flag.py
 
 	var b bytes.Buffer
-	binary.Write(&b, binary.BigEndian, int32(timestamp))
+	binary.Write(&b, binary.BigEndian, uint64(timestamp))
+	binary.Write(&b, binary.BigEndian, uint32(flag))
 	binary.Write(&b, binary.BigEndian, uint16(team))
-	binary.Write(&b, binary.BigEndian, byte(service))
-	if len(payload) == 0 {
-		binary.Write(&b, binary.BigEndian, crc32.ChecksumIEEE(b.Bytes()))
-		binary.Write(&b, binary.BigEndian, int32(0))
-	} else if len(payload) != 8 {
-		panic("len(payload) must be 8")
-	} else {
-		b.Write(payload)
-	}
 
 	d := sha3.New256()
 	d.Write(secret)
 	d.Write(b.Bytes())
 	mac := d.Sum(nil)
 
-	b.Write(mac[:9])
+	b.Write(mac[:10])
 	return "FLAG_" + base64.StdEncoding.EncodeToString(b.Bytes())
 }
 
