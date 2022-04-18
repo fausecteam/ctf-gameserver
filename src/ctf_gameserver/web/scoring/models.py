@@ -57,6 +57,7 @@ class Capture(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        # This constraint is necessary for correct behavior of the submission server
         unique_together = ('flag', 'capturing_team')
         index_together = ('flag', 'capturing_team')
 
