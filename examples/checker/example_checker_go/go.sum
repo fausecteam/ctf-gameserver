@@ -1,5 +1,5 @@
-github.com/fausecteam/ctf-gameserver/go/checkerlib v0.0.0-20200614124532-4fe436aebc60 h1:aENwKyAp53iRLs+xUgwpdhmT9zOs6NotYAlibMwlR+k=
-github.com/fausecteam/ctf-gameserver/go/checkerlib v0.0.0-20200614124532-4fe436aebc60/go.mod h1:kn1Odhtr8wDBWd90gXD8AX2VXJYjtV6qk+TP+f/jz+s=
+github.com/fausecteam/ctf-gameserver/go/checkerlib v0.0.0-20220418102344-6e941055f119 h1:VXdxqaul0zNKAO1xOpKjhcbBPXLbqkbUMBSbNYWtRsQ=
+github.com/fausecteam/ctf-gameserver/go/checkerlib v0.0.0-20220418102344-6e941055f119/go.mod h1:kn1Odhtr8wDBWd90gXD8AX2VXJYjtV6qk+TP+f/jz+s=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20200604202706-70a84ac30bf9 h1:vEg9joUBmeBcK9iSJftGNf3coIG4HqZElCPehJsfAYM=
 golang.org/x/crypto v0.0.0-20200604202706-70a84ac30bf9/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=

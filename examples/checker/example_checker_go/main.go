@@ -23,7 +23,7 @@ func (c checker) PlaceFlag(ip string, team int, tick int) (checkerlib.Result, er
 	}
 	defer conn.Close()
 
-	flag := checkerlib.GetFlag(tick, nil)
+	flag := checkerlib.GetFlag(tick)
 
 	_, err = fmt.Fprintf(conn, "SET %d %s\n", tick, flag)
 	if err != nil {
@@ -86,7 +86,7 @@ func (c checker) CheckFlag(ip string, team int, tick int) (checkerlib.Result, er
 	}
 	log.Printf("Received response to GET command: %q", line)
 
-	flag := checkerlib.GetFlag(tick, nil)
+	flag := checkerlib.GetFlag(tick)
 	if line != flag {
 		log.Print("Received wrong response to GET command")
 		return checkerlib.ResultFlagNotFound, nil
