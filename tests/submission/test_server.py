@@ -18,7 +18,9 @@ class ServerTest(DatabaseTestCase):
     metrics = defaultdict(Mock)
 
     async def connect(self):
-        task = asyncio.create_task(serve('localhost', 6666, self.connection, {
+        # For this to work on GitHub Actions (in Docker), we need to use the v4 address instead of
+        # "localhost"
+        task = asyncio.create_task(serve('127.0.0.1', 6666, self.connection, {
             'flag_secret': self.flag_secret,
             'team_regex': None,
             'competition_name': 'Test CTF',
@@ -28,7 +30,7 @@ class ServerTest(DatabaseTestCase):
 
         for _ in range(50):
             try:
-                reader, writer = await asyncio.open_connection('localhost', 6666)
+                reader, writer = await asyncio.open_connection('127.0.0.1', 6666)
                 break
             except OSError:
                 await asyncio.sleep(0.1)
