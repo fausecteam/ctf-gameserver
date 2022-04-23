@@ -71,8 +71,7 @@ def add_capture(db_conn, flag_id, capturing_team_net_no, prohibit_changes=False)
                            '    VALUES (%s, %s, NOW(), (SELECT current_tick FROM scoring_gamecontrol))',
                            (flag_id, capturing_team_id))
         except (UniqueViolation, sqlite3.IntegrityError):
-            # pylint: disable=raise-missing-from
-            raise DuplicateCapture()
+            raise DuplicateCapture() from None
 
 
 class TeamNotExisting(DBDataError):
