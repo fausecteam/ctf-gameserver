@@ -122,10 +122,7 @@ def service_status_json(_):
 
     game_control = models.GameControl.get_instance()
     to_tick = game_control.current_tick
-    from_tick = to_tick - 4
-
-    if from_tick < 0:
-        from_tick = 0
+    from_tick = max(to_tick - 4, 0)
 
     statuses = calculations.team_statuses(from_tick, to_tick)
     services = models.Service.objects.all().order_by('name')
@@ -199,10 +196,7 @@ def service_history(request):
 
     game_control = models.GameControl.get_instance()
     max_tick = game_control.current_tick
-    min_tick = max_tick - 30
-
-    if min_tick < 0:
-        min_tick = 0
+    min_tick = max(max_tick - 30, 0)
 
     return render(request, 'service_history.html', {
         'services': models.Service.objects.all().order_by('name'),

@@ -58,12 +58,12 @@ def verify(flag, secret, prefix='FLAG_'):
     try:
         raw_flag = base64.b64decode(flag[len(prefix):])
     except (ValueError, binascii.Error):
-        raise InvalidFlagFormat()
+        raise InvalidFlagFormat() from None
 
     try:
         protected_data, flag_mac = raw_flag[:DATA_LEN], raw_flag[DATA_LEN:]
     except IndexError:
-        raise InvalidFlagFormat()
+        raise InvalidFlagFormat() from None
 
     mac = _gen_mac(secret, protected_data)
     if not compare_digest(mac, flag_mac):

@@ -42,10 +42,9 @@ test:
 lint:
 	# Run Pylint, pycodestyle and Bandit to check the code for potential errors, style guideline violations
 	# and security issues
-	# REVISIT: Respect exit codes when linter issues are fixed
-	-pylint --rcfile $(SOURCE_DIR)/pylintrc $(SOURCE_DIR) $(TESTS_DIR)/test_*.py
-	-pycodestyle $(SOURCE_DIR) $(TESTS_DIR)
-	-bandit --ini bandit.ini -r $(SOURCE_DIR)
+	pylint --rcfile $(SOURCE_DIR)/pylintrc $(SOURCE_DIR) $(TESTS_DIR)
+	pycodestyle $(SOURCE_DIR) $(TESTS_DIR)
+	bandit --ini bandit.ini -r $(SOURCE_DIR)
 
 docs_site: mkdocs.yml $(wildcard docs/* docs/*/*)
 	mkdocs build --strict

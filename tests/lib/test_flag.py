@@ -1,6 +1,5 @@
 import datetime
 import random
-import time
 import unittest
 from unittest.mock import patch
 

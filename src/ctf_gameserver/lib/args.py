@@ -42,7 +42,7 @@ def parse_host_port(text):
 
     try:
         addrinfo = socket.getaddrinfo(url_parts.hostname, url_parts.port)
-    except socket.gaierror:
-        raise ValueError('Could not determine address family')
+    except socket.gaierror as e:
+        raise ValueError('Could not determine address family') from e
 
     return (url_parts.hostname, url_parts.port, addrinfo[0][0])

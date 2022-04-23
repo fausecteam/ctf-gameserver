@@ -8,7 +8,7 @@ class TestChecker(checkerlib.BaseChecker):
     def place_flag(self, tick):
         self._tick = tick    # pylint: disable=attribute-defined-outside-init
 
-        if self.team != 92 and self.team != 93:
+        if self.team not in (92, 93):
             raise Exception('Invalid team {}'.format(self.team))
 
         checkerlib.get_flag(tick)

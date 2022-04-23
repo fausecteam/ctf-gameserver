@@ -150,7 +150,7 @@ class TeamForm(forms.ModelForm):
 
         return self.cleaned_data['image']
 
-    def save(self, user, commit=True):   # pylint: disable=arguments-differ
+    def save(self, user, commit=True):   # pylint: disable=arguments-renamed
         """
         save() variant which takes as an additional parameter the user model to be associated with the team.
         """
@@ -214,7 +214,6 @@ class MailTeamsForm(forms.Form):
     """
 
     # Use short property names because they will end up in (visible) GET parameters
-    # pylint: disable=bad-whitespace
     addrs = forms.ChoiceField(
         choices = [('formal', 'Formal'), ('informal', 'Informal')],
         label = _('Address type'),

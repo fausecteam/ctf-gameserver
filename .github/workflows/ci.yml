@@ -5,6 +5,15 @@ on:
   - pull_request
 
 jobs:
+  lint:
+    name: Lint soure code
+    runs-on: ubuntu-latest
+    container: python:3.10-bullseye
+    steps:
+      - uses: actions/checkout@v2
+      - run: pip install -e .[dev]
+      - run: make lint
+
   # Test with Tox, a recent Python version and libraries from PyPI
   test_tox:
     name: Test with Tox
@@ -22,7 +31,6 @@ jobs:
           pip install -e .
       - run: make build
       - run: tox -e py310 -- --junitxml=.tox/py310/log/results.xml
-      - run: find .
       - name: Publish unit test results
         uses: EnricoMi/publish-unit-test-result-action@v1
         if: always()

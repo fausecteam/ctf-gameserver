@@ -9,7 +9,7 @@ from .flatpages import views as flatpages_views
 from .admin import admin_site
 from .forms import TeamAuthenticationForm, FormalPasswordResetForm
 
-# pylint: disable=invalid-name, bad-continuation
+# pylint: disable=invalid-name
 
 
 urlpatterns = [

@@ -299,7 +299,7 @@ class ServerTest(DatabaseTestCase):
             task, reader, writer = await self.connect()
             await reader.readuntil(b'\n\n')
 
-            flag = 'überfläg'.encode('utf8')
+            flag = 'überfläg'.encode('utf-8')
             writer.write(flag + b'\n')
             response = await reader.readline()
             self.assertEqual(response, flag + b' INV Invalid flag\n')

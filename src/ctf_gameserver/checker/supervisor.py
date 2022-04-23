@@ -195,6 +195,7 @@ def _run_checker_script(args, sudo_user, info, logging_params, runner_id, queue_
         # Work-around for missing IPv6 support in Python's
         # logging.handlers.DatagramHandler (https://bugs.python.org/issue14855)
         class GELFHandler(graypy.GELFHandler):
+            # pylint: disable=invalid-name
             def makeSocket(self):
                 return socket.socket(logging_params['gelf']['family'], socket.SOCK_DGRAM)
 

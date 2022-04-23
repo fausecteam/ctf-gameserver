@@ -2,7 +2,6 @@ import os.path
 from unittest import SkipTest
 from unittest.mock import patch
 import shutil
-import sqlite3
 import subprocess
 import tempfile
 import time

@@ -35,7 +35,7 @@ def get_country_names():
 
     csv_file_name = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'countries.csv')
 
-    with open(csv_file_name, encoding='utf8') as csv_file:
+    with open(csv_file_name, encoding='utf-8') as csv_file:
         csv_reader = csv.reader(csv_file)
         # Skip header line
         next(csv_reader)

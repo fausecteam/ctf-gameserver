@@ -22,7 +22,7 @@ def start_metrics_server(host, port, family, registry=prometheus_client.REGISTRY
 
 class SilentHandler(simple_server.WSGIRequestHandler):
 
-    def log_message(self, _, *args):
+    def log_message(self, _, *args):    # pylint: disable=arguments-differ
         """
         Doesn't log anything.
         """

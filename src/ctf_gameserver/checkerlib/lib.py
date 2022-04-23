@@ -125,7 +125,7 @@ def get_flag(tick: int) -> str:
         try:
             team = get_flag._team    # pylint: disable=protected-access
         except AttributeError:
-            raise Exception('get_flag() must be called through run_check()')
+            raise Exception('get_flag() must be called through run_check()') from None
         expiration = datetime.datetime(1970, 1, 1, 0, 0, tzinfo=datetime.timezone.utc)
         expiration += datetime.timedelta(minutes=tick)
         return ctf_gameserver.lib.flag.generate(expiration, 42, team, b'TOPSECRET')
@@ -163,12 +163,12 @@ def store_state(key: str, data: Any) -> None:
         _recv_ctrl_message()
     else:
         try:
-            with open(_LOCAL_STATE_PATH, 'r') as f:
+            with open(_LOCAL_STATE_PATH, 'r', encoding='utf-8') as f:
                 state = json.load(f)
         except FileNotFoundError:
             state = {}
         state[key] = serialized_data
-        with open(_LOCAL_STATE_PATH, 'w') as f:
+        with open(_LOCAL_STATE_PATH, 'w', encoding='utf-8') as f:
             json.dump(state, f, indent=4)
 
 
@@ -186,7 +186,7 @@ def load_state(key: str) -> Any:
             return None
     else:
         try:
-            with open(_LOCAL_STATE_PATH, 'r') as f:
+            with open(_LOCAL_STATE_PATH, 'r', encoding='utf-8') as f:
                 state = json.load(f)
         except FileNotFoundError:
             return None

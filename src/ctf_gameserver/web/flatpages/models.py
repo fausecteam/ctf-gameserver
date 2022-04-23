@@ -16,7 +16,7 @@ class Category(models.Model):
     class Meta:
         ordering = ('ordering', 'title')
 
-    def __str__(self):
+    def __str__(self):    # pylint: disable=invalid-str-returned
         return self.title
 
 
@@ -54,7 +54,7 @@ class Flatpage(models.Model):
     # QuerySet that only returns Flatpages without a category, but not the home page
     objects_without_category = ObjectsWithoutCategoryManager()
 
-    def __str__(self):
+    def __str__(self):    # pylint: disable=invalid-str-returned
         return self.title
 
     def clean(self):
@@ -63,7 +63,6 @@ class Flatpage(models.Model):
         when category is NULL. Django's constraint validation skips this case, and the actual constraint's
         behavior is database-specific.
         """
-        # pylint: disable=bad-whitespace, bad-continuation
         if self.category is None and type(self)._default_manager.filter(
             category = self.category,
             title = self.title
