@@ -1,16 +1,33 @@
 [Unit]
 Description=CTF Flag-Submission Service
-Wants=postgresql.service
 After=postgresql.service
 
 [Service]
 Type=notify
+DynamicUser=yes
+# Python breaks without HOME environment variable and with `DynamicUser`
+Environment=HOME=/tmp
 EnvironmentFile=/etc/ctf-gameserver/submission.env
-ExecStart=/usr/bin/ctf-submission --port %i
-User=nobody
-Group=nogroup
-RestartSec=10
+ExecStart=/usr/bin/ctf-submission --listen-port %i
 Restart=on-failure
+RestartSec=5
+
+# Security options
+CapabilityBoundingSet=
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+NoNewPrivileges=yes
+PrivateDevices=yes
+PrivateTmp=yes
+PrivateUsers=yes
+ProtectControlGroups=yes
+ProtectHome=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectSystem=strict
+RestrictNamespaces=yes
+RestrictRealtime=yes
+SystemCallArchitectures=native
 
 [Install]
 WantedBy=multi-user.target
