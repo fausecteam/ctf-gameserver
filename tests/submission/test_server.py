@@ -78,7 +78,7 @@ class ServerTest(DatabaseTestCase):
         asyncio.run(coroutine())
 
     @patch('ctf_gameserver.submission.submission._match_net_number')
-    def test_multiple(self, net_number_mock):
+    def test_multiple_flags(self, net_number_mock):
         async def coroutine():
             net_number_mock.return_value = 103
 
@@ -202,6 +202,58 @@ class ServerTest(DatabaseTestCase):
             self.assertEqual(captured_flag2, 4)
 
             writer.close()
+            task.cancel()
+
+        asyncio.run(coroutine())
+
+    @patch('ctf_gameserver.submission.submission._match_net_number')
+    def test_multiple_clients(self, net_number_mock):
+        async def coroutine():
+            net_number_mock.side_effect = [103, 102]
+
+            with transaction_cursor(self.connection) as cursor:
+                cursor.execute('UPDATE scoring_gamecontrol SET start = datetime("now"), '
+                               '                               end = datetime("now", "+1 hour")')
+
+            task, reader_103, writer_103 = await self.connect()
+            await reader_103.readuntil(b'\n\n')
+            reader_102, writer_102 = await asyncio.open_connection('127.0.0.1', 6666)
+            await reader_102.readuntil(b'\n\n')
+
+            expiration_time = datetime.datetime.now() + datetime.timedelta(seconds=60)
+
+            flag_102 = generate_flag(expiration_time, 4, 102, self.flag_secret,
+                                     self.flag_prefix).encode('ascii')
+            writer_103.write(flag_102 + b'\n')
+            writer_102.write(flag_102 + b'\n')
+
+            response = await reader_103.readline()
+            self.assertEqual(response, flag_102 + b' OK\n')
+            response = await reader_102.readline()
+            self.assertEqual(response, flag_102 + b' OWN You cannot submit your own flag\n')
+
+            flag_103 = generate_flag(expiration_time, 4, 103, self.flag_secret,
+                                     self.flag_prefix).encode('ascii')
+            writer_103.write(flag_103 + b'\n')
+            writer_102.write(flag_103 + b'\n')
+
+            response = await reader_103.readline()
+            self.assertEqual(response, flag_103 + b' OWN You cannot submit your own flag\n')
+            response = await reader_102.readline()
+            self.assertEqual(response, flag_103 + b' OK\n')
+
+            writer_103.write(flag_102 + b'\n')
+
+            response = await reader_103.readline()
+            self.assertEqual(response, flag_102 + b' DUP You already submitted this flag\n')
+
+            with transaction_cursor(self.connection) as cursor:
+                cursor.execute('SELECT COUNT(*) FROM scoring_capture')
+                capture_count = cursor.fetchone()[0]
+            self.assertEqual(capture_count, 2)
+
+            writer_102.close()
+            writer_103.close()
             task.cancel()
 
         asyncio.run(coroutine())
