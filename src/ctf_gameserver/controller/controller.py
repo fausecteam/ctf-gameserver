@@ -68,7 +68,7 @@ def main():
         start_metrics_server(metrics_host, metrics_port, metrics_family)
 
     metrics = make_metrics(db_conn)
-    metrics['start_timestamp'].set(time.time())
+    metrics['start_timestamp'].set_to_current_time()
 
     daemon.notify('READY=1')
 
