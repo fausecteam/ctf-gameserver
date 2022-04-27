@@ -18,6 +18,7 @@ nav:
     - General: checkers/index.md
     - checkers/python-library.md
     - checkers/go-library.md
+  - Submission: submission.md
 
 site_dir: docs_site
 markdown_extensions:
