@@ -8,7 +8,8 @@ DynamicUser=yes
 # Python breaks without HOME environment variable and with `DynamicUser`
 Environment=HOME=/tmp
 EnvironmentFile=/etc/ctf-gameserver/submission.env
-ExecStart=/usr/bin/ctf-submission --listen-port %i
+EnvironmentFile=-/etc/ctf-gameserver/submission-%i.env
+ExecStart=/usr/bin/ctf-submission
 Restart=on-failure
 RestartSec=5
 

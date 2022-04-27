@@ -28,8 +28,8 @@ TIMEOUT_SECONDS = 300
 def main():
 
     arg_parser = get_arg_parser_with_db('CTF Gameserver Submission Server')
-    arg_parser.add_argument('--listenhost', default="localhost", help='Address to listen on')
-    arg_parser.add_argument('--listenport', default="6666", help='Port to listen on')
+    arg_parser.add_argument('--listen', default="localhost:6666",
+                            help='Address and port to listen on ("<host>:<port>")')
     arg_parser.add_argument('--flagsecret', required=True,
                             help='Base64 string used as secret in flag generation')
     arg_parser.add_argument('--teamregex', required=True,
@@ -43,11 +43,10 @@ def main():
     numeric_loglevel = getattr(logging, args.loglevel.upper())
     logging.getLogger().setLevel(numeric_loglevel)
 
-    listen_host = args.listenhost
     try:
-        listen_port = int(args.listenport)
+        listen_host, listen_port, _ = parse_host_port(args.listen)
     except ValueError:
-        logging.error('Listen port must be an integer')
+        logging.error('Listen address needs to be specified as "<host>:<port>"')
         return os.EX_USAGE
 
     try:
