@@ -36,7 +36,9 @@ care of calling your methods, merging the results and submitting them to the Che
 
 ### Persistent State
 * `StoreState(key string, data interface{})`: Store data persistently across runs (serialized as JSON).
-* `LoadState(key string) interface{}`: Retrieve data stored through `StoreState()`.
+  Data is stored per service and team with the given key as an additional identifier.
+* `LoadState(key string, data interface{}) bool`: Retrieve data stored through `StoreState()` (deserialized into
+  `data`). Returns `true` if any state was found.
 
 ### Helper functions
 * `Dial(network, address string) (net.Conn, error)`: Calls `net.DialTimeout()` with an appropriate timeout.
