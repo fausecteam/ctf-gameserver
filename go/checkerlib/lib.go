@@ -190,22 +190,22 @@ func StoreState(key string, data interface{}) {
 	}
 }
 
-// LoadState allows to retrieve data stored through StoreState. If no data
-// exists for the given key (and the current service and team), nil is
-// returned.
-func LoadState(key string) interface{} {
-	var data string
+// LoadState allows to retrieve data stored through StoreState by unmarshalling it into data.
+// If no data exists for the given key (and the current service and team)
+// false is returned.
+func LoadState(key string, data interface{}) bool {
+	var dataJson string
 	if ipc.in != nil {
 		x := ipc.SendRecv("LOAD", key)
 		if x == nil {
-			return nil
+			return false
 		}
-		data = x.(string)
+		dataJson = x.(string)
 	} else {
 		x, err := ioutil.ReadFile(localStatePath)
 		if err != nil {
 			if os.IsNotExist(err) {
-				return nil
+				return false
 			}
 			panic(err)
 		}
@@ -217,23 +217,23 @@ func LoadState(key string) interface{} {
 		}
 
 		var ok bool
-		data, ok = state[key]
+		dataJson, ok = state[key]
 		if !ok {
-			return nil
+			return false
 		}
 	}
 
 	// Deserialize data
-	x, err := base64.StdEncoding.DecodeString(data)
+	x, err := base64.StdEncoding.DecodeString(dataJson)
 	if err != nil {
 		panic(err)
 	}
-	var res interface{}
-	err = json.Unmarshal(x, &res)
+
+	err = json.Unmarshal(x, data)
 	if err != nil {
 		panic(err)
 	}
-	return res
+	return true
 }
 
 // RunCheck launches the execution of the specified Checker implementation.
