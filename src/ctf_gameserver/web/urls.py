@@ -104,6 +104,14 @@ urlpatterns = [
         scoring_views.service_history_json,
         name='service_history_json'
     ),
+    url(r'^internal/missing-checks$',
+        scoring_views.missing_checks,
+        name='missing_checks'
+    ),
+    url(r'^internal/missing-checks\.json$',
+        scoring_views.missing_checks_json,
+        name='missing_checks.json'
+    ),
     url(r'^admin/', admin_site.urls),
 
     # Multiple seperate URL patterns have to be used to work around

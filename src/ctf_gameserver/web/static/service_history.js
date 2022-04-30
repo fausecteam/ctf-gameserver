@@ -1,65 +1,13 @@
-/* jshint asi: true, sub: true */
+/* jshint asi: true, sub: true, esversion: 6 */
 
 'use strict'
 
 
 $(document).ready(function() {
-    $(window).bind('hashchange', function(e) {
-        loadTable()
-    })
-    $('#min-tick').change(loadTable)
-    $('#max-tick').change(loadTable)
-    $('#refresh').click(loadTable)
-    $('#load-current').click(function(e) {
-        // Even though the current tick is contained in the JSON data, it might be outdated, so load the
-        // table without a "to-tick"
-        loadTable(e, true)
-    })
 
-    loadTable()
+    setupDynamicContent('service-history.json', buildTable)
+
 })
-
-
-function loadTable(_, ignoreMaxTick=false) {
-
-    makeFieldsEditable(false)
-    $('#load-spinner').attr('hidden', false)
-
-    const serviceSlug = window.location.hash.slice(1)
-    if (serviceSlug.length == 0) {
-        $('#load-spinner').attr('hidden', true)
-        makeFieldsEditable(true)
-        return
-    }
-
-    const fromTick = parseInt($('#min-tick').val())
-    const toTick = parseInt($('#max-tick').val()) + 1
-    if (isNaN(fromTick) || isNaN(toTick)) {
-        return
-    }
-
-    let params = {'service': serviceSlug, 'from-tick': fromTick}
-    if (!ignoreMaxTick) {
-        params['to-tick'] = toTick
-    }
-    $.getJSON('service-history.json', params, function(data) {
-        buildTable(data)
-        $('#load-spinner').attr('hidden', true)
-        makeFieldsEditable(true)
-    })
-
-}
-
-
-function makeFieldsEditable(writeable) {
-
-    $('#service-selector').attr('disabled', !writeable)
-    $('#min-tick').attr('readonly', !writeable)
-    $('#max-tick').attr('readonly', !writeable)
-    $('#refresh').attr('disabled', !writeable)
-    $('#load-current').attr('disabled', !writeable)
-
-}
 
 
 function buildTable(data) {

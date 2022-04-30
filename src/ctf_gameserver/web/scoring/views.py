@@ -234,6 +234,7 @@ def service_history_json(request):
                                               .only('tick', 'status', 'team__user__id', 'team__net_number') \
                                               .order_by('team__user__id', 'tick')
 
+    # Get teams separately to reduce size of "status_checks" result
     teams = registration_models.Team.active_objects.select_related('user').only('user__username').in_bulk()
     max_team_id = registration_models.Team.active_objects.aggregate(Max('user__id'))['user__id__max']
 
@@ -303,3 +304,92 @@ def _get_status_descriptions():
     status_descriptions[-1] = 'not checked'
 
     return status_descriptions
+
+
+@staff_member_required
+def missing_checks(request):
+
+    game_control = models.GameControl.get_instance()
+    # For the current tick, "not checked" can also mean "still scheduled or running", so it makes little
+    # sense to include it
+    max_tick = game_control.current_tick - 1
+    min_tick = max(max_tick - 30, 0)
+
+    return render(request, 'missing_checks.html', {
+        'services': models.Service.objects.all().order_by('name'),
+        'initial_min_tick': min_tick,
+        'initial_max_tick': max_tick
+    })
+
+
+@staff_member_required
+def missing_checks_json(request):
+    """
+    View which returns the teams with status "not checked" per tick for a specific service. The result is in
+    JSON format as required by the JavaScript code in def missing_checks().
+    This can help to find unhandled exceptions in checker scripts, as "not checked" normally shouldn't occur.
+    """
+
+    service_slug = request.GET.get('service')
+    if service_slug is None:
+        return JsonResponse({'error': 'Service must be specified'}, status=400)
+
+    try:
+        service = models.Service.objects.get(slug=service_slug)
+    except models.Service.DoesNotExist:
+        return JsonResponse({'error': 'Unknown service'}, status=404)
+
+    max_tick = models.GameControl.get_instance().current_tick - 1
+    try:
+        from_tick = int(request.GET.get('from-tick', 0))
+        to_tick = int(request.GET.get('to-tick', max_tick+1))
+    except ValueError:
+        return JsonResponse({'error': 'Ticks must be integers'})
+
+    all_flags = models.Flag.objects.filter(service=service) \
+                                   .filter(tick__gte=from_tick, tick__lt=to_tick) \
+                                   .values_list('tick', 'protecting_team')
+    all_status_checks = models.StatusCheck.objects.filter(service=service) \
+                                                  .filter(tick__gte=from_tick, tick__lt=to_tick) \
+                                                  .values_list('tick', 'team')
+    checks_missing = all_flags.difference(all_status_checks).order_by('-tick', 'protecting_team')
+
+    result = []
+    current_tick = {'tick': -1}
+
+    def append_result():
+        nonlocal current_tick
+
+        # First call of `append_result()` (before any checks have been processed) has no data to add
+        if current_tick['tick'] != -1:
+            result.append(current_tick)
+
+    for check in checks_missing:
+        # Status checks are ordered by tick, finalize result for a tick when it changes
+        if current_tick['tick'] != check[0]:
+            append_result()
+            current_tick = {'tick': check[0], 'teams': []}
+
+        current_tick['teams'].append(check[1])
+
+    # Add result from last iteration
+    append_result()
+
+    teams = registration_models.Team.active_objects.select_related('user') \
+                                                   .only('pk', 'net_number', 'user__username')
+    teams_dict = {}
+    for team in teams:
+        teams_dict[team.pk] = {'name': team.user.username, 'net-number': team.net_number}
+
+    response = {
+        'checks': result,
+        'all-teams': teams_dict,
+        'min-tick': from_tick,
+        'max-tick': to_tick-1,
+        'service-name': service.name,
+        'service-slug': service.slug
+    }
+    if hasattr(settings, 'GRAYLOG_SEARCH_URL'):
+        response['graylog-search-url'] = settings.GRAYLOG_SEARCH_URL
+
+    return JsonResponse(response)

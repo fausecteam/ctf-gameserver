@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block content %}
+<script src="{% static 'service_util.js' %}" defer="defer"></script>
+<script src="{% static 'missing_checks.js' %}" defer="defer"></script>
+
+<noscript>
+    <div class="alert alert-danger" role="alert">{% trans 'Please enable JavaScript for this page to work!' %}</div>
+</noscript>
+
+<div class="page-header">
+    <h1>{% block title %}{% trans 'Missing Checks' %}{% endblock %}</h1>
+</div>
+
+<div class="clearfix">
+    <div class="dropdown pull-left">
+        <button type="button" id="service-selector" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+            <span id="selected-service">{% trans 'Select service' %}</span> <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+            {% for service in services %}
+            <li><a href="#{{ service.slug }}" class="service-option">{{ service.name }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="form-inline pull-right">
+        <img src="{% static 'progress_spinner.gif' %}" id="load-spinner" hidden="hidden" alt="Progress spinner" />
+        <button type="button" id="refresh" class="btn btn-default">
+            <span class="glyphicon glyphicon-refresh"></span>
+        </button>
+
+        <fieldset class="pull-right">
+            <label>Tick:</label>
+            <div class="input-group">
+                <div class="input-group-addon">{% trans 'Min' %}</div>
+                <input type="number" id="min-tick" class="form-control" min="0" value="{{ initial_min_tick }}" />
+            </div>
+            <div class="input-group">
+                <div class="input-group-addon">{% trans 'Max' %}</div>
+                <input type="number" id="max-tick" class="form-control" min="1" value="{{ initial_max_tick }}" />
+                <span class="input-group-btn">
+                    <button type="button" id="load-current" class="btn btn-default">{% trans 'Previous' %}</button>
+                </span>
+            </div>
+        </fieldset>
+    </div>
+</div>
+
+<div>
+    <ul id="check-list" hidden="hidden">
+    </ul>
+</div>
+{% endblock %}

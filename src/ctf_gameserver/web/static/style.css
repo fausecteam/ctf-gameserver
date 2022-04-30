@@ -58,6 +58,14 @@ th.border-right, td.border-right {
     margin-top: 40px;
 }
 
+img#load-spinner {
+    width: 1.7em;
+}
+
+img#load-spinner, button#refresh {
+    margin-right: 20px;
+}
+
 #history-table td {
     padding-left: 2px;
     padding-right: 2px;
@@ -68,14 +76,11 @@ th.border-right, td.border-right {
     display: block;
 }
 
-img#load-spinner {
-    width: 1.7em;
-}
-
-img#load-spinner, button#refresh {
-    margin-right: 20px;
-}
-
 #history-table td a:hover {
     text-decoration: none;
+}
+
+#check-list {
+    margin-top: 20px;
+    padding-left: 20px;
 }

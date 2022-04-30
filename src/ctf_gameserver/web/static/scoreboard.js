@@ -1,4 +1,4 @@
-/* jshint asi: true, sub: true */
+/* jshint asi: true, sub: true, esversion: 6 */
 
 'use strict'
 
