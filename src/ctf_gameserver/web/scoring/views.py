@@ -33,8 +33,9 @@ def scoreboard_json(_):
     else:
         to_tick = game_control.current_tick - 1
 
-    scores = calculations.scores()
-    statuses = calculations.team_statuses(to_tick, to_tick)
+    scores = calculations.scores(['team', 'team__user', 'service'],
+                                 ['team__image', 'team__user__username', 'service__name'])
+    statuses = calculations.team_statuses(to_tick, to_tick, only_team_fields=['user_id'])
     services = models.Service.objects.all()
 
     response = {
@@ -68,7 +69,7 @@ def scoreboard_json(_):
                 defense = 0
                 sla = 0
             try:
-                status = statuses[team][to_tick][service]
+                status = statuses[team][to_tick][service.pk]
             except KeyError:
                 status = ''
             team_entry['services'].append({
@@ -92,7 +93,7 @@ def scoreboard_json_ctftime(_):
 
     tasks = ['Offense', 'Defense', 'SLA']
     standings = []
-    scores = calculations.scores()
+    scores = calculations.scores(['team', 'team__user'], ['team__user__username'])
 
     for rank, (team, points) in enumerate(scores.items(), start=1):
         standings.append({
@@ -124,7 +125,8 @@ def service_status_json(_):
     to_tick = game_control.current_tick
     from_tick = max(to_tick - 4, 0)
 
-    statuses = calculations.team_statuses(from_tick, to_tick)
+    statuses = calculations.team_statuses(from_tick, to_tick, ['user'], ['image', 'nop_team',
+                                                                         'user__username'])
     services = models.Service.objects.all().order_by('name')
 
     response = {
@@ -149,7 +151,7 @@ def service_status_json(_):
             tick_services = []
             for service in services:
                 try:
-                    tick_services.append(tick_statuses[tick][service])
+                    tick_services.append(tick_statuses[tick][service.pk])
                 except KeyError:
                     tick_services.append('')
             team_entry['ticks'].append(tick_services)
