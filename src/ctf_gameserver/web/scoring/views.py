@@ -230,12 +230,13 @@ def service_history_json(request):
 
     status_checks = models.StatusCheck.objects.filter(service=service) \
                                               .filter(tick__gte=from_tick, tick__lt=to_tick) \
-                                              .select_related('team') \
+                                              .select_related('team', 'team__user') \
                                               .only('tick', 'status', 'team__user__id', 'team__net_number') \
                                               .order_by('team__user__id', 'tick')
 
     # Get teams separately to reduce size of "status_checks" result
-    teams = registration_models.Team.active_objects.select_related('user').only('user__username').in_bulk()
+    teams = registration_models.Team.active_objects.select_related('user').only('net_number',
+                                                                                'user__username').in_bulk()
     max_team_id = registration_models.Team.active_objects.aggregate(Max('user__id'))['user__id__max']
 
     result = []
