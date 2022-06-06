@@ -53,7 +53,7 @@ def team_is_nop(db_conn, team_net_no):
     return result[0]
 
 
-def add_capture(db_conn, flag_id, capturing_team_net_no, prohibit_changes=False):
+def add_capture(db_conn, flag_id, capturing_team_net_no, prohibit_changes=False, fake_team_id=None):
     """
     Stores a capture of the given flag by the given team in the database.
     """
@@ -62,6 +62,8 @@ def add_capture(db_conn, flag_id, capturing_team_net_no, prohibit_changes=False)
         cursor.execute('SELECT user_id FROM registration_team WHERE net_number = %s',
                        (capturing_team_net_no,))
         result = cursor.fetchone()
+        if fake_team_id is not None:
+            result = (fake_team_id,)
         if result is None:
             raise TeamNotExisting()
         capturing_team_id = result[0]

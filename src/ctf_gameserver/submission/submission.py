@@ -85,7 +85,7 @@ def main():
             logging.warning('Invalid database state: %s', e)
 
         database.team_is_nop(db_conn, 1)
-        database.add_capture(db_conn, 2147483647, 1, prohibit_changes=True)
+        database.add_capture(db_conn, 2147483647, 1, prohibit_changes=True, fake_team_id=42)
     except psycopg2.ProgrammingError as e:
         if e.pgcode == postgres_errors.INSUFFICIENT_PRIVILEGE:
             # Log full exception because only the backtrace will tell which kind of permission is missing
