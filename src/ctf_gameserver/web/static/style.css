@@ -100,3 +100,14 @@ img#load-spinner, button#refresh {
     margin-top: 20px;
     padding-left: 20px;
 }
+
+.jumbotron img.big-logo {
+    margin-right: 30px;
+    width: 30%;
+}
+
+#supporter-column img {
+    margin-top: 10px;
+    margin-bottom: 35px;
+    width: 100%;
+}
