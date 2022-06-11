@@ -153,6 +153,7 @@ def main():
 
         database.get_task_count(db_conn, service_id, prohibit_changes=True)
         database.get_new_tasks(db_conn, service_id, 1, prohibit_changes=True)
+        database.get_flag_id(db_conn, service_id, 1, 1, prohibit_changes=True, fake_flag_id=42)
         database.commit_result(db_conn, service_id, 1, 2147483647, 0, prohibit_changes=True, fake_team_id=1)
         database.set_flagid(db_conn, service_id, 1, 0, 'id', prohibit_changes=True, fake_team_id=1)
         database.load_state(db_conn, service_id, 1, 'key', prohibit_changes=True)
@@ -292,8 +293,10 @@ class MasterLoop:
         # We need current value for self.contest_start which might have changed
         self.refresh_control_info()
 
+        flag_id = database.get_flag_id(self.db_conn, self.service['id'], task_info['_team_id'], tick)
+
         expiration = self.contest_start + (self.flag_valid_ticks + tick) * self.tick_duration
-        return flag_lib.generate(expiration, task_info['flag'], task_info['team'], self.flag_secret,
+        return flag_lib.generate(expiration, flag_id, task_info['team'], self.flag_secret,
                                  self.flag_prefix)
 
     def handle_flagid_request(self, task_info, param):
@@ -354,8 +357,7 @@ class MasterLoop:
 
             # Information in task_info should be somewhat human-readable, because it also ends up in Checker
             # Script logs
-            task_info = {'flag': task['flag'],
-                         'service': self.service['slug'],
+            task_info = {'service': self.service['slug'],
                          'team': task['team_net_no'],
                          '_team_id': task['team_id'],
                          'tick': task['tick']}

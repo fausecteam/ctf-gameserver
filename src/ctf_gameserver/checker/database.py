@@ -119,11 +119,23 @@ def get_new_tasks(db_conn, service_id, task_count, prohibit_changes=False):
                            '    WHERE id = %s', [(task[0],) for task in tasks])
 
     return [{
-        'flag': task[0],
         'team_id': task[1],
         'team_net_no': task[3],
         'tick': task[2]
     } for task in tasks]
+
+
+def get_flag_id(db_conn, service_id, team_id, tick, prohibit_changes=False, fake_flag_id=None):
+
+    with transaction_cursor(db_conn, prohibit_changes) as cursor:
+        cursor.execute('SELECT id FROM scoring_flag'
+                       '    WHERE tick = %s'
+                       '        AND service_id = %s'
+                       '        AND protecting_team_id = %s', (tick, service_id, team_id))
+        data = cursor.fetchone()
+        if fake_flag_id is not None:
+            data = (fake_flag_id,)
+        return data[0]
 
 
 def _net_no_to_team_id(cursor, team_net_no, fake_team_id):

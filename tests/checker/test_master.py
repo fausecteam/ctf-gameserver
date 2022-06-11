@@ -5,6 +5,7 @@ from ctf_gameserver.checker.master import MasterLoop
 from ctf_gameserver.checker.metrics import DummyQueue
 from ctf_gameserver.lib.checkresult import CheckResult
 from ctf_gameserver.lib.database import transaction_cursor
+from ctf_gameserver.lib.flag import verify
 from ctf_gameserver.lib.test_util import DatabaseTestCase
 
 
@@ -13,36 +14,49 @@ class MasterTest(DatabaseTestCase):
     fixtures = ['tests/checker/fixtures/master.json']
 
     def setUp(self):
+        self.secret = b'secret'
         self.master_loop = MasterLoop(self.connection, 'service1', '/dev/null', None, 2, 8, 10, '0.0.%s.1',
-                                      b'secret', {}, DummyQueue())
+                                      self.secret, {}, DummyQueue())
 
     def test_handle_flag_request(self):
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
 
         task_info = {
-            'flag': 1,
             'service': 'service1',
             '_team_id': 2,
             'team': 92,
-            'tick': 1
+            'tick': 2
         }
 
-        params1 = {'tick': 1}
+        params1 = {'tick': 2}
         resp1 = self.master_loop.handle_flag_request(task_info, params1)
-        params2 = {'tick': 1}
+        flag_id1, team1 = verify(resp1, self.secret)
+
+        params2 = {'tick': 2}
         resp2 = self.master_loop.handle_flag_request(task_info, params2)
+        flag_id2, team2 = verify(resp2, self.secret)
         # "params3" and "resp3" don't exist anymore
 
         self.assertEqual(resp1, resp2)
+        self.assertEqual(flag_id1, 2)
+        self.assertEqual(team1, 92)
+        self.assertEqual(flag_id2, 2)
+        self.assertEqual(team2, 92)
 
-        params4 = {'tick': 2}
+        params4 = {'tick': 1}
         resp4 = self.master_loop.handle_flag_request(task_info, params4)
-        params5 = {'tick': 2}
+        flag_id4, team4 = verify(resp4, self.secret)
+        params5 = {'tick': 1}
         resp5 = self.master_loop.handle_flag_request(task_info, params5)
+        flag_id5, team5 = verify(resp5, self.secret)
 
         self.assertEqual(resp4, resp5)
         self.assertNotEqual(resp1, resp4)
+        self.assertEqual(flag_id4, 1)
+        self.assertEqual(team4, 92)
+        self.assertEqual(flag_id5, 1)
+        self.assertEqual(team5, 92)
 
         params6 = {}
         self.assertIsNone(self.master_loop.handle_flag_request(task_info, params6))
@@ -58,7 +72,6 @@ class MasterTest(DatabaseTestCase):
 
     def test_handle_result_request(self):
         task_info = {
-            'flag': 1,
             'service': 'service1',
             '_team_id': 2,
             'team': 92,
@@ -77,7 +90,6 @@ class MasterTest(DatabaseTestCase):
                            '    WHERE service_id = 1 AND protecting_team_id = 2 AND tick = 1')
             self.assertGreaterEqual(cursor.fetchone()[0], start_time)
 
-        task_info['flag'] = 2
         task_info['tick'] = 2
         param = CheckResult.FAULTY.value
         start_time = datetime.datetime.utcnow().replace(microsecond=0)
@@ -90,7 +102,6 @@ class MasterTest(DatabaseTestCase):
                            '    WHERE service_id = 1 AND protecting_team_id = 2 AND tick = 2')
             self.assertGreaterEqual(cursor.fetchone()[0], start_time)
 
-        task_info['flag'] = 3
         task_info['tick'] = 3
         param = 'Not an int'
         self.assertIsNone(self.master_loop.handle_result_request(task_info, param))
