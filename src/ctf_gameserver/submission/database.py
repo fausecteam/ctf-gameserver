@@ -53,7 +53,8 @@ def team_is_nop(db_conn, team_net_no):
     return result[0]
 
 
-def add_capture(db_conn, flag_id, capturing_team_net_no, prohibit_changes=False, fake_team_id=None):
+def add_capture(db_conn, flag_id, capturing_team_net_no, prohibit_changes=False, fake_team_id=None,
+                fake_tick=None):
     """
     Stores a capture of the given flag by the given team in the database.
     """
@@ -68,10 +69,15 @@ def add_capture(db_conn, flag_id, capturing_team_net_no, prohibit_changes=False,
             raise TeamNotExisting()
         capturing_team_id = result[0]
 
+        cursor.execute('SELECT current_tick FROM scoring_gamecontrol')
+        result = cursor.fetchone()
+        if fake_tick is not None:
+            result = (fake_tick,)
+        tick = result[0]
+
         try:
             cursor.execute('INSERT INTO scoring_capture (flag_id, capturing_team_id, timestamp, tick)'
-                           '    VALUES (%s, %s, NOW(), (SELECT current_tick FROM scoring_gamecontrol))',
-                           (flag_id, capturing_team_id))
+                           '    VALUES (%s, %s, NOW(), %s)', (flag_id, capturing_team_id, tick))
         except (UniqueViolation, sqlite3.IntegrityError):
             raise DuplicateCapture() from None
 
