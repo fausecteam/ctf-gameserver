@@ -165,6 +165,7 @@ async def serve(host, port, db_conn, params):
 
     async def wrapper(reader, writer):
         metrics = params['metrics']
+        client_addr = writer.get_extra_info('peername')[0]
 
         try:
             await handle_connection(reader, writer, db_conn, params)
@@ -173,8 +174,11 @@ async def serve(host, port, db_conn, params):
             metrics['server_kills'].inc()
             # pylint: disable=protected-access
             os._exit(os.EX_IOERR)
+        except ConnectionError:
+            logging.warning('[%s]: Client connection error, closing the connection', client_addr)
+            writer.close()
         except:    # noqa, pylint: disable=bare-except
-            logging.exception('Exception in client connection, closing the connection:')
+            logging.exception('[%s]: Exception in client connection, closing the connection:', client_addr)
             metrics['unhandled_exceptions'].inc()
             writer.close()
 
@@ -196,7 +200,7 @@ async def handle_connection(reader, writer, db_conn, params):
     try:
         client_net_no = _match_net_number(params['team_regex'], client_addr)
     except ValueError:
-        logging.error('Could not match client address %s with team, closing the connection', client_addr)
+        logging.error('[%s]: Could not match client address with team, closing the connection', client_addr)
         metrics['connections'].labels(-1).inc()
         writer.write(b'Error: Could not match your IP address with a team\n')
         writer.close()
