@@ -24,13 +24,16 @@ class MetricsTest(TestCase):
     metrics_url = 'http://127.0.0.1:9002/metrics'
 
     def setUp(self):
-        def metrics_factory(registry):
+        def metrics_factory(registry, service):
+            service_gauge = prometheus_client.Gauge('service_gauge', 'Gauge with "service" label',
+                                                    ['service'], registry=registry)
+            service_gauge.labels(service)
+
             return {
                 'plain_gauge': prometheus_client.Gauge('plain_gauge', 'Simple gauge', registry=registry),
                 'instance_gauge': prometheus_client.Gauge('instance_gauge', 'Gauge with custom label',
                                                           ['instance'], registry=registry),
-                'service_gauge': prometheus_client.Gauge('service_gauge', 'Gauge with "service" label',
-                                                         ['service'], registry=registry),
+                'service_gauge': service_gauge,
                 'counter': prometheus_client.Counter('counter', 'Simple counter', registry=registry),
                 'summary': prometheus_client.Summary('summary', 'Simple summary', registry=registry),
                 'histogram': prometheus_client.Histogram('histogram', 'Histogram with custom and "service" '

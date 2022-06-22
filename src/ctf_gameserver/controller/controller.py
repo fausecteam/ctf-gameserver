@@ -82,18 +82,18 @@ def make_metrics(db_conn, registry=prometheus_client.REGISTRY):
     metric_prefix = 'ctf_controller_'
 
     gauges = [
-        ('start_timestamp', '(Unix) timestamp when the process was started', []),
-        ('current_tick', 'The current tick', [])
+        ('start_timestamp', '(Unix) timestamp when the process was started'),
+        ('current_tick', 'The current tick')
     ]
-    for name, doc, labels in gauges:
-        metrics[name] = prometheus_client.Gauge(metric_prefix+name, doc, labels, registry=registry)
+    for name, doc in gauges:
+        metrics[name] = prometheus_client.Gauge(metric_prefix+name, doc, registry=registry)
 
     histograms = [
-        ('tick_change_delay_seconds', 'Differences between supposed and actual tick change times', [],
+        ('tick_change_delay_seconds', 'Differences between supposed and actual tick change times',
          (1, 3, 5, 10, 30, 60, float('inf')))
     ]
-    for name, doc, labels, buckets in histograms:
-        metrics[name] = prometheus_client.Histogram(metric_prefix+name, doc, labels, buckets=buckets,
+    for name, doc, buckets in histograms:
+        metrics[name] = prometheus_client.Histogram(metric_prefix+name, doc, buckets=buckets,
                                                     registry=registry)
 
     class DatabaseCollector:

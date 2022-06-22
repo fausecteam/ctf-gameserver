@@ -4,6 +4,7 @@ from wsgiref import simple_server
 
 import prometheus_client
 
+from ctf_gameserver.lib.checkresult import CheckResult
 from ctf_gameserver.lib.metrics import SilentHandler
 
 
@@ -50,40 +51,49 @@ class HTTPGenMessage:
     """
 
 
-def checker_metrics_factory(registry):
+def checker_metrics_factory(registry, service):
 
     metrics = {}
     metric_prefix = 'ctf_checkermaster_'
 
     counters = [
-        ('started_tasks', 'Number of started Checker Script instances', []),
-        ('completed_tasks', 'Number of successfully completed checks', ['result']),
-        ('terminated_tasks', 'Number of Checker Script instances forcibly terminated', [])
+        ('started_tasks', 'Number of started Checker Script instances'),
+        ('terminated_tasks', 'Number of Checker Script instances forcibly terminated')
     ]
-    for name, doc, labels in counters:
-        metrics[name] = prometheus_client.Counter(metric_prefix+name, doc, labels+['service'],
-                                                  registry=registry)
+    for name, doc in counters:
+        metrics[name] = prometheus_client.Counter(metric_prefix+name, doc, ['service'], registry=registry)
+        # Pre-declare possible label value
+        metrics[name].labels(service)
+
+    metrics['completed_tasks'] = prometheus_client.Counter(
+        metric_prefix+'completed_tasks', 'Number of successfully completed checks', ['result', 'service'],
+        registry=registry
+    )
+    for result in CheckResult:
+        # Pre-declare possible label value combinations
+        metrics['completed_tasks'].labels(result.name, service)
 
     gauges = [
-        ('start_timestamp', '(Unix timestamp when the process was started', []),
-        ('interval_length_seconds', 'Configured launch interval length', []),
-        ('last_launch_timestamp', '(Unix) timestamp when tasks were launched the last time', []),
-        ('tasks_per_launch_count', 'Number of checks to start in one launch interval', []),
-        ('max_task_duration_seconds', 'Currently estimated maximum runtime of one check', [])
+        ('start_timestamp', '(Unix timestamp when the process was started'),
+        ('interval_length_seconds', 'Configured launch interval length'),
+        ('last_launch_timestamp', '(Unix) timestamp when tasks were launched the last time'),
+        ('tasks_per_launch_count', 'Number of checks to start in one launch interval'),
+        ('max_task_duration_seconds', 'Currently estimated maximum runtime of one check')
     ]
-    for name, doc, labels in gauges:
-        metrics[name] = prometheus_client.Gauge(metric_prefix+name, doc, labels+['service'],
-                                                registry=registry)
+    for name, doc in gauges:
+        metrics[name] = prometheus_client.Gauge(metric_prefix+name, doc, ['service'], registry=registry)
+        metrics[name].labels(service)
 
     histograms = [
-        ('task_launch_delay_seconds', 'Differences between supposed and actual task launch times', [],
+        ('task_launch_delay_seconds', 'Differences between supposed and actual task launch times',
          (0.01, 0.03, 0.05, 0.1, 0.3, 0.5, 1, 3, 5, 10, 30, 60, float('inf'))),
-        ('script_duration_seconds', 'Observed runtimes of Checker Scripts', [],
+        ('script_duration_seconds', 'Observed runtimes of Checker Scripts',
          (1, 3, 5, 8, 10, 20, 30, 45, 60, 90, 120, 150, 180, 240, 300, float('inf')))
     ]
-    for name, doc, labels, buckets in histograms:
-        metrics[name] = prometheus_client.Histogram(metric_prefix+name, doc, labels+['service'],
-                                                    buckets=buckets, registry=registry)
+    for name, doc, buckets in histograms:
+        metrics[name] = prometheus_client.Histogram(metric_prefix+name, doc, ['service'], buckets=buckets,
+                                                    registry=registry)
+        metrics[name].labels(service)
 
     return metrics
 
@@ -96,14 +106,14 @@ def run_collector(service, metrics_factory, in_queue, pipe_to_server):
 
     Args:
         service: Slug of this checker instance's service.
-        metrics_factory: Callable returning a dict of the mtrics to use mapping from name to Metric object.
+        metrics_factory: Callable returning a dict of the metrics, mapping from name to Metric object.
         in_queue: Queue over which MetricsMessages and HTTPGenMessages are received.
         pipe_to_server: Pipe to which text representations of the metrics are sent in response to
                         HTTPGenMessages.
     """
 
     registry = prometheus_client.CollectorRegistry()
-    metrics = metrics_factory(registry)
+    metrics = metrics_factory(registry, service)
 
     def handle_metrics_message(msg):
         try:
