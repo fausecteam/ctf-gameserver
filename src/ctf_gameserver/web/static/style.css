@@ -103,7 +103,17 @@ img#load-spinner, button#refresh {
 
 .jumbotron img.big-logo {
     margin-right: 30px;
-    width: 30%;
+    width: 40%;
+}
+
+.navbar-brand {
+    padding: 5px 15px;
+}
+
+.navbar-brand img {
+    display: inline;
+    margin-right: 15px;
+    height: 35px;
 }
 
 #supporter-column img {
