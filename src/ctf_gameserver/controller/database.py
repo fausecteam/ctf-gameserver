@@ -40,7 +40,7 @@ def update_scoring(db_conn):
 
     with transaction_cursor(db_conn) as cursor:
         cursor.execute('UPDATE scoring_flag as outerflag'
-                       '    SET bonus = 1 / ('
+                       '    SET bonus = 1.0 / ('
                        '        SELECT greatest(1, count(*))'
                        '        FROM scoring_flag'
                        '        LEFT OUTER JOIN scoring_capture ON scoring_capture.flag_id = scoring_flag.id'
