@@ -64,7 +64,7 @@ WITH
   )
 SELECT team_id,
        service_id,
-       coalesce(attack, 0)::double precision as attack,
+       (coalesce(attack, 0)+coalesce(bonus, 0))::double precision as attack,
        coalesce(bonus, 0) as bonus,
        coalesce(defense, 0)::double precision as defense,
        coalesce(sla, 0) as sla,
