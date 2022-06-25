@@ -63,6 +63,15 @@ urlpatterns = [
         name='password_reset_complete'
     ),
 
+    url(r'^team/files/$',
+        registration_views.team_files,
+        name='team_files'
+    ),
+    url(r'^team/files/(\d+)$',
+        registration_views.team_files_download,
+        name='team_files_download'
+    ),
+
     url(r'^competition/teams/$',
         registration_views.TeamList.as_view(),
         name='team_list'

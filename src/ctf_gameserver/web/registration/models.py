@@ -49,3 +49,15 @@ class Team(models.Model):
     def __str__(self):
         # pylint: disable=no-member
         return self.user.username
+
+
+class File(models.Model):
+    """
+    File assigned to a specific team.
+    Can be used to provide configuration files to teams.
+    """
+
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    name = models.CharField(max_length=32)
+    description = models.TextField()
+    data = models.BinaryField()
