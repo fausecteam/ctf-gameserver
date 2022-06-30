@@ -1,3 +1,5 @@
+import logging
+
 from ctf_gameserver.lib.database import transaction_cursor
 from ctf_gameserver.lib.date_time import ensure_utc_aware
 from ctf_gameserver.lib.exceptions import DBDataError
@@ -58,6 +60,14 @@ def update_scoring(db_conn):
                        '        OR outerflag.bonus IS NULL')
         cursor.execute('REFRESH MATERIALIZED VIEW "scoring_scoreboard"')
 
+    # don't block the old scoreboard when the new one is updating
+    with transaction_cursor(db_conn) as cursor:
+        try:
+            cursor.execute('REFRESH MATERIALIZED VIEW "scoreboard_v2_flag_points"')
+            cursor.execute('REFRESH MATERIALIZED VIEW CONCURRENTLY "scoreboard_v2_board"')
+        except Exception as e:    # noqa, pylint: disable=broad-except
+            # don't crash controller on problems with the new scoreboard
+            logging.warning("Failed to update scorebard_v2: %s", e)
 
 def get_exploiting_teams_counts(db_conn, prohibit_changes=False):
 

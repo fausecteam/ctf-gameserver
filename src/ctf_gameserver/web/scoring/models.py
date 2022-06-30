@@ -39,7 +39,8 @@ class Flag(models.Model):
         unique_together = ('service', 'protecting_team', 'tick')
         index_together = (
             ('service', 'tick'),
-            ('service', 'protecting_team', 'tick')
+            ('service', 'protecting_team', 'tick', 'id'), # for scoreboard_v2
+            ('service', 'id'), # for scoreboard_v2
         )
 
     def __str__(self):
@@ -59,7 +60,11 @@ class Capture(models.Model):
     class Meta:
         # This constraint is necessary for correct behavior of the submission server
         unique_together = ('flag', 'capturing_team')
-        index_together = ('flag', 'capturing_team')
+        index_together = (
+            ('flag', 'capturing_team'),
+            ('capturing_team', 'tick', 'flag'), # for scoreboard_v2
+            ('flag', 'tick') # for scoreboard_v2
+        )
 
     def __str__(self):
         return 'Capture {:d}'.format(self.id)
