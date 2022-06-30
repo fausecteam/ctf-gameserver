@@ -50,7 +50,13 @@ def update_scoring(db_conn):
                        '        scoring_gamecontrol.current_tick - scoring_gamecontrol.valid_ticks'
                        '        OR outerflag.bonus IS NULL')
         cursor.execute('REFRESH MATERIALIZED VIEW "scoring_scoreboard"')
-
+        
+        try:
+            cursor.execute('REFRESH MATERIALIZED VIEW "scoreboard_v2_flag_points"')
+            cursor.execute('REFRESH MATERIALIZED VIEW CONCURRENTLY "scoreboard_v2_board"')
+        except Exception as e:
+            print(e)
+            pass
 
 def get_exploiting_teams_counts(db_conn, prohibit_changes=False):
 

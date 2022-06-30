@@ -28,6 +28,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'ctf_gameserver.web.templatetags',
     'ctf_gameserver.web.registration',
+    'ctf_gameserver.web.scoreboard_v2',
     'ctf_gameserver.web.scoring',
     'ctf_gameserver.web.flatpages'
 )
