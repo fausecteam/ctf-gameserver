@@ -181,6 +181,9 @@ def main_loop_step(db_conn, metrics, nonstop):
         return
 
     if (not nonstop) and (now >= control_info['end']):
+        # Update scoring for last tick of game
+        database.update_scoring(db_conn)
+
         # Do not stop the program because a daemon might get restarted if it exits
         # Prevent a busy loop in case we have not slept above as the hypothetic next tick would be overdue
         logging.info('Competition is already over')

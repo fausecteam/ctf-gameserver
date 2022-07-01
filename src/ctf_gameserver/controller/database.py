@@ -46,8 +46,9 @@ def update_scoring(db_conn):
                        '        LEFT OUTER JOIN scoring_capture ON scoring_capture.flag_id = scoring_flag.id'
                        '        WHERE scoring_capture.flag_id = outerflag.id)'
                        '    FROM scoring_gamecontrol'
-                       '    WHERE outerflag.tick + scoring_gamecontrol.valid_ticks < '
-                       '        scoring_gamecontrol.current_tick AND outerflag.bonus IS NULL')
+                       '    WHERE outerflag.tick >='
+                       '        scoring_gamecontrol.current_tick - scoring_gamecontrol.valid_ticks'
+                       '        OR outerflag.bonus IS NULL')
         cursor.execute('REFRESH MATERIALIZED VIEW "scoring_scoreboard"')
 
 
