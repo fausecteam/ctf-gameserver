@@ -188,7 +188,7 @@ def main_loop_step(db_conn, metrics, nonstop):
         return
 
     # Check if we really need to increase the tick because of the capping to 60 seconds from above
-    if get_sleep_seconds(control_info, metrics) <= 0:
+    if get_sleep_seconds(control_info, metrics, now) <= 0:
         logging.info('After tick %d, increasing tick to the next one', control_info['current_tick'])
         database.increase_tick(db_conn)
         database.update_scoring(db_conn)
