@@ -1,6 +1,4 @@
-from operator import mod
 from django.db import models
-from django.utils.translation import gettext_lazy as _
 
 from ctf_gameserver.web.registration.models import Team
 from ctf_gameserver.web.scoring.models import Service
@@ -33,7 +31,7 @@ class Board(models.Model):
 class FirstBloods(models.Model):
     """
     First team to capture a flag per service.
-    Calculated externally. May be a view or a real table 
+    Calculated externally. May be a view or a real table
     and should just be handled read-only from within the website.
     """
     service = models.OneToOneField(Service, primary_key=True, editable=False, on_delete=models.PROTECT)
@@ -43,6 +41,6 @@ class FirstBloods(models.Model):
 
     class Meta:
         managed = False # django should not create a table for this
-    
+
     def __str__(self):
         return 'Firstblood of service {} by team {} in tick {}'.format(self.service, self.team, self.tick)
