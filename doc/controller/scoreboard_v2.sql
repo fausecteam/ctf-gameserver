@@ -78,11 +78,21 @@ DROP MATERIALIZED VIEW IF EXISTS "scoreboard_v2_board";
 
 CREATE MATERIALIZED VIEW "scoreboard_v2_board" AS
 WITH RECURSIVE
-  -- use the current tick as max tick for all queries
-  -- access to the scoreboard of the currently running tick is prevented by the django endpoint
-  -- this is done to avoid not updating for last tick in game
+  -- calculate the max tick of the scoreboard.
+  -- Normally this is current_tick - 1 because the current_tick is running and thus does not have final scoring
+  -- However on game end we want the scoreboard to include the current_tick==last tick as current_tick is not incremented on game end
   max_scoreboard_tick AS (
-    SELECT current_tick from scoring_gamecontrol
+    SELECT CASE WHEN (
+      -- Check if the game is still running
+      -- Use a slack of 1 sec to avoid time sync issues
+      SELECT ("end" - INTERVAL '1 sec') > NOW() FROM scoring_gamecontrol
+    ) THEN (
+      -- game is running - avoid current_tick
+      SELECT current_tick - 1 FROM scoring_gamecontrol 
+    ) ELSE (
+      -- game ended - include current_tick
+      SELECT current_tick from scoring_gamecontrol
+    ) END
   ),
   valid_ticks AS (
     SELECT valid_ticks from scoring_gamecontrol
@@ -278,7 +288,8 @@ NATURAL FULL OUTER JOIN (SELECT * FROM attack_bonus ORDER BY tick) AS attack_bon
 NATURAL FULL OUTER JOIN (SELECT * FROM flags_lost ORDER BY tick) AS flags_lost
 NATURAL FULL OUTER JOIN (SELECT * FROM defense ORDER BY tick) AS defense
 NATURAL FULL OUTER JOIN (SELECT * FROM sla ORDER BY tick) AS sla
-WHERE tick >= 0; -- filter out -1 ticks
+-- filter out -1 tick and larger ticks
+WHERE tick >= 0 AND tick <= (SELECT * FROM max_scoreboard_tick);
 
 CREATE UNIQUE INDEX unique_per_tick
   ON "scoreboard_v2_board" (tick, team_id, service_id);
