@@ -5,6 +5,7 @@ from django.urls import re_path as url, reverse_lazy
 
 from .registration import views as registration_views
 from .scoring import views as scoring_views
+from .scoreboard_v2 import views as scoreboard_v2_views
 from .flatpages import views as flatpages_views
 from .vpnstatus import views as vpnstatus_views
 from .admin import admin_site
@@ -105,6 +106,23 @@ urlpatterns = [
     url(r'^downloads/(?P<filename>[^/]+)$',
         registration_views.get_team_download,
         name='get_team_download'
+    ),
+
+    url(r'^competition/scoreboard-v2/scoreboard_round_(?P<tick>-?\d+)\.json$',
+        scoreboard_v2_views.round_json,
+        name='scoreboard_v2_round_json'
+    ),
+    url(r'^competition/scoreboard-v2/scoreboard_team_(?P<team>\d+)\.json$',
+        scoreboard_v2_views.per_team_json,
+        name='scoreboard_v2_team_json'
+    ),
+    url(r'^competition/scoreboard-v2/scoreboard_current\.json$',
+        scoreboard_v2_views.current_json,
+        name='scoreboard_v2_current_json'
+    ),
+    url(r'^competition/scoreboard-v2/scoreboard_teams\.json$',
+        scoreboard_v2_views.teams_json,
+        name='scoreboard_v2_teams_json'
     ),
 
     url(r'^internal/mail-teams/$',
