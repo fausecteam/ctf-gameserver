@@ -148,7 +148,10 @@ def current_json(_):
 def teams_json(_):
 
     teams = registration_models.Team.active_not_nop_objects \
-      .select_related('user').only('user__username', 'affiliation', 'country', 'image').all()
+      .select_related('user') \
+      .only('user__username', 'affiliation', 'country', 'image') \
+      .order_by('user_id') \
+      .all()
 
     result = {}
     for team in teams:
