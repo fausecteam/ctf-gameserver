@@ -186,7 +186,7 @@ def teams_json(_):
         flag_ids[flag.service.name][flag.protecting_team.net_number].append(flag.flagid)
 
     response = {
-        'teams': list(teams),
+        'teams': sorted(list(teams)),
         'flag_ids': flag_ids
     }
 
