@@ -314,3 +314,6 @@ INNER JOIN scoring_capture ON scoring_capture.flag_id = scoring_flag.id
 ORDER BY service_id, scoring_capture.timestamp;
 
 GRANT SELECT on TABLE "scoreboard_v2_firstbloods" TO gameserver_web;
+
+-- NOTE: REFRESH MATERIALIZED VIEW CONCURRENTLY needs additional permissions:
+-- GRANT TEMPORARY ON DATABASE $db TO gameserver_controller;
