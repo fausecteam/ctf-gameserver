@@ -4,7 +4,7 @@ EXT_DIR ?= $(WEB_DIR)/static/ext
 DEV_MANAGE ?= src/dev_manage.py
 TESTS_DIR ?= tests
 
-.PHONY: dev build ext migrations test lint clean
+.PHONY: dev build ext migrations run_web test lint clean
 .INTERMEDIATE: bootstrap.zip
 
 dev: $(WEB_DIR)/dev-db.sqlite3 ext
@@ -35,6 +35,9 @@ $(WEB_DIR)/registration/countries.csv:
 	# Official download link from http://data.okfn.org/data/core/country-list, under Public Domain
 	curl https://raw.githubusercontent.com/datasets/country-list/master/data.csv -o $@
 
+
+run_web:
+	$(DEV_MANAGE) runserver
 
 test:
 	pytest --cov $(SOURCE_DIR) $(TESTS_DIR)
