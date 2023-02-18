@@ -17,7 +17,7 @@ migrations: $(WEB_DIR)/registration/countries.csv
 
 $(WEB_DIR)/dev-db.sqlite3: migrations $(WEB_DIR)/registration/countries.csv
 	$(DEV_MANAGE) migrate
-	$(DEV_MANAGE) createsuperuser --username admin --email ''
+	DJANGO_SUPERUSER_PASSWORD=password $(DEV_MANAGE) createsuperuser --no-input --username admin --email 'admin@example.org'
 
 $(EXT_DIR)/jquery.min.js:
 	mkdir -p $(EXT_DIR)
