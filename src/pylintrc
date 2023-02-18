@@ -17,8 +17,9 @@ reports = no
 #     * "Similar lines" messages
 #     * "Consider using 'with'" messages
 #     * Advices to use f-strings instead of `format()`
+#     * Advices to not raise bare Exceptions
 #     * Messages about locally disabled messages
-disable = design, too-many-nested-blocks, fixme, global-statement, missing-docstring, no-else-return, no-self-use, duplicate-code, consider-using-with, consider-using-f-string, locally-disabled
+disable = design, too-many-nested-blocks, fixme, global-statement, missing-docstring, no-else-return, duplicate-code, consider-using-with, consider-using-f-string, broad-exception-raised, locally-disabled
 # Variable names which would generally be invalid, but are accepted anyway
 good-names = e, f, fd, i, ip, j, k, _
 

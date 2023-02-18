@@ -1,3 +1,5 @@
+# pylint: disable=missing-timeout
+
 import multiprocessing
 import socket
 import time
