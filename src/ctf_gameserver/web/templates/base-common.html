@@ -90,14 +90,20 @@
                             </a>
 
                             <ul class="dropdown-menu">
+                                {% if user.team %}
+                                <li class="disabled"><a href="#">{% trans 'Team number' %}: {{ user.team.net_number }}</a></li>
+                                <li class="divider" role="separator"></li>
+                                {% endif %}
                                 {% if registration_open %}
                                 <li><a href="{% url 'edit_team' %}">{% trans 'Edit' %}</a></li>
+                                <li class="divider" role="separator"></li>
                                 {% endif %}
                                 {% if user.is_staff %}
                                 <li><a href="{% url 'admin:index' %}">{% trans 'Administration' %}</a></li>
                                 <li><a href="{% url 'service_history' %}">{% trans 'Service History' %}</a></li>
                                 <li><a href="{% url 'missing_checks' %}">{% trans 'Missing Checks' %}</a></li>
                                 <li><a href="{% url 'mail_teams' %}">{% trans 'Email Teams' %}</a></li>
+                                <li class="divider" role="separator"></li>
                                 {% endif %}
                                 <li><a href="{% url 'logout' %}">{% trans 'Logout' %}</a></li>
                             </ul>
