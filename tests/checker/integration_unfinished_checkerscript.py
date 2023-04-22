@@ -12,7 +12,7 @@ if __name__ == '__main__':
     with open(pidfile_path, 'w', encoding='ascii') as pidfile:
         pidfile.write(str(os.getpid()))
 
-    checkerlib.get_flag(1)
+    checkerlib.store_state('key', 'Lorem ipsum dolor sit amet')
 
     while True:
         time.sleep(10)
