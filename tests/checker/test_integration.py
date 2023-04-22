@@ -237,6 +237,63 @@ class IntegrationTest(DatabaseTestCase):
         del os.environ['CHECKERSCRIPT_PIDFILE']
         checkerscript_pidfile.close()
 
+    @patch('logging.warning')
+    @patch('ctf_gameserver.checker.master.get_monotonic_time')
+    def test_cancel_checks(self, monotonic_mock, warning_mock):
+        checkerscript_path = os.path.join(os.path.dirname(__file__),
+                                          'integration_unfinished_checkerscript.py')
+
+        checkerscript_pidfile = tempfile.NamedTemporaryFile()
+        os.environ['CHECKERSCRIPT_PIDFILE'] = checkerscript_pidfile.name
+
+        monotonic_mock.return_value = 10
+        master_loop = MasterLoop(self.connection, 'service1', checkerscript_path, None, 2, 1, 10,
+                                 '0.0.%s.1', b'secret', {}, DummyQueue())
+
+        with transaction_cursor(self.connection) as cursor:
+            cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
+            cursor.execute('UPDATE scoring_gamecontrol SET current_tick=0')
+            cursor.execute('INSERT INTO scoring_flag (service_id, protecting_team_id, tick)'
+                           '    VALUES (1, 2, 0)')
+        monotonic_mock.return_value = 20
+
+        master_loop.supervisor.queue_timeout = 0.01
+        # Checker Script gets started, will return False because no messages yet
+        self.assertFalse(master_loop.step())
+        master_loop.supervisor.queue_timeout = 10
+        self.assertTrue(master_loop.step())
+
+        with transaction_cursor(self.connection) as cursor:
+            cursor.execute('SELECT data FROM scoring_checkerstate WHERE service_id=1 AND team_id=2')
+            state_result = cursor.fetchone()
+        self.assertEqual(state_result[0], 'gASVHgAAAAAAAACMGkxvcmVtIGlwc3VtIGRvbG9yIHNpdCBhbWV0lC4=')
+
+        checkerscript_pidfile.seek(0)
+        checkerscript_pid = int(checkerscript_pidfile.read())
+        # Ensure process is running by sending signal 0
+        os.kill(checkerscript_pid, 0)
+
+        with transaction_cursor(self.connection) as cursor:
+            cursor.execute('UPDATE scoring_gamecontrol SET cancel_checks=1')
+
+        master_loop.supervisor.queue_timeout = 0.01
+        monotonic_mock.return_value = 190
+        self.assertFalse(master_loop.step())
+        # Poll whether the process has been killed
+        for _ in range(100):
+            try:
+                os.kill(checkerscript_pid, 0)
+            except ProcessLookupError:
+                break
+            time.sleep(0.1)
+        with self.assertRaises(ProcessLookupError):
+            os.kill(checkerscript_pid, 0)
+
+        warning_mock.assert_called_with('Terminating all %d Runner processes', 1)
+
+        del os.environ['CHECKERSCRIPT_PIDFILE']
+        checkerscript_pidfile.close()
+
     @patch('ctf_gameserver.checker.master.get_monotonic_time')
     def test_multi_teams_ticks(self, monotonic_mock):
         checkerscript_path = os.path.join(os.path.dirname(__file__),

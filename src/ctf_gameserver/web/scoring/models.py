@@ -155,6 +155,8 @@ class GameControl(models.Model):
     # Number of ticks a flag is valid for including the one it was generated in
     valid_ticks = models.PositiveSmallIntegerField(default=5)
     current_tick = models.IntegerField(default=-1)
+    # Instruct Checker Runners to cancel any running checks
+    cancel_checks = models.BooleanField(default=False)
     flag_prefix = models.CharField(max_length=20, default='FLAG_')
     registration_open = models.BooleanField(default=False)
     registration_confirm_text = models.TextField(blank=True)

@@ -16,7 +16,7 @@ class GameControlAdminForm(forms.ModelForm):
 
     class Meta:
         model = models.GameControl
-        exclude = ('current_tick',)
+        exclude = ('current_tick', 'cancel_checks')
         help_texts = {
             'competition_name': _('Human-readable title of the CTF'),
             'services_public': _('Time at which information about the services is public, but the actual '

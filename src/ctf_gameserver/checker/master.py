@@ -336,12 +336,16 @@ class MasterLoop:
             self.update_launch_params(new_tick)
             self.known_tick = new_tick
 
-        current_tick = database.get_current_tick(self.db_conn)
+        current_tick, cancel_checks = database.get_current_tick(self.db_conn)
         if current_tick < 0:
             # Competition not running yet
             return
         if current_tick != self.known_tick:
             change_tick(current_tick)
+        elif cancel_checks:
+            # Competition over
+            self.supervisor.terminate_runners()
+            return
 
         tasks = database.get_new_tasks(self.db_conn, self.service['id'], self.tasks_per_launch)
 

@@ -44,17 +44,17 @@ def get_service_attributes(db_conn, service_slug, prohibit_changes=False):
 
 def get_current_tick(db_conn, prohibit_changes=False):
     """
-    Reads the current tick from the game database.
+    Reads the current tick and the "cancel_checks" field from the game database.
     """
 
     with transaction_cursor(db_conn, prohibit_changes) as cursor:
-        cursor.execute('SELECT current_tick FROM scoring_gamecontrol')
+        cursor.execute('SELECT current_tick, cancel_checks FROM scoring_gamecontrol')
         result = cursor.fetchone()
 
     if result is None:
         raise DBDataError('Game control information has not been configured')
 
-    return result[0]
+    return result
 
 
 def get_check_duration(db_conn, service_id, std_dev_count, prohibit_changes=False):

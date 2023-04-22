@@ -181,6 +181,8 @@ def main_loop_step(db_conn, metrics, nonstop):
         return
 
     if (not nonstop) and (now >= control_info['end']):
+        database.cancel_checks(db_conn)
+
         # Update scoring for last tick of game
         database.update_scoring(db_conn)
 
