@@ -91,23 +91,26 @@ def scoreboard_json_ctftime(_):
     see https://ctftime.org/json-scoreboard-feed.
     """
 
-    tasks = ['Offense', 'Defense', 'SLA']
     standings = []
     scores = calculations.scores(['team', 'team__user'], ['team__user__username'])
 
-    for rank, (team, points) in enumerate(scores.items(), start=1):
+    for rank, (team, team_points) in enumerate(scores.items(), start=1):
+        task_stats = defaultdict(lambda: {'points': 0.0})
+        for point_type in ('offense', 'defense', 'sla'):
+            for service, points in team_points[point_type][0].items():
+                task_stats[service.name]['points'] += points
+
+        for service_name in task_stats:
+            task_stats[service_name] = {'points': round(task_stats[service_name]['points'], 4)}
+
         standings.append({
             'pos': rank,
             'team': team.user.username,
-            'score': round(points['total'], 4),
-            'taskStats': {
-                'Offense': {'points': round(points['offense'][1], 4)},
-                'Defense': {'points': round(points['defense'][1], 4)},
-                'SLA': {'points': round(points['sla'][1], 4)}
-            }
+            'score': round(team_points['total'], 4),
+            'taskStats': task_stats
         })
 
-    return JsonResponse({'tasks': tasks, 'standings': standings})
+    return JsonResponse({'tasks': list(task_stats.keys()), 'standings': standings})
 
 
 @services_public_required('html')
