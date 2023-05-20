@@ -232,6 +232,7 @@ def list_team_downloads(request):
     return render(request, 'team_downloads.html', {'downloads': downloads})
 
 
+@login_required
 def get_team_download(request, filename):
     """
     Delivers a single per-team download to the logged-in user.
