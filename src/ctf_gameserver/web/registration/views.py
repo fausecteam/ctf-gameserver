@@ -1,9 +1,11 @@
 import logging
+from pathlib import Path
 import random
 
 from django.db import transaction, IntegrityError
+from django.http import FileResponse, Http404
 from django.views.generic import ListView
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.conf import settings
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
@@ -15,7 +17,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from ctf_gameserver.web.scoring.decorators import before_competition_required, registration_open_required
 import ctf_gameserver.web.scoring.models as scoring_models
 from . import forms
-from .models import Team
+from .models import Team, TeamDownload
 from .util import email_token_generator
 
 User = get_user_model()    # pylint: disable=invalid-name
@@ -206,6 +208,49 @@ def confirm_email(request):
     messages.success(request, _('Email address confirmed. Your registration is now complete.'))
 
     return redirect(settings.HOME_URL)
+
+
+@login_required
+def list_team_downloads(request):
+    """
+    Provides an HTML listing of available per-team downloads for the logged-in user.
+    """
+
+    try:
+        team = request.user.team
+    except Team.DoesNotExist as e:
+        raise Http404('User has no team') from e
+
+    team_downloads_root = Path(settings.TEAM_DOWNLOADS_ROOT)
+
+    downloads = []
+    for download in TeamDownload.objects.order_by('filename'):
+        fs_path = team_downloads_root / str(team.net_number) / download.filename
+        if fs_path.is_file():
+            downloads.append(download)
+
+    return render(request, 'team_downloads.html', {'downloads': downloads})
+
+
+def get_team_download(request, filename):
+    """
+    Delivers a single per-team download to the logged-in user.
+    """
+
+    try:
+        team = request.user.team
+    except Team.DoesNotExist as e:
+        raise Http404('User has no team') from e
+
+    get_object_or_404(TeamDownload, filename=filename)
+
+    team_downloads_root = Path(settings.TEAM_DOWNLOADS_ROOT)
+    fs_path = team_downloads_root / str(team.net_number) / filename
+
+    if not fs_path.is_file():
+        raise Http404('File not found')
+
+    return FileResponse(fs_path.open('rb'), as_attachment=True)
 
 
 @staff_member_required

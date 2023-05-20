@@ -92,6 +92,15 @@ urlpatterns = [
         name='service_status_json'
     ),
 
+    url(r'^downloads/$',
+        registration_views.list_team_downloads,
+        name='list_team_downloads'
+    ),
+    url(r'^downloads/(?P<filename>[^/]+)$',
+        registration_views.get_team_download,
+        name='get_team_download'
+    ),
+
     url(r'^internal/mail-teams/$',
         registration_views.mail_teams,
         name='mail_teams'

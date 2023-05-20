@@ -34,6 +34,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = 'ctf-gameserver.web@localhost'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')
+TEAM_DOWNLOADS_ROOT = os.path.join(BASE_DIR, 'team_downloads')
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 

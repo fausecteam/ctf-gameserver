@@ -67,6 +67,13 @@ DEFAULT_FROM_EMAIL = ''
 # ("/uploads" by default)
 MEDIA_ROOT = ''
 
+# Base filesystem path where files for per-team downloads are stored, optional without per-team downloads
+# A hierarchy with a directory per team (called by net number) is expected below this path
+# For example, file "vpn.conf" for the team with net number 42 must be in:
+#     <TEAM_DOWNLOADS_ROOT>/42/vpn.conf
+# This directory must *not* be served by a web server
+TEAM_DOWNLOADS_ROOT = ''
+
 # The backend used to store user sessions
 SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
 

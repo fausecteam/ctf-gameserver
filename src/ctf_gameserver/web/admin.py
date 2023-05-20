@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin
 
 from .registration.models import Team
-from .registration.admin import InlineTeamAdmin
+from .registration.admin_inline import InlineTeamAdmin
 from .scoring.models import GameControl
 from .util import format_lazy
 

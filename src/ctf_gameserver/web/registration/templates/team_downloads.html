@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="page-header">
+    <h1>{% block title %}{% trans 'Downloads' %}{% endblock %}</h1>
+</div>
+
+<p class="lead">
+    {% blocktrans %}
+    These files are provided to your team personally.
+    They are confidential, do not share them with anyone else!
+    {% endblocktrans %}
+</p>
+
+{% if downloads %}
+<ul>
+    {% for dl in downloads %}
+    <li>
+        <a href="{% url 'get_team_download' dl.filename %}">{{ dl.filename }}</a>:
+        {{ dl.description }}
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+{% trans 'No downloads available at the moment.' %}
+{% endif %}
+{% endblock %}

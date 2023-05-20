@@ -93,9 +93,10 @@
                                 {% if user.team %}
                                 <li class="disabled"><a href="#">{% trans 'Team number' %}: {{ user.team.net_number }}</a></li>
                                 <li class="divider" role="separator"></li>
+                                <li><a href="{% url 'list_team_downloads' %}">{% trans 'Downloads' %}</a></li>
                                 {% endif %}
                                 {% if registration_open %}
-                                <li><a href="{% url 'edit_team' %}">{% trans 'Edit' %}</a></li>
+                                <li><a href="{% url 'edit_team' %}">{% trans 'Edit Team' %}</a></li>
                                 <li class="divider" role="separator"></li>
                                 {% endif %}
                                 {% if user.is_staff %}

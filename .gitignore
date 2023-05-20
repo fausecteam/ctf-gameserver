@@ -22,6 +22,7 @@ __pycache__/
 
 # Web component
 /src/ctf_gameserver/web/dev-db.sqlite3
+/src/ctf_gameserver/web/team_downloads/
 /src/ctf_gameserver/web/uploads/
 /src/ctf_gameserver/web/static/ext/
 /src/ctf_gameserver/web/registration/countries.csv

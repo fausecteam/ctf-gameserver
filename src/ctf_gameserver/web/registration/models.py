@@ -1,3 +1,4 @@
+from django.core.validators import RegexValidator
 from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
@@ -49,3 +50,19 @@ class Team(models.Model):
     def __str__(self):
         # pylint: disable=no-member
         return self.user.username
+
+
+class TeamDownload(models.Model):
+    """
+    Database representation of a single type of per-team download. One file with the specified name can
+    be provided per team in the file system hierarchy below `settings.TEAM_DOWNLOADS_ROOT`.
+    """
+
+    filename = models.CharField(max_length=100, help_text=_('Name within the per-team filesystem hierarchy'),
+                                validators=[RegexValidator(r'^[^/]+$',
+                                                           message=_('Must not contain slashes'))])
+    description = models.TextField()
+
+    def __str__(self):
+        # pylint: disable=invalid-str-returned
+        return self.filename
