@@ -6,6 +6,9 @@ fi
 if ! getent passwd ctf-checkerrunner >/dev/null; then
 	adduser --system --group --home /var/lib/ctf-checkerrunner --gecos 'CTF Gameserver Checker Script user,,,' ctf-checkerrunner
 fi
+if ! getent passwd ctf-vpnstatus >/dev/null; then
+	adduser --system --group --home /var/lib/ctf-vpnstatus --gecos 'CTF Gameserver VPN Status Checker user,,,' ctf-vpnstatus
+fi
 
 # No dh-systemd because we don't want to enable/start any services
 if test -x /bin/systemctl; then

@@ -1,0 +1,20 @@
+[Unit]
+Description=CTF Gameserver Controller
+After=postgresql.service
+
+[Service]
+Type=notify
+User=ctf-vpnstatus
+EnvironmentFile=/etc/ctf-gameserver/vpnstatus.env
+ExecStart=/usr/bin/ctf-vpnstatus
+Restart=on-failure
+RestartSec=5
+
+# Security options, cannot use any which imply `NoNewPrivileges` because checks can get executed using sudo
+PrivateTmp=yes
+ProtectControlGroups=yes
+ProtectHome=yes
+ProtectSystem=strict
+
+[Install]
+WantedBy=multi-user.target

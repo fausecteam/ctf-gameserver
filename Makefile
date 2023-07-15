@@ -13,7 +13,7 @@ ext: $(EXT_DIR)/jquery.min.js $(EXT_DIR)/bootstrap $(WEB_DIR)/registration/count
 
 
 migrations: $(WEB_DIR)/registration/countries.csv
-	$(DEV_MANAGE) makemigrations templatetags registration scoring flatpages
+	$(DEV_MANAGE) makemigrations templatetags registration scoring flatpages vpnstatus
 
 $(WEB_DIR)/dev-db.sqlite3: migrations $(WEB_DIR)/registration/countries.csv
 	$(DEV_MANAGE) migrate

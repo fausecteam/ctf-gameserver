@@ -46,7 +46,8 @@ setup(
         'scripts/checker/ctf-checkermaster',
         'scripts/checker/ctf-logviewer',
         'scripts/controller/ctf-controller',
-        'scripts/submission/ctf-submission'
+        'scripts/submission/ctf-submission',
+        'scripts/vpnstatus/ctf-vpnstatus'
     ],
     package_data = {
         'ctf_gameserver.web': [

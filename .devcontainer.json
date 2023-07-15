@@ -1,6 +1,6 @@
 {
     "image": "python:3.9-alpine",
-    "updateContentCommand": "apk --no-cache add git curl build-base jpeg-dev zlib-dev",
+    "updateContentCommand": "apk --no-cache add git curl build-base jpeg-dev zlib-dev iputils-ping",
     "postCreateCommand": "pip3 install --editable .[dev] && make dev",
     "extensions": ["ms-python.python"]
 }

@@ -1,0 +1,107 @@
+[
+{
+    "model": "auth.user",
+    "pk": 2,
+    "fields": {
+        "password": "pbkdf2_sha256$36000$kHAF2GkRGCyG$qm+7EyJr0b8E9VbQWp3ZtfxaV0A5wIJSV/ABWEML6II=",
+        "last_login": null,
+        "is_superuser": false,
+        "username": "Team1",
+        "first_name": "",
+        "last_name": "",
+        "email": "",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2019-04-03T18:21:28.622Z",
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "auth.user",
+    "pk": 3,
+    "fields": {
+        "password": "pbkdf2_sha256$36000$xOKKVRJp772Y$YbUoJ0N2rDg3xndTwZv+jHKrIWcJ209dOUZij007eXg=",
+        "last_login": null,
+        "is_superuser": false,
+        "username": "Team2",
+        "first_name": "",
+        "last_name": "",
+        "email": "",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2019-04-03T18:21:46.918Z",
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "auth.user",
+    "pk": 4,
+    "fields": {
+        "password": "pbkdf2_sha256$36000$UGfl968SDB0l$rnxu7pLZUqwvYXk14QBjwjddYFTBrpw99PcH2FxtaKo=",
+        "last_login": null,
+        "is_superuser": false,
+        "username": "NOP",
+        "first_name": "",
+        "last_name": "",
+        "email": "",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2019-04-03T18:22:02Z",
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "registration.team",
+    "pk": 2,
+    "fields": {
+        "informal_email": "team1@example.org",
+        "image": "",
+        "affiliation": "",
+        "country": "World",
+        "nop_team": false,
+        "net_number": 102
+    }
+},
+{
+    "model": "registration.team",
+    "pk": 3,
+    "fields": {
+        "informal_email": "team2@example.org",
+        "image": "",
+        "affiliation": "",
+        "country": "World",
+        "nop_team": false,
+        "net_number": 103
+    }
+},
+{
+    "model": "registration.team",
+    "pk": 4,
+    "fields": {
+        "informal_email": "nop@example.org",
+        "image": "",
+        "affiliation": "",
+        "country": "World",
+        "nop_team": true,
+        "net_number": 104
+    }
+},
+{
+    "model": "scoring.gamecontrol",
+    "pk": 1,
+    "fields": {
+        "competition_name": "Test CTF",
+        "services_public": null,
+        "start": null,
+        "end": null,
+        "tick_duration": 180,
+        "valid_ticks": 5,
+        "current_tick": 6,
+        "flag_prefix": "FAUST_",
+        "registration_open": false
+    }
+}
+]

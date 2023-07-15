@@ -8,4 +8,7 @@ conf/controller/ctf-controller.service lib/systemd/system
 conf/submission/submission.env etc/ctf-gameserver
 conf/submission/ctf-submission@.service lib/systemd/system
 
+conf/vpnstatus/ctf-vpnstatus.env etc/ctf-gameserver
+conf/vpnstatus/ctf-vpnstatus.service lib/systemd/system
+
 conf/web/prod_settings.py etc/ctf-gameserver/web

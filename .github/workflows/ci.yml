@@ -29,6 +29,9 @@ jobs:
           pip install tox
           # Make sure we have our dependencies, which are not required for Tox but for `make build`
           pip install -e .
+          # Ping is required for VPNStatusTest
+          apt-get --yes update
+          apt-get --yes install iputils-ping
       - run: make build
       - run: tox -e py311 -- --junitxml=.tox/py311/log/results.xml
       - name: Publish unit test results

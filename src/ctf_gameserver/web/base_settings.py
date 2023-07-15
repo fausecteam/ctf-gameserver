@@ -29,7 +29,8 @@ INSTALLED_APPS = (
     'ctf_gameserver.web.templatetags',
     'ctf_gameserver.web.registration',
     'ctf_gameserver.web.scoring',
-    'ctf_gameserver.web.flatpages'
+    'ctf_gameserver.web.flatpages',
+    'ctf_gameserver.web.vpnstatus'
 )
 
 # Ordering of the middlewares is important, see
