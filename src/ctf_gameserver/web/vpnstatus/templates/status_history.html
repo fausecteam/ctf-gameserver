@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block content %}
+<div class="page-header">
+    <h1>{% block title %}{% trans 'VPN Status History' %}{% endblock %}</h1>
+</div>
+
+{% if allow_team_selection %}
+<div class="clearfix">
+    <form method="GET" class="form-inline pull-right">
+        <div class="form-group">
+            <label for="net-number">{% trans 'Team Net Number' %}</label>
+            <input type="number" name="net-number" id="net-number" class="form-control" min="1" value="{{ net_number | default_if_none:'' }}" />
+            <button type="submit" class="btn btn-primary">{% trans 'Select' %}</button>
+        </div>
+    </form>
+</div>
+{% endif %}
+
+{% if check_results is not None %}
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>{% trans 'Time' %} ({{ server_timezone }})</th>
+                <th>{% trans 'Last WireGuard Handshake' %}</th>
+                <th>{% trans 'Gateway Ping' %}</th>
+                <th>{% trans 'Demo Vulnbox Ping RTT' %}</th>
+                <th>{% trans 'Demo Vulnbox Service' %}</th>
+                <th>{% trans 'Vulnbox Ping RTT' %}</th>
+                <th>{% trans 'Vulnbox Service' %}</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        {% for result in check_results %}
+            <tr>
+                <td>
+                    {{ result.timestamp | date }} {{ result.timestamp | time }}
+                </td>
+                <td class="{% if result.wireguard_ok %}success{% else %}danger{% endif %}">
+                    {% if result.wireguard_handshake_time is not None %}
+                    {{ result.wireguard_handshake_time | time }}
+                    {% else %}
+                    <abbr title="{% trans 'Not available' %}">{% trans 'N/A' %}</abbr>
+                    {% endif %}
+                </td>
+                {% if result.gateway_ping_rtt_ms is not None %}
+                <td class="success">
+                    {{ result.gateway_ping_rtt_ms }}&nbsp;ms
+                </td>
+                {% else %}
+                <td class="danger">
+                    {% trans 'down' %}
+                </td>
+                {% endif %}
+                {% if result.demo_ping_rtt_ms is not None %}
+                <td class="success">
+                    {{ result.demo_ping_rtt_ms }}&nbsp;ms
+                </td>
+                {% else %}
+                <td class="danger">
+                    {% trans 'down' %}
+                </td>
+                {% endif %}
+                {% if result.demo_service_ok %}
+                <td class="success">
+                    {% trans 'up' %}
+                </td>
+                {% else %}
+                <td class="danger">
+                    {% trans 'down' %}
+                </td>
+                {% endif %}
+                {% if result.vulnbox_ping_rtt_ms is not None %}
+                <td class="success">
+                    {{ result.vulnbox_ping_rtt_ms }}&nbsp;ms
+                </td>
+                {% else %}
+                <td class="danger">
+                    {% trans 'down' %}
+                </td>
+                {% endif %}
+                {% if result.vulnbox_service_ok %}
+                <td class="success">
+                    {% trans 'up' %}
+                </td>
+                {% else %}
+                <td class="danger">
+                    {% trans 'down' %}
+                </td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% endblock %}

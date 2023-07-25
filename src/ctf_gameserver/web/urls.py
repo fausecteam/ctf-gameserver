@@ -6,6 +6,7 @@ from django.urls import re_path as url, reverse_lazy
 from .registration import views as registration_views
 from .scoring import views as scoring_views
 from .flatpages import views as flatpages_views
+from .vpnstatus import views as vpnstatus_views
 from .admin import admin_site
 from .forms import TeamAuthenticationForm, FormalPasswordResetForm
 
@@ -90,6 +91,11 @@ urlpatterns = [
     url(r'^competition/status\.json$',
         scoring_views.service_status_json,
         name='service_status_json'
+    ),
+
+    url(r'^vpn-status/$',
+        vpnstatus_views.status_history,
+        name='status_history'
     ),
 
     url(r'^downloads/$',
