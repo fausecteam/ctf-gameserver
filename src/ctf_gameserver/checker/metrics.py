@@ -74,7 +74,7 @@ def checker_metrics_factory(registry, service):
         metrics['completed_tasks'].labels(result.name, service)
 
     gauges = [
-        ('start_timestamp', '(Unix timestamp when the process was started'),
+        ('start_timestamp', '(Unix) timestamp when the process was started'),
         ('interval_length_seconds', 'Configured launch interval length'),
         ('last_launch_timestamp', '(Unix) timestamp when tasks were launched the last time'),
         ('tasks_per_launch_count', 'Number of checks to start in one launch interval'),
