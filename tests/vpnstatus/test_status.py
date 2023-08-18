@@ -24,7 +24,7 @@ class VPNStatusTest(DatabaseTestCase):
                 os.fchmod(sudo_file.fileno(), 0o755)
                 script_lines = [
                     '#!/bin/sh',
-                    'if [ "$*" != "wg show all latest-handshakes" ]; then',
+                    'if [ "$*" != "/usr/bin/wg show all latest-handshakes" ]; then',
                     '    exit 1',
                     'fi',
                     'echo "wg_102\tZeymPBFvUbfWHyZSccoWaf5CKEO96YZkCH5lbv8rqU0=\t1689415702"',

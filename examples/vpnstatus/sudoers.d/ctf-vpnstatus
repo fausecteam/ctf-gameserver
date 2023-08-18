@@ -1,2 +1,2 @@
 # Allow user "ctf-vpnstatus" to display WireGuard status without being prompted for a password
-ctf-vpnstatus ALL = (root) NOPASSWD: wg show all latest-handshakes
+ctf-vpnstatus ALL = (root) NOPASSWD: /usr/bin/wg show all latest-handshakes

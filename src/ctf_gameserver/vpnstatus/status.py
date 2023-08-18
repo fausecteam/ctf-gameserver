@@ -232,7 +232,7 @@ async def check_wireguard(if_pattern, teams):
     teams_map = {if_pattern % team[1]: team[0] for team in teams}
     results = {}
 
-    cmd = ['sudo', 'wg', 'show', 'all', 'latest-handshakes']
+    cmd = ['sudo', '/usr/bin/wg', 'show', 'all', 'latest-handshakes']
     proc = await asyncio.create_subprocess_exec(*cmd, stdout=asyncio.subprocess.PIPE, stderr=None)
 
     while data := await proc.stdout.readline():
