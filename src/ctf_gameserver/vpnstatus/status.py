@@ -9,6 +9,7 @@ import prometheus_client
 import psycopg2
 from psycopg2 import errorcodes as postgres_errors
 
+from ctf_gameserver.lib import daemon
 from ctf_gameserver.lib.args import get_arg_parser_with_db, parse_host_port
 from ctf_gameserver.lib.database import transaction_cursor
 from ctf_gameserver.lib.metrics import start_metrics_server
@@ -95,6 +96,8 @@ def main():
     if args.net_numbers_filter_file:
         with open(args.net_numbers_filter_file, encoding='ascii') as filter_file:
             net_numbers = set(int(line) for line in filter_file)
+
+    daemon.notify('READY=1')
 
     asyncio.run(main_loop(db_conn, metrics, args.wireguard_ifpattern, args.gateway_ippattern,
                           args.demo_ippattern, args.demo_serviceport, args.vulnbox_ippattern,
