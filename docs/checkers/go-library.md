@@ -85,10 +85,10 @@ Gameserver repository](https://github.com/fausecteam/ctf-gameserver).
 Local Execution
 ---------------
 When running your Checker Script locally, just pass your service IP, the tick to check and a dummy team ID
-as command line arguments:
+as command line arguments (Tick starts from zero):
 
 ```sh
-go build && ./checkerscript ::1 10 1
+go build && ./checkerscript ::1 10 0
 ```
 
 The library will print messages to stderr and generate dummy flags when launched without a Checker Master.

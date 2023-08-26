@@ -88,10 +88,10 @@ For a complete, but still simple, Checker Script see "examples/checker/example_c
 Local Execution
 ---------------
 When running your Checker Script locally, just pass your service IP, the tick to check and a dummy team ID
-as command line arguments:
+as command line arguments (Tick starts from zero):
 
 ```sh
-./checkerscript.py ::1 10 1
+./checkerscript.py ::1 10 0
 ```
 
 The library will print messages to stdout and generate dummy flags when launched without a Checker Master.
