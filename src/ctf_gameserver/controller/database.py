@@ -27,7 +27,8 @@ def get_control_info(db_conn, prohibit_changes=False):
 def increase_tick(db_conn, prohibit_changes=False):
 
     with transaction_cursor(db_conn, prohibit_changes) as cursor:
-        cursor.execute('UPDATE scoring_gamecontrol SET current_tick = current_tick + 1, cancel_checks = 0')
+        cursor.execute('UPDATE scoring_gamecontrol SET current_tick = current_tick + 1,'
+                       '                               cancel_checks = false')
         # Create flags for every service and team in the new tick
         cursor.execute('INSERT INTO scoring_flag (service_id, protecting_team_id, tick)'
                        '    SELECT service.id, team.user_id, control.current_tick'
@@ -39,7 +40,7 @@ def increase_tick(db_conn, prohibit_changes=False):
 def cancel_checks(db_conn, prohibit_changes=False):
 
     with transaction_cursor(db_conn, prohibit_changes) as cursor:
-        cursor.execute('UPDATE scoring_gamecontrol SET cancel_checks = 1')
+        cursor.execute('UPDATE scoring_gamecontrol SET cancel_checks = true')
 
 
 def update_scoring(db_conn):

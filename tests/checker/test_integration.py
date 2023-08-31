@@ -274,7 +274,7 @@ class IntegrationTest(DatabaseTestCase):
         os.kill(checkerscript_pid, 0)
 
         with transaction_cursor(self.connection) as cursor:
-            cursor.execute('UPDATE scoring_gamecontrol SET cancel_checks=1')
+            cursor.execute('UPDATE scoring_gamecontrol SET cancel_checks=true')
 
         master_loop.supervisor.queue_timeout = 0.01
         monotonic_mock.return_value = 190
