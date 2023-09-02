@@ -120,6 +120,9 @@ def get_flag(tick: int) -> str:
     current run. The returned flag can be used for both placement and checks.
     """
 
+    if not isinstance(tick, int):
+        raise TypeError('tick must be of type int')
+
     # Return dummy flag when launched locally
     if _launched_without_runner():
         try:
@@ -140,6 +143,9 @@ def set_flagid(data: str) -> None:
     Stores the Flag ID for the current team and tick.
     """
 
+    if not isinstance(data, str):
+        raise TypeError('data must be of type str')
+
     if not _launched_without_runner():
         _send_ctrl_message({'action': 'FLAGID', 'param': data})
         # Wait for acknowledgement
@@ -153,6 +159,9 @@ def store_state(key: str, data: Any) -> None:
     Allows a Checker Script to store arbitrary Python data persistently across runs. Data is stored per
     service and team with the given key as an additional identifier.
     """
+
+    if not isinstance(key, str):
+        raise TypeError('key must be of type str')
 
     serialized_data = base64.b64encode(pickle.dumps(data)).decode('ascii')
 
@@ -177,6 +186,9 @@ def load_state(key: str) -> Any:
     Allows to retrieve data stored through store_state(). If no data exists for the given key (and the
     current service and team), None is returned.
     """
+
+    if not isinstance(key, str):
+        raise TypeError('key must be of type str')
 
     if not _launched_without_runner():
         _send_ctrl_message({'action': 'LOAD', 'param': key})
