@@ -67,8 +67,8 @@ def get_check_duration(db_conn, service_id, std_dev_count, prohibit_changes=Fals
     """
 
     with transaction_cursor(db_conn, prohibit_changes) as cursor:
-        cursor.execute('SELECT avg(extract(epoch from (placement_end - placement_start))) + %s *'
-                       '       stddev_pop(extract(epoch from (placement_end - placement_start)))'
+        cursor.execute('SELECT (avg(extract(epoch from (placement_end - placement_start))) + %s *'
+                       '        stddev_pop(extract(epoch from (placement_end - placement_start))))::float'
                        '    FROM scoring_flag, scoring_gamecontrol'
                        '    WHERE service_id = %s AND tick < current_tick', (std_dev_count, service_id))
         result = cursor.fetchone()
