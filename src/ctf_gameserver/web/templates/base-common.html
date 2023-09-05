@@ -21,8 +21,18 @@
 
         <title itemprop="name">{% block title %}{% endblock %} | {{ competition_name }}</title>
 
+        <meta name="description" itemprop="description" property="og:description" content="
+            FAUST CTF 2023 is an online attack-defense CTF competition run by FAUST, the CTF team of
+            Friedrich-Alexander University Erlangen-Nürnberg
+        " />
+        <meta name="keywords" content="
+            ctf, capture the flag, security, it security, information security, hacking, competition,
+            contest, challenge, fau security team, fau, friedrich-alexander university
+        " />
+
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="{{ competition_name }}" />
+        <meta property="og:image" content="https://www.faustctf.net{% static 'faustctf.svg' %}" />
     </head>
 
 
