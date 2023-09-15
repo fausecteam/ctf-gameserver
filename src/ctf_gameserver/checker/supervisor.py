@@ -223,7 +223,7 @@ def _run_checker_script(args, sudo_user, info, logging_params, runner_id, queue_
 
     if sudo_user is not None:
         args = ['sudo', '--user='+sudo_user, '--preserve-env=PATH,CTF_CHECKERSCRIPT,CHECKERSCRIPT_PIDFILE',
-                '--close-from=5', '--'] + args
+                '--close-from=5', '--non-interactive', '--'] + args
 
     env = {**os.environ, 'CTF_CHECKERSCRIPT': '1'}
     script_logger.info('[RUNNER] Executing Checker Script')
@@ -252,7 +252,7 @@ def _run_checker_script(args, sudo_user, info, logging_params, runner_id, queue_
         # Avoid using kill(1) because of https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1005376
         kill_args = ['python3', '-c', f'import os; import signal; os.kill({pgid}, signal.SIGKILL)']
         if sudo_user is not None:
-            kill_args = ['sudo', '--user='+sudo_user, '--'] + kill_args
+            kill_args = ['sudo', '--user='+sudo_user, '--non-interactive', '--'] + kill_args
         subprocess.check_call(kill_args)
         # Best-effort attempt to join zombies, primarily for CI runs without an init process
         # Use a timeout to guarantee the Runner itself will always exit within a reasonable time frame

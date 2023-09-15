@@ -565,8 +565,8 @@ class IntegrationTest(DatabaseTestCase):
         checkerscript_pid = int(checkerscript_pidfile.read())
 
         def signal_script():
-            subprocess.check_call(['sudo', '--user=ctf-checkerrunner', '--', 'kill', '-0',
-                                   str(checkerscript_pid)])
+            subprocess.check_call(['sudo', '--user=ctf-checkerrunner', '--non-interactive', '--',
+                                   'kill', '-0', str(checkerscript_pid)])
 
         # Ensure process is running by sending signal 0
         signal_script()
