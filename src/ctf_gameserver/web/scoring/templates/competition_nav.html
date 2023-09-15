@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load static %}
 
 {% comment %}
 Horizontal 'nav-pill' navigation for pages from the "competition" category of the main navigation.
@@ -13,6 +14,9 @@ name as 'active' argument using `include with`.
     </li>
     <li class="{% if active == 'scoreboard' %}active{% endif %}">
         <a href="{% url 'scoreboard' %}">{% trans 'Scoreboard' %}</a>
+    </li>
+    <li>
+        <a href="{% static 'scoreboard-v2' %}">{% trans 'Scoreboard v2 (experimental)' %}</a>
     </li>
     <li class="{% if active == 'service_status' %}active{% endif %}">
         <a href="{% url 'service_status' %}">{% trans 'Service status' %}</a>
