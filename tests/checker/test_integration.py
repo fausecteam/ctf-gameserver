@@ -540,6 +540,7 @@ class IntegrationTest(DatabaseTestCase):
         checkerscript_path = os.path.join(os.path.dirname(__file__),
                                           'integration_unfinished_checkerscript.py')
 
+        # NOTE: This needs `sysctl fs.protected_regular=0` if tempfile is created in /tmp
         checkerscript_pidfile = tempfile.NamedTemporaryFile()
         os.chmod(checkerscript_pidfile.name, 0o666)
         os.environ['CHECKERSCRIPT_PIDFILE'] = checkerscript_pidfile.name
