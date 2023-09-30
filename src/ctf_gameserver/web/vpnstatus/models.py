@@ -18,5 +18,8 @@ class VPNStatusCheck(models.Model):
     vulnbox_service_ok = models.BooleanField()
     timestamp = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        verbose_name = 'VPN status check'
+
     def __str__(self):
         return 'VPN status check {:d}'.format(self.id)
