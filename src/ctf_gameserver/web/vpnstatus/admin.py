@@ -9,5 +9,5 @@ class VPNStatusCheckAdmin(admin.ModelAdmin):
 
     list_display = ('team', 'timestamp', 'wireguard_handshake_time')
     list_filter = ('team',)
-    search_fields = ('team__user__username' , 'team__net_number')
+    search_fields = ('team__user__username', 'team__net_number')
     ordering = ('timestamp', 'team')
