@@ -68,23 +68,14 @@ class CTFUserAdmin(UserAdmin):
             else:
                 return queryset
 
-    def user_has_team(self, user):
-        """
-        Indicates if the given user is associated with a team or not. This is used as value generator for an
-        additional column in user lists.
-        """
+    @admin.display(ordering='team__net_number', description='Net Number')
+    def team_net_number(self, user):
         try:
-            user.team    # pylint: disable=pointless-statement
-            return True
+            return user.team.net_number
         except Team.DoesNotExist:
-            return False
+            return None
 
-    user_has_team.short_description = _('Associated team')
-    # Display on/off icons instead of strings for the user_has_team values
-    user_has_team.boolean = True
-    user_has_team.admin_order_field = 'team'
-
-    list_display = ('username', 'is_active', 'is_staff', 'is_superuser', 'user_has_team', 'date_joined')
+    list_display = ('username', 'is_active', 'is_staff', 'is_superuser', 'team_net_number', 'date_joined')
     list_filter = ('is_active', 'is_staff', 'is_superuser', TeamListFilter, 'date_joined')
     search_fields = ('username', 'email', 'team__net_number', 'team__informal_email', 'team__affiliation',
                      'team__country')
