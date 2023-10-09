@@ -1,7 +1,7 @@
-ATC/DEF CTF Gameserver
-======================
+CTF Gameserver
+==============
 
-This is a gameserver for [attack-defense (IT security) CTFs](https://ctftime.org/ctf-wtf/). It is a fork of the project https://github.com/fausecteam/ctf-gameserver witch was was originally
+This is a gameserver for [attack-defense (IT security) CTFs](https://ctftime.org/ctf-wtf/). It was originally
 written for [FAUST CTF 2015](https://www.faustctf.net/2015/), but is designed to be re-usable for other
 competitions.
 
@@ -17,28 +17,26 @@ means of communication is a shared database.
   services.
 * Submission: Server to submit captured flags to.
 * Lib: Some code that is shared between the components.
-* Terraform: Terraform sample files to deploy teams' services.
 
 For deployment instructions and details on the implementations, see the `README`s of the individual
 components.
 
 Related projects
 ----------------
+There are several alternatives out there, although none of them could really convince us. Your mileage may
+vary at this point.
 
-As mentioned previusly, this is a fork of a project, but we also include ideas or parts of this other projects:
-
-* (PENDING Other checkers and service references).
-
-As same as in the original project, there are several alternatives we see out there, although none of them could really convince us. Your mileage may vary at this point.
-
-* ucsb-seclab/ictf-framework from the team behind iCTF, one of the most well-known attack-defense CTFs. In addition to a gameserver, it includes utilities for VM creation and network setup. We had trouble to get it running and documentation is generally rather rare.
-* HackerDom/checksystem is the gameserver powering the RuCTF. The first impression wasn't too bad, but it didn't look quite feature-complete to us. However, we didn't really grasp the Perl code, so we might have overlooked something.
-* isislab/CTFd appears to be de-facto standard for [jeopardy-based CTFs](https://ctftime.org/ctf-wtf/). It is, however, not suitable for an attack-defense CTF.
+* ucsb-seclab/ictf-framework from the team behind iCTF, one of the most well-known
+  attack-defense CTFs. In addition to a gameserver, it includes utilities for VM creation and network setup.
+  We had trouble to get it running and documentation is generally rather rare.
+* HackerDom/checksystem is the gameserver powering the RuCTF. The first impression wasn't too bad, but it
+  didn't look quite feature-complete to us. However, we didn't really grasp the Perl code, so we might have
+  overlooked something.
+* isislab/CTFd appears to be de-facto standard for [jeopardy-based CTFs](https://ctftime.org/ctf-wtf/). It
+  is, however, not suitable for an attack-defense CTF.
 
 Another factor for the creation of our own system was that we didn't want to build a large CTF on top of a
 system which we don't entirely understand.
-
-
 
 Design principles
 -----------------
@@ -59,11 +57,6 @@ some principles:
   example for such customizations can be found in the `faustctf-2015` branch of this repository.
 * Scalability: We couldn't really estimate the load beforehand, nor could we easily do realistic
   load-testing. That's why the components are loosely coupled and can be run on different machines.
-
-Recommendations
----------------
-
-We recommend to init a virtualenv before run setup, especially if you are using it for trying purpose.
 
 Licensing
 ---------
