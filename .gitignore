@@ -43,6 +43,6 @@ __pycache__/
 /terraform/aws/.terraform
 /terraform/aws/.terraform.lock.hcl
 /terraform/aws/terraform.tfvars
-/terraform/aws/                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             aws-ctf-ubuntu.pub
+/terraform/aws/terraform.tfstate*                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           aws-ctf-ubuntu.pub
 
 
