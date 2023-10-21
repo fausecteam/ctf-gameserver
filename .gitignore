@@ -35,9 +35,14 @@ __pycache__/
 
 # Virutal Enviroment
 /venv
-
+                                     
 # Terraform
 /terraform/proxmox/.terraform
 /terraform/proxmox/.terraform.lock.hcl
+/terraform/proxmox/terraform.tfvars
+/terraform/aws/.terraform
+/terraform/aws/.terraform.lock.hcl
+/terraform/aws/terraform.tfvars
+/terraform/aws/                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             aws-ctf-ubuntu.pub
 
 

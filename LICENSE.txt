@@ -1,6 +1,10 @@
+Copyright (c) 2023 Tknika
+
+Parts 
 Copyright (c) 2015 FAUST -- FAU Security Team
 Copyright (c) 2015 Christoph Egger
 Copyright (c) 2015 Felix Dreissig
+Copyright (c) 2019 Dominic Dumrauf
 
   Permission to use, copy, modify, and/or distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
