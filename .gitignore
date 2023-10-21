@@ -42,7 +42,7 @@ __pycache__/
 /terraform/proxmox/terraform.tfvars
 /terraform/aws/.terraform
 /terraform/aws/.terraform.lock.hcl
+/terraform/aws/.terraform.tfstate.lock.info
+/terraform/aws/secrets
 /terraform/aws/terraform.tfvars
-/terraform/aws/terraform.tfstate*                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           aws-ctf-ubuntu.pub
-
-
+/terraform/aws/terraform.tfstate*
