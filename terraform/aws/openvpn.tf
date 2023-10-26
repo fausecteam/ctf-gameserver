@@ -28,7 +28,6 @@ resource "aws_instance" "openvpn-team" {
   depends_on = [aws_network_interface.openvpn-priv-interface]
 
   ami                         = data.aws_ami.amazon_linux_2.id
-#  associate_public_ip_address = true
   instance_type               = var.aws-instance-type
 
   count = var.team_count
@@ -75,7 +74,6 @@ resource "null_resource" "openvpn-bootstrap" {
       "sudo yum update -y",
       "curl -O ${var.openvpn-install-script-location}",
       "chmod +x openvpn-install.sh",
-#      "sed -i -e 's/10.8.0/10.0.${count.index}/g' openvpn-install.sh",
       <<EOT
       sudo AUTO_INSTALL=y \
            APPROVE_IP=${aws_eip.openvpn-eip[count.index].public_ip} \

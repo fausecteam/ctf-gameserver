@@ -33,9 +33,6 @@ __pycache__/
 # MkDocs HTML build
 /docs_site/
 
-# Virutal Enviroment
-/venv
-                                     
 # Terraform
 /terraform/proxmox/.terraform
 /terraform/proxmox/.terraform.lock.hcl

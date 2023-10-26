@@ -32,21 +32,35 @@ resource "aws_internet_gateway" "team-gateway" {
 	vpc_id = aws_vpc.team-vpc[count.index].id
 
 	tags = {
-    	name = "team${count.index}gateway"
+    	Name = "team-gw${count.index}"
       Provisioner = "Terraform"
 	}
 }
 
-resource "aws_route_table" "team-routetable" {
+resource "aws_route_table" "team-rt" {
 
   count = var.team_count
 
 	vpc_id = aws_vpc.team-vpc[count.index].id
 
+  route {
+    	cidr_block = "10.0.0.0/16"
+    	transit_gateway_id = aws_ec2_transit_gateway.team-transit-out-gateway[count.index].id
+	}
+
+  route {
+    	cidr_block = "10.2.0.0/16"
+    	transit_gateway_id = aws_ec2_transit_gateway.team-transit-in-gateway[count.index].id
+	}
+
 	route {
     	cidr_block = "0.0.0.0/0"
     	gateway_id = aws_internet_gateway.team-gateway[count.index].id
 	}
+
+  tags = {
+    Name = "team-rt${count.index}"
+  }
 }
 
 resource "aws_route_table_association" "asoc_public" {
@@ -54,7 +68,7 @@ resource "aws_route_table_association" "asoc_public" {
   count = var.team_count
 
 	subnet_id = aws_subnet.team-subnet[count.index].id
-	route_table_id = aws_route_table.team-routetable[count.index].id
+	route_table_id = aws_route_table.team-rt[count.index].id
  
 }
 
@@ -72,7 +86,7 @@ resource "aws_network_interface" "openvpn-priv-interface" {
   ]
 
   tags = {
-    Name = "openvpn-private-network-interface"
+    Name = "openvpn-private-network-interface${count.index}"
   }
 }
 
@@ -88,6 +102,6 @@ resource "aws_network_interface" "service1-priv-interface" {
 
 
   tags = {
-    Name = "service1-private-interface"
+    Name = "service1-private-interface${count.index}"
   }
 }

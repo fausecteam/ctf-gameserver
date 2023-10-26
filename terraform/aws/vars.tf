@@ -22,6 +22,7 @@ variable "instance_root_block_device_volume_size" {
 }
 
 variable "team_count"{
+    type = number
     description = "how many teams will play"
 }
 
