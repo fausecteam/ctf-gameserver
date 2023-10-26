@@ -15,3 +15,10 @@ resource "aws_instance" "team-service1" {
    Name = "Team${count.index}-service1"
  }
 }
+
+resource "aws_eip" "team-eip" {
+  count = var.team_count
+
+  instance = aws_instance.team-service1[count.index].id
+  vpc      = true
+}
