@@ -26,19 +26,35 @@ variable "team_count"{
     description = "how many teams will play"
 }
 
-variable "aws-team-public-key"{
-    type = list
-    description = "public key location for each team"
+variable "aws-team-keys-folder"{
+    description = "public key location base for all team"
+    default = "output/team"  #usually with count.index ex: output/team1
 }
 
-variable "aws-team-private-key" {
-    type        = list
-    description = "private key location for each team"
+variable "aws-opnevpn-private-key-name" {
+    default = "openvpnkey"
 }
 
-variable "openvpn-username" {
+variable "aws-openvpn-public-key-name" {
+    default = "openvpnkey.pub"
+}
+
+variable "aws-ssh-private-key-name" {
+    default = "sshkey"
+}
+
+variable "aws-ssh-public-key-name" {
+    default     = "sshkey.pub"
+}
+
+variable "openvpn-instance-username" {
     description = "openvpn instace username"
     default = "ec2-user"
+}
+
+variable "service-instance-username" {
+    type        = list
+    description = "private key location for each team"
 }
 
 variable "ovpn-users" {
@@ -47,7 +63,7 @@ variable "ovpn-users" {
 }
 
 variable "ovpn-config-directory" {
-    default = "secrets"
+    default = "output/team"  #usually with count.index ex: output/team1
 }
 
 variable "openvpn-install-script-location" {

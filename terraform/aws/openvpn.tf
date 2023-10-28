@@ -32,7 +32,7 @@ resource "aws_instance" "openvpn-team" {
 
   count = var.team_count
 
-  key_name                    = aws_key_pair.team-key[count.index].key_name
+  key_name                    = aws_key_pair.team-ssh-key[count.index].key_name
 
   network_interface {
     network_interface_id = aws_network_interface.openvpn-priv-interface[count.index].id
@@ -63,9 +63,9 @@ resource "null_resource" "openvpn-bootstrap" {
   connection {
     type        = "ssh"
     host        = aws_eip.openvpn-eip[count.index].public_ip
-    user        = var.openvpn-username
+    user        = var.openvpn-instance-username
     port        = "22"
-    private_key = file(var.aws-team-private-key[count.index])
+    private_key = file("${var.aws-team-keys-folder}${count.index}/${var.aws-ssh-private-key-name}")
     agent       = false
   }
 
@@ -97,21 +97,21 @@ resource "null_resource" "openvpn-update-users-script" {
   connection {
     type        = "ssh"
     host        = aws_eip.openvpn-eip[count.index].public_ip
-    user        = var.openvpn-username
+    user        = var.openvpn-instance-username
     port        = "22"
-    private_key = file(var.aws-team-private-key[count.index])
+    private_key = file("${var.aws-team-keys-folder}${count.index}/${var.aws-ssh-private-key-name}")
     agent       = false
   }
 
   provisioner "file" {
     source      = "scripts/update_users.sh"
-    destination = "/home/${var.openvpn-username}/update_users.sh"
+    destination = "/home/${var.openvpn-instance-username}/update_users.sh"
   }
 
   provisioner "remote-exec" {
     inline = [
-      "chmod +x /home/${var.openvpn-username}/update_users.sh",
-      "sudo /home/${var.openvpn-username}/update_users.sh ${join(" ", var.ovpn-users)}"
+      "chmod +x /home/${var.openvpn-instance-username}/update_users.sh",
+      "sudo /home/${var.openvpn-instance-username}/update_users.sh ${join(" ", ["team${count.index}"])}"
     ]
   }
 }
@@ -130,9 +130,8 @@ resource "null_resource" "openvpn-download-configurations" {
     mkdir -p ${var.ovpn-config-directory};
     scp -o StrictHostKeyChecking=no \
         -o UserKnownHostsFile=/dev/null \
-        -i ${var.aws-team-private-key[count.index]} ${var.openvpn-username}@${aws_eip.openvpn-eip[count.index].public_ip}:/home/${var.openvpn-username}/*.ovpn ${var.ovpn-config-directory}/
-
-EOT
+        -i ${var.aws-team-keys-folder}${count.index}/${var.aws-ssh-private-key-name} ${var.openvpn-instance-username}@${aws_eip.openvpn-eip[count.index].public_ip}:/home/${var.openvpn-instance-username}/*.ovpn ${var.ovpn-config-directory}${count.index}/
+    EOT
 
   }
 }

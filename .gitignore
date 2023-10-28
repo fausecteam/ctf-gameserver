@@ -37,9 +37,8 @@ __pycache__/
 /terraform/proxmox/.terraform
 /terraform/proxmox/.terraform.lock.hcl
 /terraform/proxmox/terraform.tfvars
-/terraform/aws/.terraform
-/terraform/aws/.terraform.lock.hcl
-/terraform/aws/.terraform.tfstate.lock.info
+/terraform/aws/.terraform*
+/terraform/aws/output
 /terraform/aws/secrets
 /terraform/aws/terraform.tfvars
 /terraform/aws/terraform.tfstate*
