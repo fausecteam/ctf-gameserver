@@ -1,8 +1,8 @@
-resource "aws_security_group" "openvpn-allow-ssh" {
+resource "aws_security_group" "gamezone-allow-ssh" {
   name        = "allow-ssh"
   description = "Allow ssh inbound traffic"
 
-  vpc_id      = aws_vpc.openvpn-vpc.id
+  vpc_id      = aws_vpc.gamezone-vpc.id
 
   ingress {
     description      = "SSH from VPC"
@@ -20,15 +20,15 @@ resource "aws_security_group" "openvpn-allow-ssh" {
   }
 
   tags = {
-    Name = "allow-ssh"
+    Name = "gamezone-allow-ssh"
   }
 }
 
-resource "aws_security_group" "openvpn-allow-openvpn" {
+resource "aws_security_group" "gamezone-allow-openvpn" {
   name        = "allow-openvpn"
   description = "Allow opennpn inbound traffic"
 
-  vpc_id      = aws_vpc.openvpn-vpc.id
+  vpc_id      = aws_vpc.gamezone-vpc.id
 
   ingress {
     from_port   = 1194
@@ -45,17 +45,15 @@ resource "aws_security_group" "openvpn-allow-openvpn" {
   }
 
   tags = {
-    Name = "allow-openvpn"
+    Name = "gamezon-allow-openvpn"
   }
 }
 
-resource "aws_security_group" "team-allow-ssh" {
+resource "aws_security_group" "team-services-allow-ssh" {
   name        = "team-allow-ssh"
   description = "Allow ssh inbound traffic"
 
-  count = var.team_count
-
-  vpc_id      = aws_vpc.team-vpc[count.index].id
+  vpc_id      = aws_vpc.team-services-vpc.id
 
   ingress {
     description      = "SSH"
@@ -73,6 +71,6 @@ resource "aws_security_group" "team-allow-ssh" {
   }
 
   tags = {
-    Name = "team-allow-ssh"
+    Name = "team-services-allow-ssh"
   }
 }

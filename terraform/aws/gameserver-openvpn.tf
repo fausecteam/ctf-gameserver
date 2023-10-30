@@ -1,4 +1,4 @@
-data "aws_ami" "amazon_linux_2" {
+data "aws_ami" "gameserver-amazon_linux_2" {
   most_recent = true
 
   filter {
@@ -24,16 +24,16 @@ data "aws_ami" "amazon_linux_2" {
   owners = ["amazon"]
 }
 
-resource "aws_instance" "openvpn-team" {
-  depends_on = [aws_network_interface.openvpn-priv-interface]
+resource "aws_instance" "gameserver-openvpn" {
+  depends_on = [aws_network_interface.gameserver-openvpn-priv-interface]
 
-  ami                         = data.aws_ami.amazon_linux_2.id
+  ami                         = data.aws_ami.gameserver-amazon_linux_2.id
   instance_type               = var.aws-instance-type
 
-  key_name                    = aws_key_pair.team-openvpn-instance-ssh-key.key_name
+  key_name                    = aws_key_pair.gameserver-openvpn-instance-ssh-key.key_name
 
   network_interface {
-    network_interface_id = aws_network_interface.openvpn-priv-interface.id
+    network_interface_id = aws_network_interface.gameserver-openvpn-priv-interface.id
     device_index         = 0
   }
 
@@ -44,23 +44,23 @@ resource "aws_instance" "openvpn-team" {
   }
 
   tags = {
-    Name        = "openvpn-team"
+    Name        = "gameserver-openvpn"
   }
 }
 
-resource "aws_eip" "openvpn-eip" {
-  instance = aws_instance.openvpn-team.id
+resource "aws_eip" "gameserver-openvpn-eip" {
+  instance = aws_instance.gameserver-openvpn.id
   vpc      = true
 }
 
-resource "null_resource" "openvpn-bootstrap" {
+resource "null_resource" "gameserver-openvpn-bootstrap" {
 
   connection {
     type        = "ssh"
-    host        = aws_eip.openvpn-eip.public_ip
+    host        = aws_eip.gameserver-openvpn-eip.public_ip
     user        = var.openvpn-instance-username
     port        = "22"
-    private_key = tls_private_key.team-openvpn-instance-tls-key.private_key_openssh
+    private_key = tls_private_key.gameserver-openvpn-instance-tls-key.private_key_openssh
     agent       = false
   }
 
@@ -71,8 +71,8 @@ resource "null_resource" "openvpn-bootstrap" {
       "chmod +x openvpn-install.sh",
       <<EOT
       sudo AUTO_INSTALL=y \
-           APPROVE_IP=${aws_eip.openvpn-eip.public_ip} \
-           ENDPOINT=${aws_eip.openvpn-eip.public_dns} \
+           APPROVE_IP=${aws_eip.gameserver-openvpn-eip.public_ip} \
+           ENDPOINT=${aws_eip.gameserver-openvpn-eip.public_dns} \
            ./openvpn-install.sh
       EOT
       ,
@@ -80,8 +80,8 @@ resource "null_resource" "openvpn-bootstrap" {
   }
 }
 
-resource "null_resource" "openvpn-update-users-script" {
-  depends_on = [null_resource.openvpn-bootstrap]
+resource "null_resource" "gameserver-openvpn-update-users-script" {
+  depends_on = [null_resource.gameserver-openvpn-bootstrap]
 
   triggers = {
     ovpn_users = join(" ", var.ovpn-users)
@@ -89,10 +89,10 @@ resource "null_resource" "openvpn-update-users-script" {
 
   connection {
     type        = "ssh"
-    host        = aws_eip.openvpn-eip.public_ip
+    host        = aws_eip.gameserver-openvpn-eip.public_ip
     user        = var.openvpn-instance-username
     port        = "22"
-    private_key = tls_private_key.team-openvpn-instance-tls-key.private_key_openssh
+    private_key = tls_private_key.gameserver-openvpn-instance-tls-key.private_key_openssh
     agent       = false
   }
 
@@ -104,16 +104,14 @@ resource "null_resource" "openvpn-update-users-script" {
   provisioner "remote-exec" {
     inline = [
       "chmod +x /home/${var.openvpn-instance-username}/update_users.sh",
-      "sudo /home/${var.openvpn-instance-username}/update_users.sh ${join(" ", ["openvpn"])}"
+      "sudo /home/${var.openvpn-instance-username}/update_users.sh ${join(" ", ["master"])}"
     ]
   }
 }
 
-resource "null_resource" "openvpn-download-configurations" {
-  depends_on = [null_resource.openvpn-update-users-script,
-                local_file.team-openvpn-instance-private-key-file]
-
-  count = var.team_count
+resource "null_resource" "gameserver-openvpn-download-configurations" {
+  depends_on = [null_resource.gameserver-openvpn-update-users-script,
+                local_file.master-openvpn-instance-private-key-file]
 
   triggers = {
     ovpn_users = join(" ", var.ovpn-users)
@@ -123,7 +121,7 @@ resource "null_resource" "openvpn-download-configurations" {
     command = <<EOT
     scp -o StrictHostKeyChecking=no \
         -o UserKnownHostsFile=/dev/null \
-        -i ${var.aws-opnevpn-instance-private-key} ${var.openvpn-instance-username}@${aws_eip.openvpn-eip.public_ip}:/home/${var.openvpn-instance-username}/*.ovpn ${var.ovpn-config-directory}${count.index}/
+        -i ${var.aws-gameserver-openvpn-instance-private-key} ${var.openvpn-instance-username}@${aws_eip.gameserver-openvpn-eip.public_ip}:/home/${var.openvpn-instance-username}/*.ovpn output/
     EOT
 
   }
