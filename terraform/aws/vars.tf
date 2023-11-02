@@ -66,6 +66,13 @@ variable "aws-opnevpn-instance-private-key" {
 #     default = "sshkey.pub"
 # }
 
+#Gameserver variables
+
+variable "gameserver-instance-username" {
+    description = "gameserver instance username"
+    default     = "ubuntu"
+}
+
 #Services variables
 
 variable "service-instance-username" {

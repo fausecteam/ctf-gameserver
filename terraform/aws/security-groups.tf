@@ -49,6 +49,40 @@ resource "aws_security_group" "gamezone-allow-openvpn" {
   }
 }
 
+resource "aws_security_group" "gamezone-allow-web" {
+  name        = "gamezone-allow-web"
+  description = "Allow inbound traffic to web only from gamezone"
+
+  vpc_id      = aws_vpc.gamezone-vpc.id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = [var.gamezone-vpc-cidr]
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = [var.gamezone-vpc-cidr]
+  }
+
+
+  ingress {
+    from_port   = 8000
+    to_port     = 8000
+    protocol    = "tcp"
+    cidr_blocks = [var.gamezone-vpc-cidr]
+  }
+
+
+  tags = {
+    Name = "gamezone-allow-web"
+  }
+}
+
 resource "aws_security_group" "team-services-allow-ssh" {
   name        = "team-allow-ssh"
   description = "Allow ssh inbound traffic"

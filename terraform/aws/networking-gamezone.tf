@@ -137,7 +137,7 @@ resource "aws_route_table_association" "gamezone-nat-rt-assoc" {
 
 resource "aws_network_interface" "openvpn-priv-interface" {
 
-  subnet_id   = aws_subnet.gamezone-nat-subnet.id
+  subnet_id   = aws_subnet.openvpn-team-subnet.id
   security_groups = [
     aws_security_group.gamezone-allow-openvpn.id,
     aws_security_group.gamezone-allow-ssh.id,
@@ -156,6 +156,7 @@ resource "aws_network_interface" "gameserver-priv-interface" {
   private_ips = [var.gameserver-priv-ip]
   security_groups = [
     aws_security_group.gamezone-allow-ssh.id,
+    aws_security_group.gamezone-allow-web.id
   ]
 
   tags = {

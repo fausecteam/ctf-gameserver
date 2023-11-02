@@ -90,6 +90,7 @@ resource "aws_key_pair" "team-ssh-key"{
 resource "local_file" "master-openvpn-instance-private-key-file" {
     depends_on = [null_resource.output-team-folders]
 
+    file_permission = "600"
     content  = tls_private_key.gameserver-openvpn-instance-tls-key.private_key_openssh
     filename = "output/master-openvpn-instance-sshkey"
 }
@@ -97,7 +98,7 @@ resource "local_file" "master-openvpn-instance-private-key-file" {
 resource "local_file" "master-private-key-file" {
     depends_on = [null_resource.output-team-folders]
 
-
+    file_permission = "600"
     content  = tls_private_key.gameserver-tls-key.private_key_openssh
     filename = "output/master-sshkey"
 }
@@ -105,6 +106,7 @@ resource "local_file" "master-private-key-file" {
 resource "local_file" "team-openvpn-instance-private-key-file" {
     depends_on = [null_resource.output-team-folders]
 
+    file_permission = "600"
     content  = tls_private_key.team-openvpn-instance-tls-key.private_key_openssh
     filename = "output/openvpn-instance-sshkey"
 }
