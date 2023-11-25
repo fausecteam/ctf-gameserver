@@ -1,6 +1,7 @@
-Copyright (c) 2015 FAUST -- FAU Security Team
-Copyright (c) 2015 Christoph Egger
-Copyright (c) 2015 Felix Dreissig
+Copyright (c) FAUST -- FAU Security Team
+Copyright (c) Christoph Egger
+Copyright (c) Felix Dreissig
+Copyright (c) Simon Ruderich
 
   Permission to use, copy, modify, and/or distribute this software for any
   purpose with or without fee is hereby granted, provided that the above

@@ -58,6 +58,9 @@ some principles:
 * Scalability: We couldn't really estimate the load beforehand, nor could we easily do realistic
   load-testing. That's why the components are loosely coupled and can be run on different machines.
 
-Licensing
+Copyright
 ---------
-The whole gameserver is released under the MIT (expat) license. Contributions are welcome!
+The Gameserver was initially created by Christoph Egger and Felix Dreissig. It is currently maintained by
+Felix Dreissig and Simon Ruderich with contributions from others.
+
+It is released under the ISC License.
