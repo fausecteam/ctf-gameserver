@@ -23,6 +23,9 @@ nav:
   - Submission: submission.md
   - Observability: observability.md
 
+# Use copyright field to add links to the footer
+copyright: '<a href="https://faustctf.net/privacy/">Privacy</a> | <a href="https://faustctf.net/legal/">Legal</a>'
+
 site_dir: docs_site
 markdown_extensions:
   - toc:
