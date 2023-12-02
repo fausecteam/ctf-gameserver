@@ -55,10 +55,12 @@ class Team(models.Model):
 class TeamDownload(models.Model):
     """
     Database representation of a single type of per-team download. One file with the specified name can
-    be provided per team in the file system hierarchy below `settings.TEAM_DOWNLOADS_ROOT`.
+    be provided per team in the filesystem hierarchy below `settings.TEAM_DOWNLOADS_ROOT`.
     """
 
-    filename = models.CharField(max_length=100, help_text=_('Name within the per-team filesystem hierarchy'),
+    filename = models.CharField(max_length=100,
+                                help_text=_('Name within the per-team filesystem hierarchy, see '
+                                            '"TEAM_DOWNLOADS_ROOT" setting'),
                                 validators=[RegexValidator(r'^[^/]+$',
                                                            message=_('Must not contain slashes'))])
     description = models.TextField()

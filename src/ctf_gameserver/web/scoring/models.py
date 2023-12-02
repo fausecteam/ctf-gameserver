@@ -12,7 +12,7 @@ class Service(models.Model):
     """
 
     name = models.CharField(max_length=30, unique=True)
-    slug = models.SlugField(max_length=30, unique=True)
+    slug = models.SlugField(max_length=30, unique=True, help_text=_('Simplified name for use in paths'))
 
     def __str__(self):    # pylint: disable=invalid-str-returned
         return self.name
@@ -153,7 +153,8 @@ class GameControl(models.Model):
     # Tick duration in seconds
     tick_duration = models.PositiveSmallIntegerField(default=180)
     # Number of ticks a flag is valid for including the one it was generated in
-    valid_ticks = models.PositiveSmallIntegerField(default=5)
+    # See https://github.com/fausecteam/ctf-gameserver/issues/84
+    valid_ticks = models.PositiveSmallIntegerField(default=5, help_text=_('Currently unused'))
     current_tick = models.IntegerField(default=-1)
     # Instruct Checker Runners to cancel any running checks
     cancel_checks = models.BooleanField(default=False)
