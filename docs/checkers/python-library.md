@@ -10,11 +10,11 @@ It takes care of:
 * Starting check steps
 * Command line argument handling
 * Configuring logging to send messages to the Master
-* Setup of default timeouts for Python sockets, [urllib3](https://urllib3.readthedocs.io) and
+* Setup of default timeouts for Python sockets, [urllib3](https://urllib3.readthedocs.io), and
   [Requests](https://requests.readthedocs.io)
 * Handling of common connection exceptions and converting them to a DOWN result
 
-This means that you do *not* have to catch timeout exceptions and can just let the library take care of
+This means that you do **not** have to catch timeout exceptions and can just let the library take care of
 them.
 
 Installation
@@ -23,8 +23,8 @@ To use the library, you must have the `ctf_gameserver.checkerlib` package availa
 installation. That package is self-contained and does not require any external dependencies.
 
 One option to do that would be to clone the [CTF Gameserver
-repository](https://github.com/fausecteam/ctf-gameserver) and create a symlink called "ctf_gameserver" to
-"src/ctf_gameserver".
+repository](https://github.com/fausecteam/ctf-gameserver) and create a symlink called `ctf_gameserver` to
+`src/ctf_gameserver`.
 
 Another option would be to install CTF Gameserver (preferably to a virtualenv) by running `pip install .`
 in the repository directory.
@@ -39,10 +39,10 @@ To create a Checker Script, create a subclass of `checkerlib.BaseChecker` implem
   service health.
 * `check_flag(self, tick: int) -> checkerlib.CheckResult`: Determine if the flag for the given tick can be
   retrieved. Use `checkerlib.get_flag(tick)` to get the flag to check for. Called multiple times per Script
-  execution, for the current and different preceding ticks.
+  execution, for the current and preceding ticks.
 
 In your `__main__` code, call `checkerlib.run_check()` with your class as argument. The library will take
-care of calling your methods, merging the results and submitting them to the Checker Master.
+care of calling your methods, merging the results, and submitting them to the Checker Master.
 
 ### Functions
 * `get_flag(tick: int) -> str`: Get the flag for the given tick (for the checked team).
@@ -54,7 +54,7 @@ care of calling your methods, merging the results and submitting them to the Che
 ### Classes
 * The `checkerlib.BaseChecker` class provides the following attributes:
     * `self.ip`: IP address of the checked team (may be IPv4 or IPv6, depending on your CTF)
-    * `self.team`: (Network) number of the checked team
+    * `self.team`: (Net) number of the checked team
 * `checkerlib.CheckResult` provides the following constants to express check results, [see general
   docs](index.md#check-results) for their semantics:
     * `CheckResult.OK`
@@ -82,17 +82,17 @@ if __name__ == '__main__':
     checkerlib.run_check(MinimalChecker)
 ```
 
-For a complete, but still simple, Checker Script see "examples/checker/example_checker.py" in the
+For a complete, but still simple, Checker Script see `examples/checker/example_checker.py` in the
 [CTF Gameserver repository](https://github.com/fausecteam/ctf-gameserver).
 
 Local Execution
 ---------------
-When running your Checker Script locally, just pass your service IP, the tick to check and a dummy team ID
-as command line arguments:
+When running your Checker Script locally, just pass your service IP, the tick to check (starting from 0),
+and a dummy team ID as command line arguments:
 
 ```sh
-./checkerscript.py ::1 10 1
+./checkerscript.py ::1 10 0
 ```
 
 The library will print messages to stdout and generate dummy flags when launched without a Checker Master.
-State stored in that case will be persisted in a file called "_state.json" in the current directory.
+State stored will be persisted in a file called `_state.json` in the current directory in that case.

@@ -5,6 +5,10 @@ In order to score points for captured flags, the flags are submitted over a simp
 protocol. That protocol was agreed upon by the organizers of several A/D CTFs in [this GitHub
 discussion](https://github.com/enowars/specification/issues/14).
 
+The following documentation describes the generic, agreed-upon protocol. CTF Gameserver itself uses a more
+restricted flag format, it will for example never generate non-ASCII flags. For details on how CTF Gameserver
+creates flags, see [flag architecture](architecture.md#flags).
+
 Definitions
 -----------
 * **Whitespace** consists of one or more space (ASCII `0x20`) and/or tab (ASCII `0x09`) characters.
@@ -40,7 +44,7 @@ can be derived from the flag repetition in the response.
 
 Response Codes
 --------------
-* `OK`: The flag was valid, has been accepted by the server and will be considered for scoring.
+* `OK`: The flag was valid, has been accepted by the server, and will be considered for scoring.
 * `DUP`: The flag was already submitted before (by the same team).
 * `OWN`: The flag belongs to (i.e. is supposed to be protected by) the submitting team.
 * `OLD`: The flag has expired and cannot be submitted anymore.

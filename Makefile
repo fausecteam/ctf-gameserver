@@ -4,7 +4,7 @@ EXT_DIR ?= $(WEB_DIR)/static/ext
 DEV_MANAGE ?= src/dev_manage.py
 TESTS_DIR ?= tests
 
-.PHONY: dev build ext migrations run_web test lint clean
+.PHONY: dev build ext migrations run_web test lint run_docs clean
 .INTERMEDIATE: bootstrap.zip
 
 dev: $(WEB_DIR)/dev-db.sqlite3 ext
@@ -48,6 +48,9 @@ lint:
 	pylint --rcfile $(SOURCE_DIR)/pylintrc $(SOURCE_DIR) $(TESTS_DIR)
 	pycodestyle $(SOURCE_DIR) $(TESTS_DIR)
 	bandit --ini bandit.ini -r $(SOURCE_DIR)
+
+run_docs:
+	mkdocs serve
 
 docs_site: mkdocs.yml $(wildcard docs/* docs/*/*)
 	mkdocs build --strict

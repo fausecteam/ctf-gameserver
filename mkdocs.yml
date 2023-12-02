@@ -14,11 +14,14 @@ theme:
 
 nav:
   - Home: index.md
+  - Architecture: architecture.md
+  - Installation: installation.md
   - Checkers:
     - General: checkers/index.md
     - checkers/python-library.md
     - checkers/go-library.md
   - Submission: submission.md
+  - Observability: observability.md
 
 site_dir: docs_site
 markdown_extensions:

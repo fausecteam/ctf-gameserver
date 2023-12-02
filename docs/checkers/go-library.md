@@ -12,7 +12,7 @@ It takes care of:
 * Setup of default timeouts for "net/http"
 * Handling of common connection errors and converting them to a DOWN result
 
-This means that you do *not* have to handle timeout errors and can just let the library take care of them.
+This means that you do **not** have to handle timeout errors and can just let the library take care of them.
 
 Installation
 ------------
@@ -29,10 +29,10 @@ To create a Checker Script, implement the `checkerlib.Checker` interface with th
   service health.
 * `CheckFlag(ip string, team int, tick int) (checkerlib.Result, error)`: Determine if the flag for the given
   tick can be retrieved. Use `checkerlib.GetFlag(tick, nil)` to get the flag to check for. Called multiple
-  times per Script execution, for the current and different preceding ticks.
+  times per Script execution, for the current and preceding ticks.
 
 In your `main()`, call `checkerlib.RunCheck()` with your implementation as argument. The library will take
-care of calling your methods, merging the results and submitting them to the Checker Master.
+care of calling your methods, merging the results, and submitting them to the Checker Master.
 
 ### Persistent State
 * `StoreState(key string, data interface{})`: Store data persistently across runs (serialized as JSON).
@@ -79,17 +79,17 @@ func (c checker) CheckFlag(ip string, team int, tick int) (checkerlib.Result, er
 }
 ```
 
-For a complete, but still simple, Checker Script see "examples/checker/example_checker_go" in the [CTF
+For a complete, but still simple, Checker Script see `examples/checker/example_checker_go` in the [CTF
 Gameserver repository](https://github.com/fausecteam/ctf-gameserver).
 
 Local Execution
 ---------------
-When running your Checker Script locally, just pass your service IP, the tick to check and a dummy team ID
-as command line arguments:
+When running your Checker Script locally, just pass your service IP, the tick to check (starting from 0),
+and a dummy team ID as command line arguments:
 
 ```sh
-go build && ./checkerscript ::1 10 1
+go build && ./checkerscript ::1 10 0
 ```
 
 The library will print messages to stderr and generate dummy flags when launched without a Checker Master.
-State stored in that case will be persisted in a file called "_state.json" in the current directory.
+State stored will be persisted in a file called `_state.json` in the current directory in that case.
