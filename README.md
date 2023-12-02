@@ -58,7 +58,7 @@ platform-independent.
 
 Security
 --------
-Should you encounter any security vulnerabilities in the Gameserver, please report them to use privately.
+Should you encounter any security vulnerabilities in the Gameserver, please report them to us privately.
 Use GitHub vulnerability reporting or contact Felix Dreissig or Simon Ruderich directly.
 
 Copyright
