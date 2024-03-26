@@ -44,16 +44,39 @@ function buildTable(data) {
             const service_node = service_template.cloneNode(true)
 
             const spans = service_node.querySelectorAll('span')
+            const as = service_node.querySelectorAll('a')
             spans[2].textContent = service['offense'].toFixed(2)
             spans[5].textContent = service['defense'].toFixed(2)
             spans[8].textContent = service['sla'].toFixed(2)
 
-            service_node.querySelector('a').href += `#team-${team.id}-row`
+            as[1].href += `#team-${team.id}-row`
 
             if (service['status'] !== '') {
+                console.log(service)
+                console.log(service['flagstores'])
+                // TODO move up
+                const flagstore_classes = new Map();
+                flagstore_classes.set(-1, 'glyphicon glyphicon-question-sign text-muted'); // NOT_CHECKED
+                flagstore_classes.set(0, 'glyphicon glyphicon-ok-sign text-success'); // OK
+                flagstore_classes.set(1, 'glyphicon glyphicon-minus-sign text-danger'); // DOWN
+                flagstore_classes.set(2, 'glyphicon glyphicon-exclamation-sign text-danger'); // FAULTY
+                flagstore_classes.set(3, 'glyphicon glyphicon-question-sign text-warning'); // FLAG_NOT_FOUND
+                flagstore_classes.set(4, 'glyphicon glyphicon-plus-sign text-info'); // RECOVERING
+
+                var flagstore_id = 1;
+                for (const flagstore of service['flagstores']) {
+                    const fs_box = as[0].cloneNode(true)
+                    fs_box.firstElementChild.setAttribute('class', flagstore_classes.get(flagstore[0]))
+                    fs_box.setAttribute('title', `Flagstore ${flagstore_id}`)
+                    fs_box.setAttribute('data-content', flagstore[1] === '' ? 'up' : flagstore[1])
+                    spans[9].appendChild(fs_box)
+                    flagstore_id++
+                }
+                spans[9].removeChild(as[0])
+
                 const statusClass = statusClasses[service['status']]
-                spans[9].setAttribute('class', `text-${statusClass}`)
-                spans[9].textContent = statusDescriptions[service['status']]
+                spans[11].setAttribute('class', `text-${statusClass}`)
+                spans[11].textContent = statusDescriptions[service['status']]
 
                 service_node.setAttribute('class', statusClass)
             }
@@ -74,4 +97,9 @@ function buildTable(data) {
         template.parentNode.appendChild(entry)
         entry.hidden = false
     }
+
+    setTimeout(function () {
+        //$('[data-toggle="tooltip"]').tooltip()
+        $('[data-toggle="popover"]').popover()
+    }, 1000)
 }

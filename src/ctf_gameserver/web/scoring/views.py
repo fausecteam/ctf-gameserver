@@ -17,7 +17,7 @@ from .decorators import registration_closed_required, services_public_required
 def scoreboard(request):
 
     return render(request, 'scoreboard.html', {
-        'services': models.Service.objects.all()
+        'services': models.ServiceGroup.objects.all()
     })
 
 
@@ -33,10 +33,10 @@ def scoreboard_json(_):
     else:
         to_tick = game_control.current_tick - 1
 
-    scores = calculations.scores(['team', 'team__user', 'service'],
-                                 ['team__image', 'team__user__username', 'service__name'])
+    scores = calculations.scores(['team', 'team__user', 'service_group'],
+                                 ['team__image', 'team__user__username', 'service_group__name'])
     statuses = calculations.team_statuses(to_tick, to_tick, only_team_fields=['user_id'])
-    services = models.Service.objects.all()
+    services = models.ServiceGroup.objects.all()
 
     response = {
         'tick': to_tick,
@@ -68,15 +68,24 @@ def scoreboard_json(_):
                 offense = 0
                 defense = 0
                 sla = 0
+            flagstores = []
             try:
-                status = statuses[team][to_tick][service.pk]
-            except KeyError:
+                service_statuses = statuses[team][to_tick][service.pk]
+                status = service_statuses[-1]
+                for key in sorted(service_statuses.keys()):
+                    if key == -1:
+                        continue
+                    flagstores.append(service_statuses[key])
+            except KeyError as e:
+                import traceback
+                traceback.print_exc()
                 status = ''
             team_entry['services'].append({
                 'status': status,
                 'offense': offense,
                 'defense': defense,
-                'sla': sla
+                'sla': sla,
+                'flagstores': flagstores
             })
 
         response['teams'].append(team_entry)
@@ -130,7 +139,7 @@ def service_status_json(_):
 
     statuses = calculations.team_statuses(from_tick, to_tick, ['user'], ['image', 'nop_team',
                                                                          'user__username'])
-    services = models.Service.objects.all().order_by('name')
+    services = models.ServiceGroup.objects.all().order_by('name')
 
     response = {
         'ticks': list(range(from_tick, to_tick+1)),
@@ -154,7 +163,7 @@ def service_status_json(_):
             tick_services = []
             for service in services:
                 try:
-                    tick_services.append(tick_statuses[tick][service.pk])
+                    tick_services.append(tick_statuses[tick][service.pk][-1])
                 except KeyError:
                     tick_services.append('')
             team_entry['ticks'].append(tick_services)
@@ -178,7 +187,7 @@ def teams_json(_):
     game_control = models.GameControl.get_instance()
     # Only publish Flag IDs after the respective Tick is over
     flagid_max_tick = game_control.current_tick - 1
-    flagid_min_tick = flagid_max_tick - game_control.valid_ticks
+    flagid_min_tick = flagid_max_tick - game_control.valid_ticks + 2
 
     flag_ids = defaultdict(lambda: defaultdict(lambda: []))
     for flag in models.Flag.objects.exclude(flagid=None) \

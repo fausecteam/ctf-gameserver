@@ -19,13 +19,13 @@ class ExampleChecker(checkerlib.BaseChecker):
             logging.info('Received response to SET command: %s', repr(resp))
         except UnicodeDecodeError:
             logging.warning('Received non-UTF-8 data: %s', repr(resp))
-            return checkerlib.CheckResult.FAULTY
+            return checkerlib.CheckResult.FAULTY, 'Received non-UTF-8 data'
         if resp != 'OK':
             logging.warning('Received wrong response to SET command')
-            return checkerlib.CheckResult.FAULTY
+            return checkerlib.CheckResult.FAULTY, 'Received wrong response to SET command'
 
         conn.close()
-        return checkerlib.CheckResult.OK
+        return checkerlib.CheckResult.OK, ''
 
     def check_service(self):
         conn = connect(self.ip)
@@ -37,10 +37,10 @@ class ExampleChecker(checkerlib.BaseChecker):
             logging.info('Received response to dummy command')
         except UnicodeDecodeError:
             logging.warning('Received non-UTF-8 data')
-            return checkerlib.CheckResult.FAULTY
+            return checkerlib.CheckResult.FAULTY, 'Received non-UTF-8 data'
 
         conn.close()
-        return checkerlib.CheckResult.OK
+        return checkerlib.CheckResult.OK, ''
 
     def check_flag(self, tick):
         flag = checkerlib.get_flag(tick)
@@ -54,13 +54,13 @@ class ExampleChecker(checkerlib.BaseChecker):
             logging.info('Received response to GET command: %s', repr(resp))
         except UnicodeDecodeError:
             logging.warning('Received non-UTF-8 data: %s', repr(resp))
-            return checkerlib.CheckResult.FAULTY
+            return checkerlib.CheckResult.FAULTY, 'Received non-UTF-8 data'
         if resp != flag:
             logging.warning('Received wrong response to GET command')
-            return checkerlib.CheckResult.FLAG_NOT_FOUND
+            return checkerlib.CheckResult.FLAG_NOT_FOUND, 'Received wrong response to GET command'
 
         conn.close()
-        return checkerlib.CheckResult.OK
+        return checkerlib.CheckResult.OK, ''
 
 
 def connect(ip):

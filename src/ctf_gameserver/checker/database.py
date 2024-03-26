@@ -73,7 +73,11 @@ def get_check_duration(db_conn, service_id, std_dev_count, prohibit_changes=Fals
                        '    WHERE service_id = %s AND tick < current_tick', (std_dev_count, service_id))
         result = cursor.fetchone()
 
-    return result[0]
+    if result and len(result) == 1 and result[0] != None:
+        return float(result[0])
+    else:
+        logging.warning('could not calculate the average script runtime in get_check_duration')
+        return 20
 
 
 def get_task_count(db_conn, service_id, prohibit_changes=False):
@@ -152,7 +156,7 @@ def _net_no_to_team_id(cursor, team_net_no, fake_team_id):
     return data[0]
 
 
-def commit_result(db_conn, service_id, team_net_no, tick, result, prohibit_changes=False, fake_team_id=None):
+def commit_result(db_conn, service_id, team_net_no, tick, result, message='', prohibit_changes=False, fake_team_id=None):
     """
     Saves the result from a Checker run to game database.
     """
@@ -164,8 +168,8 @@ def commit_result(db_conn, service_id, team_net_no, tick, result, prohibit_chang
             return
 
         cursor.execute('INSERT INTO scoring_statuscheck'
-                       '    (service_id, team_id, tick, status, timestamp)'
-                       '    VALUES (%s, %s, %s, %s, NOW())', (service_id, team_id, tick, result))
+                       '    (service_id, team_id, tick, status, timestamp, message)'
+                       '    VALUES (%s, %s, %s, %s, NOW(), %s)', (service_id, team_id, tick, result, message))
         # (In case of `prohibit_changes`,) PostgreSQL checks the database grants even if nothing is matched
         # by `WHERE`
         cursor.execute('UPDATE scoring_flag'

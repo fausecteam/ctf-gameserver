@@ -311,24 +311,32 @@ class MasterLoop:
 
     def handle_result_request(self, task_info, param):
         try:
-            result = int(param)
-        except ValueError:
+            result = int(param['value'])
+        except ValueError | KeyError:
             logging.error('Invalid result from Checker Script for team %d (net number %d) in tick %d: %s',
                           task_info['_team_id'], task_info['team'], task_info['tick'], param)
             return
 
         try:
-            check_result = CheckResult(result)
+            check_result = CheckResult(param['value'])
         except ValueError:
             logging.error('Invalid result from Checker Script for team %d (net number %d) in tick %d: %d',
                           task_info['_team_id'], task_info['team'], task_info['tick'], result)
             return
 
-        logging.info('Result from Checker Script for team %d (net number %d) in tick %d: %s',
-                     task_info['_team_id'], task_info['team'], task_info['tick'], check_result)
+        try:
+            message = str(param['message'])
+        except ValueError | KeyError:
+            logging.error('Invalid result from Checker Script for team %d (net number %d) in tick %d: %s',
+                          task_info['_team_id'], task_info['team'], task_info['tick'], param)
+            return
+
+
+        logging.info('Result from Checker Script for team %d (net number %d) in tick %d: %s, msg: %s',
+                     task_info['_team_id'], task_info['team'], task_info['tick'], check_result, message)
         metrics.inc(self.metrics_queue, 'completed_tasks', labels={'result': check_result.name})
         database.commit_result(self.db_conn, self.service['id'], task_info['team'], task_info['tick'],
-                               result)
+                               result, message)
 
     def launch_tasks(self):
         def change_tick(new_tick):

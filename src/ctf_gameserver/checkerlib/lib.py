@@ -12,7 +12,7 @@ import socket
 import ssl
 import sys
 import threading
-from typing import Any, Type
+from typing import Any, Type, Tuple
 
 import ctf_gameserver.lib.flag
 from ctf_gameserver.lib.checkresult import CheckResult
@@ -104,13 +104,13 @@ class BaseChecker:
         self.ip = ip
         self.team = team
 
-    def place_flag(self, tick: int) -> CheckResult:
+    def place_flag(self, tick: int) -> Tuple[CheckResult, str]:
         raise NotImplementedError('place_flag() must be implemented by the subclass')
 
-    def check_service(self) -> CheckResult:
+    def check_service(self) -> Tuple[CheckResult, str]:
         raise NotImplementedError('check_service() must be implemented by the subclass')
 
-    def check_flag(self, tick: int) -> CheckResult:
+    def check_flag(self, tick: int) -> Tuple[CheckResult, str]:
         raise NotImplementedError('check_flag() must be implemented by the subclass')
 
 
@@ -151,7 +151,17 @@ def set_flagid(data: str) -> None:
         # Wait for acknowledgement
         _recv_ctrl_message()
     else:
-        print('Storing Flag ID: {}'.format(data))
+        logging.info('Storing Flag ID: {}'.format(data))
+
+    store_state(f'__flagid_{tick}', data)
+
+
+def get_flagid(tick: int) -> str:
+    """
+    Allows to retrieve Flag ID for the current team and tick.
+    """
+
+    return load_state(f'__flagid_{tick}')
 
 
 def store_state(key: str, data: Any) -> None:
@@ -214,6 +224,7 @@ def run_check(checker_cls: Type[BaseChecker]) -> None:
     """
     Launch execution of the specified Checker implementation. Must be called by all Checker Scripts.
     """
+    global tick
 
     if len(sys.argv) != 4:
         raise Exception('Invalid arguments, usage: {} <ip> <team-net-no> <tick>'.format(sys.argv[0]))
@@ -230,58 +241,66 @@ def run_check(checker_cls: Type[BaseChecker]) -> None:
         get_flag._team = team    # pylint: disable=protected-access
 
     checker = checker_cls(ip, team)
-    result = _run_check_steps(checker, tick)
+    result, phase, message = _run_check_steps(checker, tick)
+
+    msg = f'{phase}{message}'
 
     if not _launched_without_runner():
-        _send_ctrl_message({'action': 'RESULT', 'param': result.value})
+        _send_ctrl_message({'action': 'RESULT', 'param': {
+            'value': result.value,
+            'message': msg,
+        }})
         # Wait for acknowledgement
         _recv_ctrl_message()
     else:
-        print('Check result: {}'.format(result))
+        print('Check result: {}, message: "{}"'.format(result, msg))
 
 
 def _run_check_steps(checker, tick):
 
     tick_lookback = 5
 
+    phase = 'placing flag: '
     try:
         logging.info('Placing flag')
-        result = checker.place_flag(tick)
+        result, message = checker.place_flag(tick)
         logging.info('Flag placement result: %s', result)
         if result != CheckResult.OK:
-            return result
+            return result, phase, message
 
+        phase = 'checking service: '
         logging.info('Checking service')
-        result = checker.check_service()
+        result, message = checker.check_service()
         logging.info('Service check result: %s', result)
         if result != CheckResult.OK:
-            return result
+            return result, phase, message
 
+        phase = 'checking flag: '
         current_tick = tick
         oldest_tick = max(tick-tick_lookback, 0)
         recovering = False
         while current_tick >= oldest_tick:
             logging.info('Checking flag of tick %d', current_tick)
-            result = checker.check_flag(current_tick)
+            result, message = checker.check_flag(current_tick)
             logging.info('Flag check result of tick %d: %s', current_tick, result)
             if result != CheckResult.OK:
                 if current_tick != tick and result == CheckResult.FLAG_NOT_FOUND:
                     recovering = True
                 else:
-                    return result
+                    return result, phase, message
             current_tick -= 1
 
         if recovering:
-            return CheckResult.RECOVERING
+            return CheckResult.RECOVERING, phase, message
         else:
-            return CheckResult.OK
+            return CheckResult.OK, '', message
     except Exception as e:    # pylint: disable=broad-except
         if _is_conn_error(e):
             logging.warning('Connection error during check', exc_info=e)
-            return CheckResult.DOWN
+            return CheckResult.DOWN, phase, 'connection timed out'
         else:
-            # Just let the Checker Script die, logging will be handled by the Runner
-            raise e
+            logging.exception('Exception in checker')
+            return CheckResult.DOWN, phase, 'checker error'
 
 
 def _launched_without_runner():
