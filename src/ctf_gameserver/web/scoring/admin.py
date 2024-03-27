@@ -6,6 +6,12 @@ from ctf_gameserver.web.admin import admin_site
 from . import models, forms
 
 
+@admin.register(models.ServiceGroup, site=admin_site)
+class ServiceGroupAdmin(admin.ModelAdmin):
+
+    prepopulated_fields = {'slug': ('name',)}
+
+
 @admin.register(models.Service, site=admin_site)
 class ServiceAdmin(admin.ModelAdmin):
 
@@ -67,8 +73,8 @@ class CaptureAdmin(admin.ModelAdmin):
 @admin.register(models.StatusCheck, site=admin_site)
 class StatusCheckAdmin(admin.ModelAdmin):
 
-    list_display = ('id', 'service', 'team', 'tick', 'status')
-    list_filter = ('service', 'tick', 'status')
+    list_display = ('id', 'service', 'team', 'tick', 'status', 'message')
+    list_filter = ('service', 'tick', 'status', 'message')
     search_fields = ('service__name', 'team__user__username')
     ordering = ('tick', 'timestamp')
 

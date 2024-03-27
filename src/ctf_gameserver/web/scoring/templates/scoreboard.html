@@ -78,6 +78,12 @@
                     <span class="glyphicon glyphicon-dashboard"></span> <span class="sr-only">SLA</span>
                     <span><!-- SLA --></span> <br/>
 
+                    <span class="flagstore-group">
+                        <!-- <span class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="bottom" title="not checked"></span> -->
+                        <a tabindex="0" class="flagstore" role="button" data-toggle="popover" data-trigger="focus hover" data-placement="bottom"
+                              title="All flagstores" data-content="not checked"><span class="glyphicon glyphicon-question-sign text-muted">
+                            </span></a>
+                    </span>
                     <a href="{% url 'service_status' %}">
                     <!-- Status -->
                     <span class="text-muted">{% trans 'not checked' %}</span>

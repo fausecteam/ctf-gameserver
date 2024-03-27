@@ -361,13 +361,12 @@ def handle_script_message(message, ctrlin_fd, runner_id, queue_to_master, pipe_f
 
     if action == ACTION_RESULT:
         try:
-            result = CheckResult(int(param))
-        except ValueError:
+            result = CheckResult(int(param['value']))
+            script_logger.info('[RUNNER] Checker Script result: %s, msg: %s', result.name, param['message'],
+                               extra={'result': result.value})
+        except ValueError | KeyError:
             # Ignore malformed message from the Checker Script, will be logged by the Master
             pass
-        else:
-            script_logger.info('[RUNNER] Checker Script result: %s', result.name,
-                               extra={'result': result.value})
 
     queue_to_master.put((runner_id, action, param))
     response = pipe_from_master.recv()
