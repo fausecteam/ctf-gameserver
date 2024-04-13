@@ -143,6 +143,7 @@ def main():
         try:
             service_id = database.get_service_attributes(db_conn, args.service,
                                                          prohibit_changes=True)['id']
+            database.get_service_margin(db_conn, args.service, prohibit_changes=True)
         except DBDataError as e:
             logging.warning('Invalid database state: %s', e)
             service_id = 1337    # Use dummy value for subsequent grant checks
@@ -392,7 +393,7 @@ class MasterLoop:
         total_tasks = database.get_task_count(self.db_conn, self.service['id'])
         local_tasks = math.ceil(total_tasks / self.checker_count)
 
-        margin_seconds = self.tick_duration.total_seconds() / 6
+        margin_seconds = database.get_service_margin(self.db_conn, self.service['slug'])
         launch_timeframe = max(self.tick_duration.total_seconds() - check_duration - margin_seconds, 0)
 
         intervals_per_timeframe = math.floor(launch_timeframe / self.interval) + 1

@@ -172,4 +172,4 @@ class MasterTest(DatabaseTestCase):
         self.master_loop.interval = 10
         self.master_loop.tick_duration = datetime.timedelta(seconds=90)
         self.master_loop.update_launch_params(10)
-        self.assertEqual(self.master_loop.tasks_per_launch, 7)
+        self.assertEqual(self.master_loop.tasks_per_launch, 9)

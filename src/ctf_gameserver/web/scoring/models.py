@@ -13,6 +13,10 @@ class Service(models.Model):
 
     name = models.CharField(max_length=30, unique=True)
     slug = models.SlugField(max_length=30, unique=True, help_text=_('Simplified name for use in paths'))
+    margin = models.PositiveIntegerField(default=30,
+                                         help_text=_('Safety margin (in seconds) for checker scheduling, '
+                                                     'gets added to the automatically determined check '
+                                                     'duration'))
 
     def __str__(self):    # pylint: disable=invalid-str-returned
         return self.name

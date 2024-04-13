@@ -42,6 +42,21 @@ def get_service_attributes(db_conn, service_slug, prohibit_changes=False):
     }
 
 
+def get_service_margin(db_conn, service_slug, prohibit_changes=False):
+    """
+    Returns the configured safety margin of a service for a given slug.
+    """
+
+    with transaction_cursor(db_conn, prohibit_changes) as cursor:
+        cursor.execute('SELECT margin FROM scoring_service WHERE slug = %s', (service_slug,))
+        result = cursor.fetchone()
+
+    if result is None:
+        raise DBDataError('Service has not been configured')
+
+    return result[0]
+
+
 def get_current_tick(db_conn, prohibit_changes=False):
     """
     Reads the current tick and the "cancel_checks" field from the game database.
