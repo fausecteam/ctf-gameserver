@@ -30,3 +30,4 @@ site_dir: docs_site
 markdown_extensions:
   - toc:
       permalink: True
+  - admonition

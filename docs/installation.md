@@ -137,10 +137,18 @@ that also acts as reverse proxy for the application). An example nginx config sn
     }
     location /uploads/ {
         alias /var/www/gameserver_uploads/;
+        # Prevent any JS execution from user uploads as a defense-in-depth measure
+        add_header Content-Security-Policy "default-src 'none'";
     }
     location = /robots.txt {
         alias /usr/lib/python3/dist-packages/ctf_gameserver/web/static/robots.txt;
     }
+
+!!! warning
+
+    Using the nginx `add_header` directive within a `location` block will clear **any** other headers set in
+    outer blocks. Repeat those headers in the `location` block or switch all of your nginx header handling to
+    [ngx_headers_more](https://github.com/openresty/headers-more-nginx-module).
 
 Manual Database Setup (without Ansible)
 ---------------------------------------
