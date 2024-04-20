@@ -106,13 +106,16 @@ def main():
     metrics = make_metrics()
     metrics['start_timestamp'].set_to_current_time()
 
-    try:
-        competition_name, flag_prefix = database.get_static_info(db_conn)
-    except DBDataError as e:
-        logging.error('Invalid database state, exiting: %s', e)
-        return os.EX_DATAERR
-
     daemon.notify('READY=1')
+
+    while True:
+        try:
+            competition_name, flag_prefix = database.get_static_info(db_conn)
+        except DBDataError as e:
+            logging.warning('Invalid database state, sleeping for 60 seconds: %s', e)
+            time.sleep(60)
+        else:
+            break
 
     asyncio.run(serve(listen_host, listen_port, db_conn, {
         'flag_secret': flag_secret,
