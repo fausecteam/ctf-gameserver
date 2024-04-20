@@ -40,7 +40,7 @@ The build commands are:
     $ cd ctf-gameserver
     # Do custom adjustments if desired
     $ sudo apt install devscripts dpkg-dev equivs
-    $ mk-build-deps --install debian/control
+    $ sudo mk-build-deps --install debian/control
     $ dpkg-buildpackage --unsigned-changes --unsigned-buildinfo
 
 This should result in a package file called `ctf-gameserver_1.0_all.deb` **in the parent directory**.
@@ -52,9 +52,10 @@ application server).
 Ansible
 -------
 The recommended way to install and configure CTF Gameserver is to use our Ansible roles provided in
-[CTF Gameserver Ansible](https://github.com/fausecteam/ctf-gameserver-ansible). 
+[CTF Gameserver Ansible](https://github.com/fausecteam/ctf-gameserver-ansible).
 
-For instructions on how to use these roles, please refer to that repo's README file.
+For instructions on how to use these roles, please refer to that repo's README file. The roles will install a
+PostgreSQL server from the Debian repositories and set up the Gameserver database.
 
 Configuration
 -------------
@@ -120,6 +121,17 @@ The WSGI module for CTF Gameserver is called `ctf_gameserver.web.wsgi:applicatio
 configuration file, `/etc/ctf-gameserver/web` must be on the PYTHONPATH and the environment variable
 `DJANGO_SETTINGS_MODULE` must be set to `prod_settings`.
 
+Example config for uWSGI, using Debian packages `uwsgi` and `uwsgi-plugin-python3`:
+
+    [uwsgi]
+    plugins = python3
+    uwsgi-socket = /run/uwsgi/ctf-gameserver.sock
+    python-path = /etc/ctf-gameserver/web
+    module = ctf_gameserver.web.wsgi:application
+    env = DJANGO_SETTINGS_MODULE=prod_settings
+    master = True
+    vacuum = True
+
 Medium-sized or larger setups should utilize [Django’s cache framework](https://docs.djangoproject.com/en/4.2/topics/cache/).
 We recommend [using Memcached](https://docs.djangoproject.com/en/4.2/topics/cache/#memcached) with
 `django.core.cache.backends.memcached.PyMemcacheCache`. Memcached's memory limits should be increased by
@@ -152,7 +164,7 @@ that also acts as reverse proxy for the application). An example nginx config sn
 
 Manual Database Setup (without Ansible)
 ---------------------------------------
-If you are **not using our Ansible roles**, you need to manually set up the database.
+If you are **not using our Ansible roles**, you need to manually install PostgreSQL and set up the database.
 
 1. Create a Postgres user and a database owned by it. Add these parameters to
    `/etc/ctf-gameserver/web/prod_settings.py`.
