@@ -101,14 +101,10 @@ one tick can be loaded in subsequent ones, regardless of the Master instances in
 
 Flag IDs
 --------
-In some cases, you want to provide teams with an identifier which helps retrieve an individual Flag. For
-example, consider a case where an exploit allows read access to a key/value store. To get Flag data, teams
-still have to know the keys under which valid Flags are stored. This can also help to reduce load on your
-service, because keys don't have to be brute-forced and a listing is not necessary.
+See ["Flag IDs" on Architecture page](../architecture.md#flag-ids).
 
-For this purpose, we provide the concept of **Flag IDs**. One ID can be stored per Flag by the Checker
-Script. It is provided to teams as JSON by the CTF Gameserver web component. Flag IDs must be UTF-8 strings
-with a maximum length of 100 characters. They are purely optional, not every service needs to provide them.
+One ID can be stored per Flag by the Checker Script. Flag IDs must be UTF-8 strings with a maximum length of
+100 characters.
 
 IPC Protocol
 ------------

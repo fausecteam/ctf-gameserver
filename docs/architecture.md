@@ -46,6 +46,16 @@ flag secret. It consists of a configurable static prefix, followed by the encode
 
 Using a prefix of `FAUST_`, a valid flag could look like this: `FAUST_Q1RGLRml7uVTRVJBRXdsFhEI3jhxey9I`
 
+Flag IDs
+--------
+In some cases, you want to provide teams with an identifier which helps retrieve an individual Flag. For
+example, consider a case where an exploit allows read access to a key/value store. To get Flag data, teams
+still have to know the keys under which valid Flags are stored. This can also help to reduce load on your
+service, because keys don't have to be brute-forced and a listing is not necessary.
+
+For this purpose, we provide the concept of **Flag IDs**. They are purely optional, not every service needs
+to provide them.
+
 Team Numbers
 ------------
 Teams have two different numbers, ID and Net Number.
@@ -57,3 +67,20 @@ The **Team Net Number** is used to construct the team's IP address range (e.g. `
 It is assigned randomly and sometimes also just called "Team Number". It aims to prevent correlation between
 the teams' registration order and address range, making it harder to target a specific team. This means teams
 should only know their own assignment.
+
+teams.json
+----------
+Flag IDs and the set of actually assigned Net Numbers are generally unknown to teams. This information is
+provided to teams as JSON by the CTF Gameserver web component under the path `/competition/teams.json` in the
+following format:
+
+    {
+        "teams": [123, 456, 789],
+        "flag_ids": {
+            "service1": {
+    			// Keys are net numbers from above as strings
+                "123": ["abc123", "def456"],
+                "789": ["xxx", "yyy"]
+            }
+        }
+    }
