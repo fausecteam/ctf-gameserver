@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     container: python:3.11-bookworm
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: pip install -e .[dev]
       - run: make lint
 
@@ -23,7 +23,7 @@ jobs:
       # Required for "EnricoMi/publish-unit-test-result-action"
       checks: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup dependencies
         run: |
           pip install tox
@@ -41,14 +41,14 @@ jobs:
           files: .tox/py*/log/results.xml
           comment_mode: "off"
       - name: Archive unit test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: tox-test-results
           path: .tox/py*/log/results.xml
           if-no-files-found: error
       - name: Archive code coverage results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: tox-code-coverage-report
@@ -60,7 +60,7 @@ jobs:
     runs-on: ubuntu-latest
     container: debian:bookworm
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: apt-get --yes update
       - run: apt-get --yes install --no-install-recommends devscripts dpkg-dev equivs
       # Add `--yes` to mk-build-deps' default options for apt-get
@@ -68,7 +68,7 @@ jobs:
       - run: dpkg-buildpackage --unsigned-changes --unsigned-buildinfo
       - run: mv ../ctf-gameserver_*.deb .
       - name: Store Debian package
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: deb-package
           path: ctf-gameserver_*.deb
@@ -81,8 +81,8 @@ jobs:
     container: debian:bookworm
     needs: build_deb_package
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
         with:
           name: deb-package
       - run: apt-get --yes update
@@ -92,14 +92,14 @@ jobs:
       - run: make build
       - run: pytest-3 --junitxml=results.xml --cov=src --cov-report=term --cov-report=html tests
       - name: Archive unit test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: debian-test-results
           path: results.xml
           if-no-files-found: error
       - name: Archive code coverage results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: debian-code-coverage-report
