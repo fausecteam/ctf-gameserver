@@ -5,6 +5,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Max
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.utils.translation import gettext_lazy as _
 from django.views.decorators.cache import cache_page
 
 import ctf_gameserver.web.registration.models as registration_models
@@ -331,8 +332,8 @@ def missing_checks(request):
 @staff_member_required
 def missing_checks_json(request):
     """
-    View which returns the teams with status "not checked" per tick for a specific service. The result is in
-    JSON format as required by the JavaScript code in def missing_checks().
+    View which returns the teams with status "not checked" or "timeout" per tick for a specific service. The
+    result is in JSON format as required by the JavaScript code in missing_checks().
     This can help to find unhandled exceptions in checker scripts, as "not checked" normally shouldn't occur.
     """
 
@@ -352,13 +353,23 @@ def missing_checks_json(request):
     except ValueError:
         return JsonResponse({'error': 'Ticks must be integers'})
 
+    status_timeout = models.StatusCheck.STATUSES[_('timeout')]
+
     all_flags = models.Flag.objects.filter(service=service) \
                                    .filter(tick__gte=from_tick, tick__lt=to_tick) \
                                    .values_list('tick', 'protecting_team')
     all_status_checks = models.StatusCheck.objects.filter(service=service) \
                                                   .filter(tick__gte=from_tick, tick__lt=to_tick) \
+                                                  .exclude(status=status_timeout) \
                                                   .values_list('tick', 'team')
     checks_missing = all_flags.difference(all_status_checks).order_by('-tick', 'protecting_team')
+
+    checks_timeout = defaultdict(set)
+    for tick, team in models.StatusCheck.objects.filter(service=service) \
+                                                .filter(tick__gte=from_tick, tick__lt=to_tick) \
+                                                .filter(status=status_timeout) \
+                                                .values_list('tick', 'team'):
+        checks_timeout[tick].add(team)
 
     result = []
     current_tick = {'tick': -1}
@@ -371,12 +382,14 @@ def missing_checks_json(request):
             result.append(current_tick)
 
     for check in checks_missing:
-        # Status checks are ordered by tick, finalize result for a tick when it changes
-        if current_tick['tick'] != check[0]:
-            append_result()
-            current_tick = {'tick': check[0], 'teams': []}
+        check_tick, check_team = check
 
-        current_tick['teams'].append(check[1])
+        # Status checks are ordered by tick, finalize result for a tick when it changes
+        if current_tick['tick'] != check_tick:
+            append_result()
+            current_tick = {'tick': check_tick, 'teams': []}
+
+        current_tick['teams'].append((check_team, check_team in checks_timeout[check_tick]))
 
     # Add result from last iteration
     append_result()

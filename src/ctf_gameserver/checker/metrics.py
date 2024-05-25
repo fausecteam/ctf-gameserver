@@ -58,7 +58,8 @@ def checker_metrics_factory(registry, service):
 
     counters = [
         ('started_tasks', 'Number of started Checker Script instances'),
-        ('terminated_tasks', 'Number of Checker Script instances forcibly terminated')
+        ('timeout_tasks', 'Number of Checker Script instances forcibly terminated at end of tick'),
+        ('killed_tasks', 'Number of Checker Script instances forcibly terminated because of misbehavior')
     ]
     for name, doc in counters:
         metrics[name] = prometheus_client.Counter(metric_prefix+name, doc, ['service'], registry=registry)
@@ -66,6 +67,7 @@ def checker_metrics_factory(registry, service):
         metrics[name].labels(service)
 
     metrics['completed_tasks'] = prometheus_client.Counter(
+        # Timeouts do not count as successfully completed checks
         metric_prefix+'completed_tasks', 'Number of successfully completed checks', ['result', 'service'],
         registry=registry
     )

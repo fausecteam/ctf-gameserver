@@ -1,5 +1,6 @@
 import logging
 
+from ctf_gameserver.lib.checkresult import STATUS_TIMEOUT
 from ctf_gameserver.lib.database import transaction_cursor
 from ctf_gameserver.lib.exceptions import DBDataError
 
@@ -181,13 +182,13 @@ def commit_result(db_conn, service_id, team_net_no, tick, result, prohibit_chang
         cursor.execute('INSERT INTO scoring_statuscheck'
                        '    (service_id, team_id, tick, status, timestamp)'
                        '    VALUES (%s, %s, %s, %s, NOW())', (service_id, team_id, tick, result))
-        # (In case of `prohibit_changes`,) PostgreSQL checks the database grants even if nothing is matched
-        # by `WHERE`
-        cursor.execute('UPDATE scoring_flag'
-                       '    SET placement_end = NOW()'
-                       '    WHERE service_id = %s AND protecting_team_id = %s AND tick = %s', (service_id,
-                                                                                               team_id,
-                                                                                               tick))
+        if result != STATUS_TIMEOUT:
+            # (In case of `prohibit_changes`,) PostgreSQL checks the database grants even if nothing is
+            # matched by `WHERE`
+            cursor.execute('UPDATE scoring_flag'
+                           '    SET placement_end = NOW()'
+                           '    WHERE service_id = %s AND protecting_team_id = %s AND tick = %s',
+                           (service_id, team_id, tick))
 
 
 def set_flagid(db_conn, service_id, team_net_no, tick, flagid, prohibit_changes=False, fake_team_id=None):

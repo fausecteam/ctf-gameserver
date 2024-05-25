@@ -8,7 +8,8 @@ const statusClasses = {
     1: 'danger',
     2: 'danger',
     3: 'warning',
-    4: 'info'
+    4: 'info',
+    5: 'active'
 }
 
 

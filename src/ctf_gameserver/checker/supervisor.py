@@ -86,16 +86,20 @@ class RunnerSupervisor:
         logging.info('Terminating Runner process, info: %s', self.processes[runner_id][2])
         self.processes[runner_id][0].terminate()
         # Afterwards, get_request() will join the child and remove it from `self.processes`
-        metrics.inc(self.metrics_queue, 'terminated_tasks')
 
     def terminate_runners(self):
+        terminated_infos = []
+
         if len(self.processes) > 0:
             logging.warning('Terminating all %d Runner processes', len(self.processes))
-            for runner_id in self.processes:
+            for runner_id, process in self.processes.items():
                 self.terminate_runner(runner_id)
+                terminated_infos.append(process[2])
 
         # Prevent memory leaks
         self._reset()
+
+        return terminated_infos
 
     def get_request(self):
         # Use a loop to not leak our implementation detail for ACTION_RUNNER_EXIT: Only return None when the

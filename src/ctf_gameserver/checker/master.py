@@ -12,8 +12,8 @@ from psycopg2 import errorcodes as postgres_errors
 
 from ctf_gameserver.lib.args import get_arg_parser_with_db, parse_host_port
 from ctf_gameserver.lib import daemon
+from ctf_gameserver.lib.checkresult import CheckResult, STATUS_TIMEOUT
 from ctf_gameserver.lib.database import transaction_cursor
-from ctf_gameserver.lib.checkresult import CheckResult
 from ctf_gameserver.lib.exceptions import DBDataError
 import ctf_gameserver.lib.flag as flag_lib
 
@@ -264,11 +264,13 @@ class MasterLoop:
                     # We can't signal an error to the Checker Script (which might be waiting for a response),
                     # so our only option is to kill it
                     self.supervisor.terminate_runner(req['runner_id'])
+                    metrics.inc(self.metrics_queue, 'killed_tasks')
                     send_resp = False
             except:    # noqa, pylint: disable=bare-except
                 logging.exception('Checker Script communication error for team %d (net number %d) in tick '
                                   '%d:', req['info']['_team_id'], req['info']['team'], req['info']['tick'])
                 self.supervisor.terminate_runner(req['runner_id'])
+                metrics.inc(self.metrics_queue, 'killed_tasks')
             else:
                 if send_resp:
                     req['send'].send(resp)
@@ -332,8 +334,16 @@ class MasterLoop:
                                result)
 
     def launch_tasks(self):
+        def timeout_runners():
+            for task_info in self.supervisor.terminate_runners():
+                logging.info('Forcefully terminated Checker Script for team %d (net number %d) in tick %d',
+                             task_info['_team_id'], task_info['team'], task_info['tick'])
+                metrics.inc(self.metrics_queue, 'timeout_tasks')
+                database.commit_result(self.db_conn, self.service['id'], task_info['team'],
+                                       task_info['tick'], STATUS_TIMEOUT)
+
         def change_tick(new_tick):
-            self.supervisor.terminate_runners()
+            timeout_runners()
             self.update_launch_params(new_tick)
             self.known_tick = new_tick
 
@@ -345,7 +355,7 @@ class MasterLoop:
             change_tick(current_tick)
         elif cancel_checks:
             # Competition over
-            self.supervisor.terminate_runners()
+            timeout_runners()
             return
 
         tasks = database.get_new_tasks(self.db_conn, self.service['id'], self.tasks_per_launch)

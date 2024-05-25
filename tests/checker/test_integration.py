@@ -230,7 +230,10 @@ class IntegrationTest(DatabaseTestCase):
                            '    WHERE placement_start IS NOT NULL AND placement_end IS NULL')
             self.assertEqual(cursor.fetchone()[0], 1)
             cursor.execute('SELECT COUNT(*) FROM scoring_statuscheck')
-            self.assertEqual(cursor.fetchone()[0], 0)
+            self.assertEqual(cursor.fetchone()[0], 1)
+            cursor.execute('SELECT status FROM scoring_statuscheck'
+                           '    WHERE service_id=1 AND team_id=2 AND tick=0')
+            self.assertEqual(cursor.fetchone()[0], 5)
 
         warning_mock.assert_called_with('Terminating all %d Runner processes', 1)
 
@@ -596,8 +599,9 @@ class IntegrationTest(DatabaseTestCase):
             cursor.execute('SELECT COUNT(*) FROM scoring_flag'
                            '    WHERE placement_start IS NOT NULL AND placement_end IS NULL')
             self.assertEqual(cursor.fetchone()[0], 1)
-            cursor.execute('SELECT COUNT(*) FROM scoring_statuscheck')
-            self.assertEqual(cursor.fetchone()[0], 0)
+            cursor.execute('SELECT status FROM scoring_statuscheck'
+                           '    WHERE service_id=1 AND team_id=2 AND tick=0')
+            self.assertEqual(cursor.fetchone()[0], 5)
 
         warning_mock.assert_called_with('Terminating all %d Runner processes', 1)
 

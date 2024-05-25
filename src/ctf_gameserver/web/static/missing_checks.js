@@ -31,7 +31,8 @@ function buildList(data) {
         tickEntry.appendChild(prefix)
 
         for (let i = 0; i < check['teams'].length; i++) {
-            const teamID = check['teams'][i]
+            const teamID = check['teams'][i][0]
+            const isTimeout = check['teams'][i][1]
             const teamName = data['all-teams'][teamID]['name']
             const teamNetNo = data['all-teams'][teamID]['net-number']
 
@@ -45,6 +46,9 @@ function buildList(data) {
                                            'q=service:' + data['service-slug'] + ' AND team:' + teamNetNo +
                                            ' AND tick:' + check['tick'])
                 teamEntry.target = '_blank'
+                if (isTimeout) {
+                    teamEntry.classList.add('text-muted')
+                }
             }
             teamEntry.textContent = teamName + ' (' + teamNetNo + ')'
             tickEntry.appendChild(teamEntry)

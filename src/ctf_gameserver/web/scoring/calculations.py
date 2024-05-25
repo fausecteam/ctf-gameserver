@@ -1,6 +1,7 @@
 from collections import defaultdict, OrderedDict
 
 from django.core.cache import cache
+from django.utils.translation import gettext_lazy as _
 
 from ctf_gameserver.web.registration.models import Team
 from . import models
@@ -89,7 +90,8 @@ def team_statuses(from_tick, to_tick, select_related_team_fields=None, only_team
         statuses[team] = defaultdict(lambda: {})
         teams[team.pk] = team
 
-    status_checks = models.StatusCheck.objects.filter(tick__gte=from_tick, tick__lte=to_tick)
+    status_checks = models.StatusCheck.objects.filter(tick__gte=from_tick, tick__lte=to_tick) \
+                                              .exclude(status=models.StatusCheck.STATUSES[_('timeout')])
     for check in status_checks:
         statuses[teams[check.team_id]][check.tick][check.service_id] = check.status
 
