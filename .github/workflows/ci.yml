@@ -8,7 +8,7 @@ jobs:
   lint:
     name: Lint soure code
     runs-on: ubuntu-latest
-    container: python:3.11-bullseye
+    container: python:3.11-bookworm
     steps:
       - uses: actions/checkout@v3
       - run: pip install -e .[dev]
@@ -18,7 +18,7 @@ jobs:
   test_tox:
     name: Test with Tox
     runs-on: ubuntu-latest
-    container: python:3.11-bullseye
+    container: python:3.11-bookworm
     permissions:
       # Required for "EnricoMi/publish-unit-test-result-action"
       checks: write
@@ -58,14 +58,11 @@ jobs:
   build_deb_package:
     name: Build Debian package
     runs-on: ubuntu-latest
-    container: debian:bullseye
+    container: debian:bookworm
     steps:
       - uses: actions/checkout@v3
-      - run: echo 'deb http://deb.debian.org/debian/ bullseye-backports main' >> /etc/apt/sources.list
       - run: apt-get --yes update
       - run: apt-get --yes install --no-install-recommends devscripts dpkg-dev equivs
-      # It's a bit ugly to do this explicitly, but we really need Django from backports
-      - run: apt-get --yes install -t bullseye-backports python3-django
       # Add `--yes` to mk-build-deps' default options for apt-get
       - run: mk-build-deps --install --tool 'apt-get --yes -o Debug::pkgProblemResolver=yes --no-install-recommends' debian/control
       - run: dpkg-buildpackage --unsigned-changes --unsigned-buildinfo
@@ -81,17 +78,14 @@ jobs:
   test_debian:
     name: Test with Debian
     runs-on: ubuntu-latest
-    container: debian:bullseye
+    container: debian:bookworm
     needs: build_deb_package
     steps:
       - uses: actions/checkout@v3
       - uses: actions/download-artifact@v3
         with:
           name: deb-package
-      - run: echo 'deb http://deb.debian.org/debian/ bullseye-backports main' >> /etc/apt/sources.list
       - run: apt-get --yes update
-      # It's a bit ugly to do this explicitly, but we really need Django from backports
-      - run: apt-get --yes install -t bullseye-backports python3-django
       # Install our package in order to install its dependencies
       - run: apt-get --yes install --no-install-recommends ./ctf-gameserver_*.deb
       - run: apt-get --yes install make curl unzip python3-pytest python3-pytest-cov
