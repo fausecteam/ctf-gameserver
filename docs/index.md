@@ -45,3 +45,14 @@ It expects a network, completely local or VPN-based, with the following properti
   scheme like `10.66.<team>.0/24`.
 * One exception is displaying the latest handshake on the VPN Status History page, which is currently only
   implemented for [WireGuard](https://www.wireguard.com/).
+
+Further Reading
+---------------
+Some links that contain interesting information for hosting your own CTF:
+
+* A member of the team behind the *Pls, I Want In* CTF wrote about their infrastructure
+  [here](https://dev.jameslowther.com/Projects/Pls,-I-Want-In---2024). They used CTF Gameserver and a
+  scalable, highly available setup hosted on AWS with Terraform.
+* The FAUST CTF infrastructure team gave [a talk on preventing traffic
+  fingerprinting](https://www.haproxy.com/user-spotlight-series/preventing-traffic-fingerprinting-in-capture-the-flag-competitions) with iptables and HAProxy
+  at HAProxyConf 2022.
