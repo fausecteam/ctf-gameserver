@@ -1,5 +1,6 @@
 import datetime
 import logging
+from threading import Lock, Thread
 import time
 import os
 
@@ -71,10 +72,12 @@ def main():
     metrics = make_metrics(db_conn)
     metrics['start_timestamp'].set_to_current_time()
 
+    scoring_lock = Lock()
+
     daemon.notify('READY=1')
 
     while True:
-        main_loop_step(db_conn, metrics, args.nonstop)
+        main_loop_step(db_conn, metrics, scoring_lock, args.nonstop)
 
 
 def make_metrics(db_conn, registry=prometheus_client.REGISTRY):
@@ -144,7 +147,7 @@ def make_metrics(db_conn, registry=prometheus_client.REGISTRY):
     return metrics
 
 
-def main_loop_step(db_conn, metrics, nonstop):
+def main_loop_step(db_conn, metrics, scoring_lock, nonstop):
 
     def sleep(duration):
         logging.info('Sleeping for %d seconds', duration)
@@ -199,11 +202,25 @@ def main_loop_step(db_conn, metrics, nonstop):
     if get_sleep_seconds(control_info, metrics, now) <= 0:
         logging.info('After tick %d, increasing tick to the next one', control_info['current_tick'])
         database.increase_tick(db_conn)
+        calculate_scoreboard_in_thread(db_conn, metrics, scoring_lock)
 
-        scoring_start_time = time.monotonic()
-        scoring.calculate_scoreboard(db_conn)
-        metrics['scoreboard_update_seconds'].observe(time.monotonic() - scoring_start_time)
-        logging.info('New scoreboard calculated')
+
+def calculate_scoreboard_in_thread(db_conn, metrics, lock):
+
+    def calculate():
+        if not lock.acquire(blocking=False):
+            logging.warning('Skipping scoreboard calculation because previous run is stil ongoing')
+            return
+
+        try:
+            scoring_start_time = time.monotonic()
+            scoring.calculate_scoreboard(db_conn)
+            metrics['scoreboard_update_seconds'].observe(time.monotonic() - scoring_start_time)
+            logging.info('New scoreboard calculated')
+        finally:
+            lock.release()
+
+    Thread(target=calculate, daemon=True).start()
 
 
 def get_sleep_seconds(control_info, metrics, now=None):

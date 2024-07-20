@@ -21,6 +21,9 @@ def transaction_cursor(db_conn, always_rollback=False):
     cursor = db_conn.cursor()
 
     if isinstance(cursor, sqlite3.Cursor):
+        if sqlite3.threadsafety < 2:
+            raise Exception('SQLite must be built with thread safety')
+
         cursor = _SQLite3Cursor(cursor)
 
     try:
