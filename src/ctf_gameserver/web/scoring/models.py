@@ -36,8 +36,6 @@ class Flag(models.Model):
     placement_end = models.DateTimeField(null=True, blank=True, default=None)
     # Optional identifier to help Teams retrieve the Flag, we don't enforce this to uniquely identify a Flag
     flagid = models.CharField(max_length=100, null=True, blank=True, default=None)
-    # Bonus points for capturing this flag
-    bonus = models.FloatField(null=True, blank=True, default=None)
 
     class Meta:
         unique_together = ('service', 'protecting_team', 'tick')
@@ -108,14 +106,12 @@ class StatusCheck(models.Model):
 
 class ScoreBoard(models.Model):
     """
-    Scoreboard as calculated by external, asyncron helper. May be a
-    (materialized) view or a real table and should just be handled
-    read-only from within the website.
+    Calculated current state of the scoreboard.
+    Can be recreated from other data at any point, but persisted for performance reasons.
     """
-    team = models.OneToOneField(Team, editable=False, primary_key=True, on_delete=models.PROTECT)
-    service = models.OneToOneField(Service, editable=False, on_delete=models.PROTECT)
+    team = models.ForeignKey(Team, editable=False, on_delete=models.PROTECT)
+    service = models.ForeignKey(Service, editable=False, on_delete=models.PROTECT)
     attack = models.FloatField(editable=False)
-    bonus = models.FloatField(editable=False)
     defense = models.FloatField(editable=False)
     sla = models.FloatField(editable=False)
     total = models.FloatField(editable=False)

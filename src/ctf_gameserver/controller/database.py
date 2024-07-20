@@ -43,22 +43,6 @@ def cancel_checks(db_conn, prohibit_changes=False):
         cursor.execute('UPDATE scoring_gamecontrol SET cancel_checks = true')
 
 
-def update_scoring(db_conn):
-
-    with transaction_cursor(db_conn) as cursor:
-        cursor.execute('UPDATE scoring_flag as outerflag'
-                       '    SET bonus = 1.0 / ('
-                       '        SELECT greatest(1, count(*))'
-                       '        FROM scoring_flag'
-                       '        LEFT OUTER JOIN scoring_capture ON scoring_capture.flag_id = scoring_flag.id'
-                       '        WHERE scoring_capture.flag_id = outerflag.id)'
-                       '    FROM scoring_gamecontrol'
-                       '    WHERE outerflag.tick >='
-                       '        scoring_gamecontrol.current_tick - scoring_gamecontrol.valid_ticks'
-                       '        OR outerflag.bonus IS NULL')
-        cursor.execute('REFRESH MATERIALIZED VIEW "scoring_scoreboard"')
-
-
 def get_exploiting_teams_counts(db_conn, prohibit_changes=False):
 
     with transaction_cursor(db_conn, prohibit_changes) as cursor:

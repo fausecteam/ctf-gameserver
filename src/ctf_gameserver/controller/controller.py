@@ -14,7 +14,7 @@ from ctf_gameserver.lib.database import transaction_cursor
 from ctf_gameserver.lib.exceptions import DBDataError
 from ctf_gameserver.lib.metrics import start_metrics_server
 
-from . import database
+from . import database, scoring
 
 
 def main():
@@ -50,6 +50,7 @@ def main():
             logging.warning('Invalid database state: %s', e)
 
         database.increase_tick(db_conn, prohibit_changes=True)
+        scoring.calculate_scoreboard(db_conn, prohibit_changes=True)
     except psycopg2.ProgrammingError as e:
         if e.pgcode == postgres_errors.INSUFFICIENT_PRIVILEGE:
             # Log full exception because only the backtrace will tell which kind of permission is missing
@@ -90,7 +91,9 @@ def make_metrics(db_conn, registry=prometheus_client.REGISTRY):
 
     histograms = [
         ('tick_change_delay_seconds', 'Differences between supposed and actual tick change times',
-         (1, 3, 5, 10, 30, 60, float('inf')))
+         (1, 3, 5, 10, 30, 60, float('inf'))),
+        ('scoreboard_update_seconds', 'Time spent calculating the scoreboard',
+         (0.1, 0.5, 1, 3, 5, 10, 30, 60, 120, 180, 240, float('inf')))
     ]
     for name, doc, buckets in histograms:
         metrics[name] = prometheus_client.Histogram(metric_prefix+name, doc, buckets=buckets,
@@ -184,7 +187,7 @@ def main_loop_step(db_conn, metrics, nonstop):
         database.cancel_checks(db_conn)
 
         # Update scoring for last tick of game
-        database.update_scoring(db_conn)
+        scoring.calculate_scoreboard(db_conn)
 
         # Do not stop the program because a daemon might get restarted if it exits
         # Prevent a busy loop in case we have not slept above as the hypothetic next tick would be overdue
@@ -196,7 +199,11 @@ def main_loop_step(db_conn, metrics, nonstop):
     if get_sleep_seconds(control_info, metrics, now) <= 0:
         logging.info('After tick %d, increasing tick to the next one', control_info['current_tick'])
         database.increase_tick(db_conn)
-        database.update_scoring(db_conn)
+
+        scoring_start_time = time.monotonic()
+        scoring.calculate_scoreboard(db_conn)
+        metrics['scoreboard_update_seconds'].observe(time.monotonic() - scoring_start_time)
+        logging.info('New scoreboard calculated')
 
 
 def get_sleep_seconds(control_info, metrics, now=None):

@@ -172,7 +172,6 @@ If you are **not using our Ansible roles**, you need to manually install Postgre
 3. `PYTHONPATH=/etc/ctf-gameserver/web DJANGO_SETTINGS_MODULE=prod_settings django-admin migrate`
 4. To create an initial admin user for the Web component, run:
    `PYTHONPATH=/etc/ctf-gameserver/web DJANGO_SETTINGS_MODULE=prod_settings django-admin createsuperuser`
-5. Create the Materialized View for scoring, apply [scoring.sql](https://github.com/fausecteam/ctf-gameserver/blob/master/conf/controller/scoring.sql): `psql < scoring.sql`
 
 If you want to restrict database access for the individual roles to what is actually required, create
 additional Postgres users with the respective database grants. For details, see the [tasks from the
