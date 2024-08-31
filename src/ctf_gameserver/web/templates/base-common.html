@@ -32,7 +32,7 @@
 
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="{{ competition_name }}" />
-        <meta property="og:image" content="https://www.faustctf.net{% static 'faustctf.svg' %}" />
+        <meta property="og:image" content="/img/faustctf.png" />
     </head>
 
 
@@ -47,7 +47,10 @@
                         <span class="icon-bar"></span>
                     </button>
 
-                    <a class="navbar-brand" href="{{ HOME_URL }}">{{ competition_name }}</a>
+                    <a class="navbar-brand" href="{{ HOME_URL }}">
+                        <img src="/img/faustctf.png" alt="FAUST CTF 2024 logo" />
+                        <span>{{ competition_name }}</span>
+                    </a>
                 </div>
 
                 <div class="collapse navbar-collapse" id="main-menu">
