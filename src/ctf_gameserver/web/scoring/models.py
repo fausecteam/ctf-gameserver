@@ -35,7 +35,7 @@ class Flag(models.Model):
     placement_start = models.DateTimeField(null=True, blank=True, default=None)
     placement_end = models.DateTimeField(null=True, blank=True, default=None)
     # Optional identifier to help Teams retrieve the Flag, we don't enforce this to uniquely identify a Flag
-    flagid = models.CharField(max_length=100, null=True, blank=True, default=None)
+    flagid = models.CharField(max_length=200, null=True, blank=True, default=None)
 
     class Meta:
         unique_together = ('service', 'protecting_team', 'tick')
