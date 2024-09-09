@@ -145,6 +145,8 @@ def set_flagid(data: str) -> None:
 
     if not isinstance(data, str):
         raise TypeError('data must be of type str')
+    if len(data) > 200:
+        raise AttributeError('data must not be longer than 200 bytes')
 
     if not _launched_without_runner():
         _send_ctrl_message({'action': 'FLAGID', 'param': data})
