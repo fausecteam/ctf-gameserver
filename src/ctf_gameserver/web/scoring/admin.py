@@ -62,6 +62,8 @@ class CaptureAdmin(admin.ModelAdmin):
     search_fields = ('capturing_team__user__username', 'flag__protecting_team__user__username',
                      'flag__service__name')
     ordering = ('timestamp',)
+    # A giant dropdown of *all* flags made the admin page unusably slow
+    raw_id_fields = ('flag',)
 
 
 @admin.register(models.StatusCheck, site=admin_site)
