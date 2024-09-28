@@ -285,9 +285,11 @@ async def check_pings(ip_pattern, teams):
 
     async def ping(ip):
         cmd = ['ping', '-W', str(NETWORK_TIMEOUT), '-c', '1', '-n', ip]
+        # `stderr=None` inherits the parents stderr, "sendmsg: Destination address required" messages here
+        # result from the WireGuard interface having no active peer and returning EDESTADDRREQ
         proc = await asyncio.create_subprocess_exec(*cmd, stdout=asyncio.subprocess.PIPE, stderr=None)
 
-        rtt_re = re.compile(r'^rtt min/avg/max/mdev = ([0-9.]+)/[0-9.]+/[0-9.]+/[0-9.]+ ms$')
+        rtt_re = re.compile(r'^rtt min/avg/max/mdev = ([0-9.]+)/[0-9.]+/[0-9.]+/[0-9.-]+ ms$')
         rtt = None
 
         while data := await proc.stdout.readline():
@@ -301,6 +303,17 @@ async def check_pings(ip_pattern, teams):
         if proc.returncode == 0:
             if rtt is None:
                 logging.error('"%s" call returned 0, but could not parse result', ' '.join(cmd))
+            if rtt > NETWORK_TIMEOUT * 1000:
+                # RTT values are unreliable because time is stored in the ICMP data field, which is
+                # controlled by the ping target in Reply packets:
+                #   https://stackoverflow.com/a/71461124/1792200
+                #   https://datatracker.ietf.org/doc/html/rfc4443#section-4.2
+                # We once saw some interesting things here:
+                #   rtt min/avg/max/mdev =
+                #   700000000777036.385/700000000777036.416/700000000777036.385/-9223372036854775.-808 ms
+                logging.warning('"%s" call returned bogus RTT: %d', ' '.join(cmd), rtt)
+                # Safe max value of Django PositiveIntegerField
+                return 2147483647
             return rtt
         elif proc.returncode == 1:
             # No reply received
