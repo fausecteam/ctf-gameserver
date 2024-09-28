@@ -51,13 +51,13 @@ class CaptureAdmin(admin.ModelAdmin):
         """
         return capture.flag.service
 
-    def tick(self, capture):
+    def flag_tick(self, capture):
         """
         Returns the tick of the capture's flag for usage in `list_display`.
         """
         return capture.flag.tick
 
-    list_display = ('id', 'capturing_team', 'protecting_team', 'service', 'tick')
+    list_display = ('id', 'capturing_team', 'protecting_team', 'service', 'flag_tick', 'timestamp')
     list_filter = (ServiceFilter,)
     search_fields = ('capturing_team__user__username', 'flag__protecting_team__user__username',
                      'flag__service__name')
