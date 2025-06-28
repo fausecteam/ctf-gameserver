@@ -16,7 +16,7 @@ setup(
 
     install_requires = [
         'ConfigArgParse',
-        'Django == 3.2.*',
+        'Django == 4.2.*',
         'Markdown',
         'Pillow',
         'prometheus_client',

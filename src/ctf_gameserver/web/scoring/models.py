@@ -38,11 +38,14 @@ class Flag(models.Model):
     flagid = models.CharField(max_length=200, null=True, blank=True, default=None)
 
     class Meta:
-        unique_together = ('service', 'protecting_team', 'tick')
-        index_together = (
-            ('service', 'tick'),
-            ('service', 'protecting_team', 'tick')
-        )
+        constraints = [
+            models.UniqueConstraint(fields=['service', 'protecting_team', 'tick'],
+                                    name='scoring_flag_service_protecting_team_tick_uniq')
+        ]
+        indexes = [
+            models.Index(fields=['service', 'tick']),
+            models.Index(fields=['service', 'protecting_team', 'tick'])
+        ]
 
     def __str__(self):
         return 'Flag {:d}'.format(self.id)
@@ -60,8 +63,13 @@ class Capture(models.Model):
 
     class Meta:
         # This constraint is necessary for correct behavior of the submission server
-        unique_together = ('flag', 'capturing_team')
-        index_together = ('flag', 'capturing_team')
+        constraints = [
+            models.UniqueConstraint(fields=['flag', 'capturing_team'],
+                                    name='scoring_capture_flag_capturing_team_uniq')
+        ]
+        indexes = [
+            models.Index(fields=['flag', 'capturing_team'])
+        ]
 
     def __str__(self):
         return 'Capture {:d}'.format(self.id)
@@ -94,11 +102,14 @@ class StatusCheck(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('service', 'team', 'tick')
-        index_together = (
-            ('service', 'tick', 'status'),
-            ('service', 'team', 'status')
-        )
+        constraints = [
+            models.UniqueConstraint(fields=['service', 'team', 'tick'],
+                                    name='scoring_statuscheck_service_team_tick_uniq')
+        ]
+        indexes = [
+            models.Index(fields=['service', 'tick', 'status']),
+            models.Index(fields=['service', 'team', 'status'])
+        ]
 
     def __str__(self):
         return 'Status check {:d}'.format(self.id)
@@ -134,8 +145,13 @@ class CheckerState(models.Model):
     data = models.TextField()
 
     class Meta:
-        unique_together = ('service', 'team', 'key')
-        index_together = ('service', 'team', 'key')
+        constraints = [
+            models.UniqueConstraint(fields=['service', 'team', 'key'],
+                                    name='scoring_checkerstate_service_team_key_uniq')
+        ]
+        indexes = [
+            models.Index(fields=['service', 'team', 'key'])
+        ]
 
     def __str__(self):
         return 'Checker state "{}" for service {} and team {}'.format(self.key, self.service, self.team)

@@ -38,11 +38,15 @@ class Flatpage(models.Model):
     class Meta:
         # Slug is usually (automatically) generated from the title, add constraints for both because of
         # https://code.djangoproject.com/ticket/13091
-        unique_together = (
-            ('category', 'title'),
-            ('category', 'slug')
-        )
-        index_together = ('category', 'slug')
+        constraints = [
+            models.UniqueConstraint(fields=['category', 'title'],
+                                    name='flatpages_flatpage_category_title_uniq'),
+            models.UniqueConstraint(fields=['category', 'slug'],
+                                    name='flatpages_flatpage_category_slug_uniq')
+        ]
+        indexes = [
+            models.Index(fields=['category', 'slug'])
+        ]
         ordering = ('category', 'ordering', 'title')
 
     class ObjectsWithoutCategoryManager(models.Manager):

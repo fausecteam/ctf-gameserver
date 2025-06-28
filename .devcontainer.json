@@ -1,5 +1,5 @@
 {
-    "image": "python:3.11-alpine",
+    "image": "python:3.13-alpine",
     "updateContentCommand": "apk --no-cache add git curl build-base jpeg-dev zlib-dev iputils-ping",
     "postCreateCommand": "pip3 install --editable .[dev] && make dev",
     "customizations": {

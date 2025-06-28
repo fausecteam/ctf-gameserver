@@ -8,7 +8,7 @@ from django.views.generic import ListView
 from django.shortcuts import get_object_or_404, render, redirect
 from django.conf import settings
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.contrib import messages
 from django.contrib.auth import logout, get_user_model
 from django.contrib.auth.decorators import login_required

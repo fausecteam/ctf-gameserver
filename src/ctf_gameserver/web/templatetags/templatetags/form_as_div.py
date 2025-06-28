@@ -1,9 +1,9 @@
 from django import template
 from django.forms import CheckboxInput, CheckboxSelectMultiple, RadioSelect, FileInput, MultiWidget
 from django.forms.utils import ErrorList
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from django.utils.html import format_html, format_html_join, conditional_escape
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.utils.safestring import mark_safe
 
 register = template.Library()    # pylint: disable=invalid-name
@@ -91,13 +91,13 @@ def as_div(form):
         div_classes, field_classes, iterate_subfields, wrap_in_label = _get_css_classes(field)
 
         div_class_string = format_html_join(' ', '{}', [(mark_safe(c),) for c in div_classes])
-        div_class_string += mark_safe(' ') + conditional_escape(force_text(field.css_classes()))
+        div_class_string += mark_safe(' ') + conditional_escape(force_str(field.css_classes()))
         field_class_string = format_html_join(' ', '{}', [(mark_safe(c),) for c in field_classes])
 
         output.append(format_html('<div class="{}">', div_class_string))
 
         if not wrap_in_label:
-            output.append(force_text(field.label_tag()))
+            output.append(force_str(field.label_tag()))
 
         if field.errors:
             output.append(str(_ListGroupErrorList([conditional_escape(e) for e in field.errors])))
@@ -109,27 +109,27 @@ def as_div(form):
 
             for subfield in field:
                 rendered_parts.append(format_html('<div class="{}">', field_class_string))
-                rendered_parts.append(force_text(subfield))
+                rendered_parts.append(force_str(subfield))
                 rendered_parts.append(mark_safe('</div>'))
 
             rendered_field = format_html_join('\n', '{}', ((p,) for p in rendered_parts))
         else:
-            rendered_field = force_text(field.as_widget(attrs={'class': field_class_string}))
+            rendered_field = force_str(field.as_widget(attrs={'class': field_class_string}))
 
         # Bootstrap requires to actial `<input>` element to be inside the associated `<label>` for
         # checkboxes
         if wrap_in_label:
-            label_content = rendered_field + mark_safe(' ') + conditional_escape(force_text(field.label))
-            output.append(force_text(field.label_tag(label_content, label_suffix='')))
+            label_content = rendered_field + mark_safe(' ') + conditional_escape(force_str(field.label))
+            output.append(force_str(field.label_tag(label_content, label_suffix='')))
         else:
             output.append(rendered_field)
 
         # 'show_hidden_initial' on fields means that they should additionally be rendered hidden for
         # comparisons between the initial and the current value
         if field.field.show_hidden_initial:
-            output.append(force_text(field.as_hidden(only_initial=True)))
+            output.append(force_str(field.as_hidden(only_initial=True)))
 
-        help_text = conditional_escape(force_text(field.help_text))
+        help_text = conditional_escape(force_str(field.help_text))
 
         if not field.field.required:
             help_text = mark_safe('<span class="label label-default">Optional</span> ') + help_text
@@ -140,6 +140,6 @@ def as_div(form):
         output.append(mark_safe('</div>'))
 
     if top_errors:
-        output.insert(0, force_text(top_errors))
+        output.insert(0, force_str(top_errors))
 
     return format_html_join('\n', '{}', ((o,) for o in output))

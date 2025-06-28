@@ -8,7 +8,7 @@ jobs:
   lint:
     name: Lint soure code
     runs-on: ubuntu-latest
-    container: python:3.11-bookworm
+    container: python:3.13-bookworm
     steps:
       - uses: actions/checkout@v4
       - run: pip install -e .[dev]
@@ -18,7 +18,7 @@ jobs:
   test_tox:
     name: Test with Tox
     runs-on: ubuntu-latest
-    container: python:3.11-bookworm
+    container: python:3.13-bookworm
     permissions:
       # Required for "EnricoMi/publish-unit-test-result-action"
       checks: write
@@ -58,7 +58,7 @@ jobs:
   build_deb_package:
     name: Build Debian package
     runs-on: ubuntu-latest
-    container: debian:bookworm
+    container: debian:trixie
     steps:
       - uses: actions/checkout@v4
       - run: apt-get --yes update
@@ -78,7 +78,7 @@ jobs:
   test_debian:
     name: Test with Debian
     runs-on: ubuntu-latest
-    container: debian:bookworm
+    container: debian:trixie
     needs: build_deb_package
     steps:
       - uses: actions/checkout@v4
