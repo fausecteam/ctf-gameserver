@@ -209,7 +209,7 @@ def calculate_scoreboard_in_thread(db_conn, metrics, lock):
 
     def calculate():
         if not lock.acquire(blocking=False):
-            logging.warning('Skipping scoreboard calculation because previous run is stil ongoing')
+            logging.warning('Skipping scoreboard calculation because previous run is still ongoing')
             return
 
         try:
