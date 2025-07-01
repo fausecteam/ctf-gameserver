@@ -223,6 +223,16 @@ def calculate_scoreboard_in_thread(db_conn, metrics, lock):
     Thread(target=calculate, daemon=True).start()
 
 
+def wait_for_calculate_scoreboard_thread(lock):
+    """
+    Waits until scoreboard calculation thread has finished.
+
+    Only used in tests to prevent race conditions.
+    """
+
+    lock.acquire()
+
+
 def get_sleep_seconds(control_info, metrics, now=None):
     """
     Returns the number of seconds until the next tick starts.

@@ -12,10 +12,15 @@ class MainLoopTest(DatabaseTestCase):
     fixtures = ['tests/controller/fixtures/main_loop.json']
     metrics = defaultdict(Mock)
 
+    def main_loop_step(self, nonstop):
+        lock = Lock()
+        controller.main_loop_step(self.connection, self.metrics, lock, nonstop)
+        controller.wait_for_calculate_scoreboard_thread(lock)
+
     @patch('time.sleep')
     @patch('logging.warning')
     def test_null(self, warning_mock, sleep_mock):
-        controller.main_loop_step(self.connection, self.metrics, Lock(), False)
+        self.main_loop_step(False)
 
         warning_mock.assert_called_with('Competition start and end time must be configured in the database')
         sleep_mock.assert_called_once_with(60)
@@ -26,7 +31,7 @@ class MainLoopTest(DatabaseTestCase):
             cursor.execute('UPDATE scoring_gamecontrol SET start = datetime("now", "+1 hour"), '
                            '                               end = datetime("now", "+1 day")')
 
-        controller.main_loop_step(self.connection, self.metrics, Lock(), False)
+        self.main_loop_step(False)
 
         sleep_mock.assert_called_once_with(60)
 
@@ -46,7 +51,7 @@ class MainLoopTest(DatabaseTestCase):
             cursor.execute('UPDATE scoring_gamecontrol SET start = datetime("now"), '
                            '                               end = datetime("now", "+1 day")')
 
-        controller.main_loop_step(self.connection, self.metrics, Lock(), False)
+        self.main_loop_step(False)
         sleep_mock.assert_called_once_with(0)
 
         with transaction_cursor(self.connection) as cursor:
@@ -86,7 +91,7 @@ class MainLoopTest(DatabaseTestCase):
                            '                               end = datetime("now", "+85370 seconds"), '
                            '                               current_tick=5')
 
-        controller.main_loop_step(self.connection, self.metrics, Lock(), False)
+        self.main_loop_step(False)
 
         sleep_mock.assert_called_once()
         sleep_arg = sleep_mock.call_args[0][0]
@@ -110,7 +115,7 @@ class MainLoopTest(DatabaseTestCase):
                            '                               end=datetime("now", "+1421 minutes"), '
                            '                               current_tick=5, cancel_checks=true')
 
-        controller.main_loop_step(self.connection, self.metrics, Lock(), False)
+        self.main_loop_step(False)
 
         sleep_mock.assert_called_once_with(0)
 
@@ -136,7 +141,7 @@ class MainLoopTest(DatabaseTestCase):
                            '                               end = datetime("now", "+3 minutes"), '
                            '                               current_tick=479')
 
-        controller.main_loop_step(self.connection, self.metrics, Lock(), False)
+        self.main_loop_step(False)
         sleep_mock.assert_called_once_with(0)
 
         with transaction_cursor(self.connection) as cursor:
@@ -156,7 +161,7 @@ class MainLoopTest(DatabaseTestCase):
                            '                               end = datetime("now"), '
                            '                               current_tick=479')
 
-        controller.main_loop_step(self.connection, self.metrics, Lock(), False)
+        self.main_loop_step(False)
         self.assertEqual(sleep_mock.call_count, 2)
         self.assertEqual(sleep_mock.call_args_list[0][0][0], 0)
         self.assertEqual(sleep_mock.call_args_list[1][0][0], 60)
@@ -183,7 +188,7 @@ class MainLoopTest(DatabaseTestCase):
                            '                               end = datetime("now", "-25 minutes"), '
                            '                               current_tick=479')
 
-        controller.main_loop_step(self.connection, self.metrics, Lock(), False)
+        self.main_loop_step(False)
         self.assertEqual(sleep_mock.call_count, 2)
         self.assertEqual(sleep_mock.call_args_list[0][0][0], 0)
         self.assertEqual(sleep_mock.call_args_list[1][0][0], 60)
@@ -210,7 +215,7 @@ class MainLoopTest(DatabaseTestCase):
                            '                               end = datetime("now"), '
                            '                               current_tick=479')
 
-        controller.main_loop_step(self.connection, self.metrics, Lock(), True)
+        self.main_loop_step(True)
         sleep_mock.assert_called_once_with(0)
 
         with transaction_cursor(self.connection) as cursor:
