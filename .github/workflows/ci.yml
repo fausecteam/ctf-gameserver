@@ -40,20 +40,20 @@ jobs:
         with:
           files: .tox/py*/log/results.xml
           comment_mode: "off"
-      - name: Archive unit test results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: tox-test-results
-          path: .tox/py*/log/results.xml
-          if-no-files-found: error
-      - name: Archive code coverage results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: tox-code-coverage-report
-          path: .tox/py*/log/htmlcov
-          if-no-files-found: error
+      #- name: Archive unit test results
+      #  uses: actions/upload-artifact@v4
+      #  if: always()
+      #  with:
+      #    name: tox-test-results
+      #    path: .tox/py*/log/results.xml
+      #    if-no-files-found: error
+      #- name: Archive code coverage results
+      #  uses: actions/upload-artifact@v4
+      #  if: always()
+      #  with:
+      #    name: tox-code-coverage-report
+      #    path: .tox/py*/log/htmlcov
+      #    if-no-files-found: error
 
   build_deb_package:
     name: Build Debian package
