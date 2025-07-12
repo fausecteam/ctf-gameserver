@@ -41,6 +41,11 @@ class MainLoopTest(DatabaseTestCase):
         self.assertEqual(new_tick, -1)
 
         with transaction_cursor(self.connection) as cursor:
+            cursor.execute('SELECT COUNT(*) FROM scoring_scoreboard')
+            scoreboard_count = cursor.fetchone()[0]
+        self.assertEqual(scoreboard_count, 0)
+
+        with transaction_cursor(self.connection) as cursor:
             cursor.execute('SELECT COUNT(*) FROM scoring_flag')
             total_flag_count = cursor.fetchone()[0]
         self.assertEqual(total_flag_count, 0)
@@ -63,6 +68,11 @@ class MainLoopTest(DatabaseTestCase):
             cursor.execute('SELECT cancel_checks FROM scoring_gamecontrol')
             cancel_checks = cursor.fetchone()[0]
         self.assertFalse(cancel_checks)
+
+        with transaction_cursor(self.connection) as cursor:
+            cursor.execute('SELECT COUNT(*) FROM scoring_scoreboard')
+            scoreboard_count = cursor.fetchone()[0]
+        self.assertEqual(scoreboard_count, 0)
 
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('SELECT COUNT(*) FROM scoring_flag')
@@ -128,6 +138,11 @@ class MainLoopTest(DatabaseTestCase):
             cursor.execute('SELECT cancel_checks FROM scoring_gamecontrol')
             cancel_checks = cursor.fetchone()[0]
         self.assertFalse(cancel_checks)
+
+        with transaction_cursor(self.connection) as cursor:
+            cursor.execute('SELECT COUNT(*) FROM scoring_scoreboard')
+            scoreboard_count = cursor.fetchone()[0]
+        self.assertEqual(scoreboard_count, 4)
 
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('SELECT COUNT(*) FROM scoring_flag WHERE tick=6')

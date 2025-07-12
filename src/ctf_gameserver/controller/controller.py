@@ -201,8 +201,10 @@ def main_loop_step(db_conn, metrics, scoring_lock, nonstop):
     # Check if we really need to increase the tick because of the capping to 60 seconds from above
     if get_sleep_seconds(control_info, metrics, now) <= 0:
         logging.info('After tick %d, increasing tick to the next one', control_info['current_tick'])
+        is_first_increase = control_info['current_tick'] < 0
         database.increase_tick(db_conn)
-        calculate_scoreboard_in_thread(db_conn, metrics, scoring_lock)
+        if not is_first_increase:
+            calculate_scoreboard_in_thread(db_conn, metrics, scoring_lock)
 
 
 def calculate_scoreboard_in_thread(db_conn, metrics, lock):
