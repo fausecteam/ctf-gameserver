@@ -10,8 +10,8 @@ setup(
     description = 'FAUST CTF Gameserver',
     url = 'http://ctf-gameserver.org',
     version = '1.0',
-    author = 'Christoph Egger, Felix Dreissig',
-    author_email = 'christoph.egger@fau.de, f30@f30.me',
+    author = 'Christoph Egger, Felix Dreissig, Simon Ruderich',
+    author_email = 'christoph.egger@fau.de, f30@f30.me, simon@ruderich.org',
     license = 'ISC',
 
     install_requires = [
