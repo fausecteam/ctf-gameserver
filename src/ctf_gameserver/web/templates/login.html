@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n %}
-{% load form_as_div %}
+{% load form_as_bs_div %}
 
 {% block content %}
 <div class="page-header">
@@ -25,7 +25,7 @@
 <form method="post">
     {% csrf_token %}
 
-    {{ form|as_div }}
+    {{ form|as_bs_div }}
 
     <button type="submit" class="btn btn-primary">{% trans 'Login' %}</button>
 

@@ -69,7 +69,7 @@ def _get_css_classes(field):
 
 
 @register.filter
-def as_div(form):
+def as_bs_div(form):
     """
     Template filter that renders a form in `div` tags, using Bootstrap CSS classes. This is kind of inspired
     by django.forms.forms.BaseForm._html_output().

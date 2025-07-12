@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n %}
-{% load form_as_div %}
+{% load form_as_bs_div %}
 
 {% block content %}
 <div class="page-header">
@@ -15,7 +15,7 @@
 </p>
 
 <form method="GET" class="form-inline">
-    {{ form|as_div }}
+    {{ form|as_bs_div }}
 
     <button type="submit" class="btn btn-default">{% trans 'Set' %}</button>
 </form>
