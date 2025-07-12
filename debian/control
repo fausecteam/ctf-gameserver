@@ -8,6 +8,7 @@ Build-Depends:
  curl,
  python3,
  python3-all,
+ python3-argon2,
  python3-django,
  python3-markdown,
  python3-pil,

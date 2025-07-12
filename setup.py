@@ -15,6 +15,7 @@ setup(
     license = 'ISC',
 
     install_requires = [
+        'argon2-cffi',
         'ConfigArgParse',
         'Django == 4.2.*',
         'Markdown',
