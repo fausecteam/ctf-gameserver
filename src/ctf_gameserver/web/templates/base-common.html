@@ -107,7 +107,12 @@
                                 <li><a href="{% url 'mail_teams' %}">{% trans 'Email Teams' %}</a></li>
                                 <li class="divider" role="separator"></li>
                                 {% endif %}
-                                <li><a href="{% url 'logout' %}">{% trans 'Logout' %}</a></li>
+                                <li>
+                                    <form method="post" action="{% url 'logout' %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-link">{% translate 'Logout' %}</button>
+                                    </form>
+                                </li>
                             </ul>
                         </li>
                         {% endif %}
