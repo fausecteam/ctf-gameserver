@@ -1,6 +1,6 @@
 import asyncio
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, UTC
 import os
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -38,7 +38,7 @@ class VPNStatusTest(DatabaseTestCase):
         self.assertEqual(len(checks), 3)
 
         self.assertEqual(checks[0]['team_id'], 2)
-        self.assertEqual(checks[0]['wireguard_handshake_time'], datetime.utcfromtimestamp(1689415702))
+        self.assertEqual(checks[0]['wireguard_handshake_time'], datetime.fromtimestamp(1689415702, UTC))
 
         self.assertEqual(checks[1]['team_id'], 3)
         self.assertIsNone(checks[1]['wireguard_handshake_time'])

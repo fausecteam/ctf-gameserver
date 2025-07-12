@@ -1,5 +1,5 @@
 import asyncio
-from datetime import datetime
+from datetime import datetime, UTC
 import logging
 import os
 import re
@@ -249,7 +249,7 @@ async def check_wireguard(if_pattern, teams):
             # No handshake yet
             handshake_time = None
         else:
-            handshake_time = datetime.utcfromtimestamp(int(handshake_timestamp))
+            handshake_time = datetime.fromtimestamp(int(handshake_timestamp), UTC)
         results[teams_map[interface]] = handshake_time
 
     await proc.wait()

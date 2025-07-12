@@ -78,7 +78,7 @@ class MasterTest(DatabaseTestCase):
             'tick': 1
         }
         param = CheckResult.OK.value
-        start_time = datetime.datetime.utcnow().replace(microsecond=0)
+        start_time = datetime.datetime.now(datetime.UTC).replace(microsecond=0, tzinfo=None)
         self.assertIsNone(self.master_loop.handle_result_request(task_info, param))
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('SELECT COUNT(*) FROM scoring_statuscheck')
@@ -92,7 +92,7 @@ class MasterTest(DatabaseTestCase):
 
         task_info['tick'] = 2
         param = CheckResult.FAULTY.value
-        start_time = datetime.datetime.utcnow().replace(microsecond=0)
+        start_time = datetime.datetime.now(datetime.UTC).replace(microsecond=0, tzinfo=None)
         self.assertIsNone(self.master_loop.handle_result_request(task_info, param))
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('SELECT status FROM scoring_statuscheck'
