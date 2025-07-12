@@ -1,7 +1,6 @@
 import datetime
 from unittest import TestCase
-
-import pytz
+from zoneinfo import ZoneInfo
 
 from ctf_gameserver.lib import date_time
 
@@ -19,7 +18,7 @@ class EnsureUTCAwareTest(TestCase):
         self.assertEqual(dt_out.utcoffset().total_seconds(), 0)
 
     def test_datetime_berlin(self):
-        timezone = pytz.timezone('Europe/Berlin')
+        timezone = ZoneInfo('Europe/Berlin')
         dt_in = datetime.datetime(2000, 1, 1, tzinfo=timezone)
         dt_out = date_time.ensure_utc_aware(dt_in)
 

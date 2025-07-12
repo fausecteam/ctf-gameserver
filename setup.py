@@ -20,7 +20,6 @@ setup(
         'Markdown',
         'Pillow',
         'prometheus_client',
-        'pytz',
         'requests',
     ],
     extras_require = {
