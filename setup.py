@@ -60,9 +60,10 @@ setup(
             'static/*.gif',
             'static/*.js',
             'static/ext/jquery.min.js',
-            'static/ext/bootstrap/css/*',
-            'static/ext/bootstrap/fonts/*',
-            'static/ext/bootstrap/js/*'
+            'static/ext/bootstrap/**/*',
+            'static/ext/fontawesome-free/css/*',
+            'static/ext/fontawesome-free/webfonts/*',
+            'static/ext/fontawesome-free/LICENSE.txt'
         ],
         'ctf_gameserver.web.registration': [
             'countries.csv'

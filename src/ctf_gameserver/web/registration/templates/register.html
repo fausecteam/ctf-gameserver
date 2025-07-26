@@ -3,7 +3,7 @@
 {% load form_as_bs_div %}
 
 {% block content %}
-<div class="page-header">
+<div>
     <h1>{% block title %}{% trans 'Registration' %}{% endblock %}</h1>
 </div>
 
@@ -13,7 +13,7 @@
     {% endblocktrans %}
 </p>
 
-<form enctype="multipart/form-data" method="post">
+<form enctype="multipart/form-data" method="post" class="mt-4">
     {% csrf_token %}
 
     {{ user_form|as_bs_div }}

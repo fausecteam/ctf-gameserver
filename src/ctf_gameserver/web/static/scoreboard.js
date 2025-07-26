@@ -44,18 +44,18 @@ function buildTable(data) {
             const service_node = service_template.cloneNode(true)
 
             const spans = service_node.querySelectorAll('span')
-            spans[2].textContent = service['offense'].toFixed(2)
-            spans[5].textContent = service['defense'].toFixed(2)
-            spans[8].textContent = service['sla'].toFixed(2)
+            spans[0].textContent = service['offense'].toFixed(2)
+            spans[1].textContent = service['defense'].toFixed(2)
+            spans[2].textContent = service['sla'].toFixed(2)
 
             service_node.querySelector('a').href += `#team-${team.id}-row`
 
             if (service['status'] !== '') {
                 const statusClass = statusClasses[service['status']]
-                spans[9].setAttribute('class', `text-${statusClass}`)
-                spans[9].textContent = statusDescriptions[service['status']]
+                spans[3].setAttribute('class', `text-${statusClass}`)
+                spans[3].textContent = statusDescriptions[service['status']]
 
-                service_node.setAttribute('class', statusClass)
+                service_node.setAttribute('class', 'table-' + statusClass)
             }
 
             service_template.parentNode.insertBefore(service_node, service_template)

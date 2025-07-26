@@ -2,7 +2,7 @@
 {% load i18n %}
 
 {% block content %}
-<div class="page-header">
+<div>
     <h1>{% block title %}{% trans 'Registered Teams' %}{% endblock %}</h1>
 </div>
 
@@ -12,10 +12,10 @@
     <table class="table table-striped">
         <thead>
             <tr>
-                <th class="image-column"><!-- Image --></th>
-                <th>{% trans 'Name' %}</th>
-                <th>{% trans 'Affiliation' %}</th>
-                <th>{% trans 'Country' %}</th>
+                <th scope="col" class="image-column"><!-- Image --></th>
+                <th scope="col">{% trans 'Name' %}</th>
+                <th scope="col">{% trans 'Affiliation' %}</th>
+                <th scope="col">{% trans 'Country' %}</th>
             </tr>
         </thead>
 

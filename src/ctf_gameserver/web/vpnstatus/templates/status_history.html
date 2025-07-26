@@ -3,18 +3,16 @@
 {% load static %}
 
 {% block content %}
-<div class="page-header">
+<div>
     <h1>{% block title %}{% trans 'VPN Status History' %}{% endblock %}</h1>
 </div>
 
 {% if allow_team_selection %}
-<div class="clearfix">
-    <form method="GET" class="form-inline pull-right">
-        <div class="form-group">
-            <label for="net-number">{% trans 'Team Net Number' %}</label>
-            <input type="number" name="net-number" id="net-number" class="form-control" min="1" value="{{ net_number | default_if_none:'' }}" />
-            <button type="submit" class="btn btn-primary">{% trans 'Select' %}</button>
-        </div>
+<div class="clearfix mb-4">
+    <form method="GET" class="d-flex flex-row justify-content-end align-items-center">
+        <label for="net-number" class="me-3">{% trans 'Team Net Number' %}:</label>
+        <input type="number" name="net-number" id="net-number" class="number-field form-control me-3" min="1" value="{{ net_number | default_if_none:'' }}" />
+        <button type="submit" class="btn btn-secondary">{% trans 'Select' %}</button>
     </form>
 </div>
 {% endif %}
@@ -24,13 +22,13 @@
     <table class="table">
         <thead>
             <tr>
-                <th>{% trans 'Time' %} ({{ server_timezone }})</th>
-                <th>{% trans 'Last WireGuard Handshake' %}</th>
-                <th>{% trans 'Gateway Ping RTT' %}</th>
-                <th>{% trans 'Testing Vulnbox Ping RTT' %}</th>
-                <th>{% trans 'Testing Vulnbox Service' %}</th>
-                <th>{% trans 'Vulnbox Ping RTT' %}</th>
-                <th>{% trans 'Vulnbox Service' %}</th>
+                <th scope="col">{% trans 'Time' %} ({{ server_timezone }})</th>
+                <th scope="col">{% trans 'Last WireGuard Handshake' %}</th>
+                <th scope="col">{% trans 'Gateway Ping RTT' %}</th>
+                <th scope="col">{% trans 'Testing Vulnbox Ping RTT' %}</th>
+                <th scope="col">{% trans 'Testing Vulnbox Service' %}</th>
+                <th scope="col">{% trans 'Vulnbox Ping RTT' %}</th>
+                <th scope="col">{% trans 'Vulnbox Service' %}</th>
             </tr>
         </thead>
 
@@ -48,47 +46,47 @@
                     {% endif %}
                 </td>
                 {% if result.gateway_ping_rtt_ms is not None %}
-                <td class="success">
+                <td class="text-success">
                     {{ result.gateway_ping_rtt_ms }}&nbsp;ms
                 </td>
                 {% else %}
-                <td class="danger">
+                <td class="text-danger">
                     {% trans 'down' %}
                 </td>
                 {% endif %}
                 {% if result.demo_ping_rtt_ms is not None %}
-                <td class="success">
+                <td class="text-success">
                     {{ result.demo_ping_rtt_ms }}&nbsp;ms
                 </td>
                 {% else %}
-                <td class="danger">
+                <td class="text-danger">
                     {% trans 'down' %}
                 </td>
                 {% endif %}
                 {% if result.demo_service_ok %}
-                <td class="success">
+                <td class="text-success">
                     {% trans 'up' %}
                 </td>
                 {% else %}
-                <td class="danger">
+                <td class="text-danger">
                     {% trans 'down' %}
                 </td>
                 {% endif %}
                 {% if result.vulnbox_ping_rtt_ms is not None %}
-                <td class="success">
+                <td class="text-success">
                     {{ result.vulnbox_ping_rtt_ms }}&nbsp;ms
                 </td>
                 {% else %}
-                <td class="danger">
+                <td class="text-danger">
                     {% trans 'down' %}
                 </td>
                 {% endif %}
                 {% if result.vulnbox_service_ok %}
-                <td class="success">
+                <td class="text-success">
                     {% trans 'up' %}
                 </td>
                 {% else %}
-                <td class="danger">
+                <td class="text-danger">
                     {% trans 'down' %}
                 </td>
                 {% endif %}

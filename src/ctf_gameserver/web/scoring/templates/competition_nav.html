@@ -8,14 +8,14 @@ name as 'active' argument using `include with`.
 
 {% if services_public %}
 <ul class="nav nav-pills">
-    <li class="{% if active == 'team_list' %}active{% endif %}">
-        <a href="{% url 'team_list' %}">{% trans 'Registered teams' %}</a>
+    <li class="nav-item">
+        <a class="nav-link {% if active == 'team_list' %}active{% endif %}" href="{% url 'team_list' %}">{% trans 'Registered teams' %}</a>
     </li>
-    <li class="{% if active == 'scoreboard' %}active{% endif %}">
-        <a href="{% url 'scoreboard' %}">{% trans 'Scoreboard' %}</a>
+    <li class="nav-item">
+        <a class="nav-link {% if active == 'scoreboard' %}active{% endif %}" href="{% url 'scoreboard' %}">{% trans 'Scoreboard' %}</a>
     </li>
-    <li class="{% if active == 'service_status' %}active{% endif %}">
-        <a href="{% url 'service_status' %}">{% trans 'Service status' %}</a>
+    <li class="nav-item">
+        <a class="nav-link {% if active == 'service_status' %}active{% endif %}" href="{% url 'service_status' %}">{% trans 'Service status' %}</a>
     </li>
 </ul>
 {% endif %}

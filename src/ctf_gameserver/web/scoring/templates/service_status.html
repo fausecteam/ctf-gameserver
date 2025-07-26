@@ -12,34 +12,34 @@
     <div class="alert alert-danger" role="alert">{% trans 'Please enable JavaScript for this page to work!' %}</div>
 </noscript>
 
-<div class="page-header">
+<div>
     <h1>{% block title %}{% trans 'Service Status' %}{% endblock %}</h1>
 </div>
 
 {% include 'competition_nav.html' with active='service_status' %}
 
-<div class="table-responsive">
+<div class="table-responsive small">
     <table id="status-table" class="table" hidden="hidden">
         <thead>
             <tr>
-                <th class="image-column"><!-- Image --></th>
-                <th class="border-right">{% trans 'Team' %}</th>
+                <th scope="col" class="image-column"><!-- Image --></th>
+                <th scope="col" class="name-column border-right">{% trans 'Team' %}</th>
                 <!-- Ticks, copied via JavaScript -->
-                <th>Tick <span><!-- Tick --></span></th>
+                <th scope="col">Tick <span><!-- Tick --></span></th>
             </tr>
         </thead>
 
         <tbody>
             <!-- Teams, copied via JavaScript -->
-            <tr id="team-template-row" class="active">
-                <td>
+            <tr id="team-template-row" class="table-active">
+                <td class="image-column">
                     <!-- Image -->
                     <a href="">
                         <img class="team-image" src="" alt="" />
                     </a>
                 </td>
 
-                <td class="border-right">
+                <td class="name-column border-right text-break">
                     <strong><!-- Name --></strong>
                 </td>
 

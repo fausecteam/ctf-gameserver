@@ -12,45 +12,45 @@
     <div class="alert alert-danger" role="alert">{% trans 'Please enable JavaScript for this page to work!' %}</div>
 </noscript>
 
-<div class="page-header">
+<div>
     <h1>{% block title %}{% trans 'Scoreboard' %}{% endblock %}</h1>
 </div>
 
 <div class="clearfix">
-    <div class="pull-left">
+    <div class="float-start">
         {% include 'competition_nav.html' with active='scoreboard' %}
     </div>
 
-    <p class="text-muted pull-right">
+    <p class="text-muted float-end">
         {% blocktrans %}
         Tick: <span id="tick"></span>
         {% endblocktrans %}
     </p>
 </div>
 
-<div class="table-responsive">
+<div class="table-responsive small">
     <table class="table">
-        <thead>
+        <thead class="align-middle">
             <tr>
-                <th><!-- Rank --></th>
-                <th class="image-column"><!-- Image --></th>
-                <th class="border-right">{% trans 'Team' %}</th>
+                <th scope="col"><!-- Rank --></th>
+                <th scope="col" class="image-column"><!-- Image --></th>
+                <th scope="col" class="name-column border-right">{% trans 'Team' %}</th>
                 {% for service in services %}
-                <th>{{ service.name }}</th>
+                <th scope="col">{{ service.name }}</th>
                 {% endfor %}
-                <th class="border-left">
-                    <span class="glyphicon glyphicon-fire"></span> <span class="sr-only">Offense</span>
+                <th scope="col" class="border-left">
+                    <i class="fa-solid fa-fire"></i>
                     {% trans 'Total Offense' %}
                 </th>
-                <th>
-                    <span class="glyphicon glyphicon-tower"></span> <span class="sr-only">Defense</span>
+                <th scope="col">
+                    <i class="fa-solid fa-chess-rook"></i>
                     {% trans 'Total Defense' %}
                 </th>
-                <th>
-                    <span class="glyphicon glyphicon-dashboard"></span> <span class="sr-only">SLA</span>
+                <th scope="col">
+                    <i class="fa-solid fa-gauge-high"></i>
                     {% trans 'Total SLA' %}
                 </th>
-                <th class="border-left">{% trans 'Total' %}</th>
+                <th scope="col" class="border-left">{% trans 'Total' %}</th>
             </tr>
         </thead>
 
@@ -58,24 +58,24 @@
             <tr id="team-template-row" hidden="hidden">
                 <td><strong><!-- Position --></strong></td>
 
-                <td>
+                <td class="image-column">
                     <!-- Image -->
                     <a href="">
                         <img class="team-image" src="" alt="" />
                     </a>
                 </td>
 
-                <td class="border-right">
+                <td class="name-column border-right text-break">
                     <strong><!-- Name --></strong>
                 </td>
 
                 <!-- Services, copied via JavaScript -->
-                <td class="active">
-                    <span class="glyphicon glyphicon-fire"></span> <span class="sr-only">Offense</span>
+                <td class="table-active">
+                    <i class="fa-solid fa-fire" aria-label="Offense"></i>
                     <span><!-- Offense --></span> <br/>
-                    <span class="glyphicon glyphicon-tower"></span> <span class="sr-only">Defense</span>
+                    <i class="fa-solid fa-chess-rook" aria-label="Defense"></i>
                     <span><!-- Defense --></span> <br/>
-                    <span class="glyphicon glyphicon-dashboard"></span> <span class="sr-only">SLA</span>
+                    <i class="fa-solid fa-gauge-high" aria-label="SLA"></i>
                     <span><!-- SLA --></span> <br/>
 
                     <a href="{% url 'service_status' %}">

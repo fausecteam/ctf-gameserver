@@ -5,11 +5,11 @@ DEV_MANAGE ?= src/dev_manage.py
 TESTS_DIR ?= tests
 
 .PHONY: dev build ext migrations run_web test lint run_docs clean
-.INTERMEDIATE: bootstrap.zip
+.INTERMEDIATE: bootstrap.zip fontawesome-free.zip
 
 dev: $(WEB_DIR)/dev-db.sqlite3 ext
 build: ext migrations
-ext: $(EXT_DIR)/jquery.min.js $(EXT_DIR)/bootstrap $(WEB_DIR)/registration/countries.csv
+ext: $(EXT_DIR)/jquery.min.js $(EXT_DIR)/bootstrap $(EXT_DIR)/fontawesome-free $(WEB_DIR)/registration/countries.csv
 
 
 migrations: $(WEB_DIR)/registration/countries.csv
@@ -21,15 +21,23 @@ $(WEB_DIR)/dev-db.sqlite3: migrations $(WEB_DIR)/registration/countries.csv
 
 $(EXT_DIR)/jquery.min.js:
 	mkdir -p $(EXT_DIR)
-	curl https://code.jquery.com/jquery-1.11.3.min.js -o $@
+	curl https://code.jquery.com/jquery-3.6.0.min.js -o $@
 
 bootstrap.zip:
-	curl -L https://github.com/twbs/bootstrap/releases/download/v3.3.5/bootstrap-3.3.5-dist.zip -o $@
+	curl -L https://github.com/twbs/bootstrap/releases/download/v5.3.7/bootstrap-5.3.7-dist.zip -o $@
 
 $(EXT_DIR)/bootstrap: bootstrap.zip
 	mkdir -p $(EXT_DIR)
 	unzip -n $< -d $(EXT_DIR)
-	mv -v $(EXT_DIR)/bootstrap-3.3.5-dist $(EXT_DIR)/bootstrap
+	mv -v $(EXT_DIR)/bootstrap-5.3.7-dist $(EXT_DIR)/bootstrap
+
+fontawesome-free.zip:
+	curl -L https://use.fontawesome.com/releases/v7.0.0/fontawesome-free-7.0.0-web.zip -o $@
+
+$(EXT_DIR)/fontawesome-free: fontawesome-free.zip
+	mkdir -p $(EXT_DIR)
+	unzip -n $< -d $(EXT_DIR)
+	mv -v $(EXT_DIR)/fontawesome-free-7.0.0-web $(EXT_DIR)/fontawesome-free
 
 $(WEB_DIR)/registration/countries.csv:
 	# Official download link from http://data.okfn.org/data/core/country-list, under Public Domain

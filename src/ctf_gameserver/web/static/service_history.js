@@ -81,7 +81,7 @@ function buildTable(data) {
 
             col.title = statusDescriptions[check]
             if (check != -1) {
-                col.classList.add(statusClasses[check])
+                col.classList.add("table-" + statusClasses[check])
             }
             row.appendChild(col)
         }
