@@ -11,10 +11,6 @@
     margin-bottom: 30px;
 }
 
-.bg-block {
-    padding: 15px;
-}
-
 .form-inline .form-group {
     margin-right: 10px;
 }
@@ -52,10 +48,6 @@ th.border-right, td.border-right {
 
 .header-buttons {
     margin-top: 20px;
-}
-
-#mail-teams-content {
-    margin-top: 40px;
 }
 
 img#load-spinner {

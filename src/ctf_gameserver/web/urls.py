@@ -107,10 +107,6 @@ urlpatterns = [
         name='get_team_download'
     ),
 
-    url(r'^internal/mail-teams/$',
-        registration_views.mail_teams,
-        name='mail_teams'
-    ),
     url(r'^internal/service-history$',
         scoring_views.service_history,
         name='service_history'
