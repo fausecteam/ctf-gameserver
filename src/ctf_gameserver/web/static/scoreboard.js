@@ -43,17 +43,17 @@ function buildTable(data) {
         for (const service of team['services']) {
             const service_node = service_template.cloneNode(true)
 
-            const spans = service_node.querySelectorAll('span')
-            spans[0].textContent = service['offense'].toFixed(2)
-            spans[1].textContent = service['defense'].toFixed(2)
-            spans[2].textContent = service['sla'].toFixed(2)
+            service_node.querySelector('.points-offense').textContent = service['offense'].toFixed(2)
+            service_node.querySelector('.points-defense').textContent = service['defense'].toFixed(2)
+            service_node.querySelector('.points-sla').textContent = service['sla'].toFixed(2)
 
             service_node.querySelector('a').href += `#team-${team.id}-row`
 
             if (service['status'] !== '') {
+                const statusSpan = service_node.querySelector('.service-status')
                 const statusClass = statusClasses[service['status']]
-                spans[3].setAttribute('class', `text-${statusClass}`)
-                spans[3].textContent = statusDescriptions[service['status']]
+                statusSpan.setAttribute('class', `text-${statusClass}`)
+                statusSpan.textContent = statusDescriptions[service['status']]
 
                 service_node.setAttribute('class', 'table-' + statusClass)
             }

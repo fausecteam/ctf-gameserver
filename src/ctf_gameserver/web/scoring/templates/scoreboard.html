@@ -71,16 +71,22 @@
 
                 <!-- Services, copied via JavaScript -->
                 <td class="table-active">
-                    <i class="fa-solid fa-fire" aria-label="Offense"></i>
-                    <span><!-- Offense --></span> <br/>
-                    <i class="fa-solid fa-chess-rook" aria-label="Defense"></i>
-                    <span><!-- Defense --></span> <br/>
-                    <i class="fa-solid fa-gauge-high" aria-label="SLA"></i>
-                    <span><!-- SLA --></span> <br/>
+                    <span class="text-nowrap">
+                        <i class="fa-solid fa-fire" aria-label="Offense"></i>
+                        <span class="points-offense"><!-- Offense --></span> <br/>
+                    </span>
+                    <span class="text-nowrap">
+                        <i class="fa-solid fa-chess-rook" aria-label="Defense"></i>
+                        <span class="points-defense"><!-- Defense --></span> <br/>
+                    </span>
+                    <span class="text-nowrap">
+                        <i class="fa-solid fa-gauge-high" aria-label="SLA"></i>
+                        <span class="points-sla"><!-- SLA --></span> <br/>
+                    </span>
 
                     <a href="{% url 'service_status' %}">
                     <!-- Status -->
-                    <span class="text-muted">{% trans 'not checked' %}</span>
+                    <span class="text-muted service-status">{% trans 'not checked' %}</span>
                     </a>
                 </td>
 
