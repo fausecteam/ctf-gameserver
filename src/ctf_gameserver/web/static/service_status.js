@@ -78,4 +78,11 @@ function buildTable(data) {
     template.parentNode.removeChild(template)
 
     table.hidden = false
+
+    if (location.hash !== '') {
+        const scrollRow = document.querySelector(location.hash)
+        if (scrollRow !== undefined) {
+            scrollRow.scrollIntoView({'behavior': 'instant'})
+        }
+    }
 }
