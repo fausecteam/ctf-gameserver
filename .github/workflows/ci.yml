@@ -8,17 +8,17 @@ jobs:
   lint:
     name: Lint soure code
     runs-on: ubuntu-latest
-    container: python:3.13-bookworm
+    container: python:3.13-trixie
     steps:
       - uses: actions/checkout@v4
       - run: pip install -e .[dev]
       - run: make lint
 
-  # Test with Tox, a recent Python version and libraries from PyPI
-  test_tox:
-    name: Test with Tox
+  # Test with a recent Python version and libraries from PyPI
+  test_pypi:
+    name: Test with PyPI dependencies
     runs-on: ubuntu-latest
-    container: python:3.13-bookworm
+    container: python:3.13-trixie
     permissions:
       # Required for "EnricoMi/publish-unit-test-result-action"
       checks: write
@@ -26,34 +26,32 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup dependencies
         run: |
-          pip install tox
-          # Make sure we have our dependencies, which are not required for Tox but for `make build`
-          pip install -e .
+          pip install -e .[dev]
           # Ping is required for VPNStatusTest
           apt-get --yes update
           apt-get --yes install iputils-ping
       - run: make build
-      - run: tox -e py311 -- --junitxml=.tox/py311/log/results.xml
+      - run: pytest --junitxml=pytest-results.xml --cov=src --cov-report=term --cov-report=html tests
       - name: Publish unit test results
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
         with:
-          files: .tox/py*/log/results.xml
+          files: pytest-results.xml
           comment_mode: "off"
-      #- name: Archive unit test results
-      #  uses: actions/upload-artifact@v4
-      #  if: always()
-      #  with:
-      #    name: tox-test-results
-      #    path: .tox/py*/log/results.xml
-      #    if-no-files-found: error
-      #- name: Archive code coverage results
-      #  uses: actions/upload-artifact@v4
-      #  if: always()
-      #  with:
-      #    name: tox-code-coverage-report
-      #    path: .tox/py*/log/htmlcov
-      #    if-no-files-found: error
+      - name: Archive unit test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pypi-test-results
+          path: pytest-results.xml
+          if-no-files-found: error
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pypi-test-coverage-report
+          path: htmlcov
+          if-no-files-found: error
 
   build_deb_package:
     name: Build Debian package
@@ -90,13 +88,13 @@ jobs:
       - run: apt-get --yes install --no-install-recommends ./ctf-gameserver_*.deb
       - run: apt-get --yes install make curl unzip python3-pytest python3-pytest-cov
       - run: make build
-      - run: pytest-3 --junitxml=results.xml --cov=src --cov-report=term --cov-report=html tests
+      - run: pytest-3 --junitxml=pytest-results.xml --cov=src --cov-report=term --cov-report=html tests
       - name: Archive unit test results
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: debian-test-results
-          path: results.xml
+          path: pytest-results.xml
           if-no-files-found: error
       - name: Archive code coverage results
         uses: actions/upload-artifact@v4

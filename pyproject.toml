@@ -34,7 +34,6 @@ dev = [
     "pylint",
     "pytest",
     "pytest-cov",
-    "tox",
 ]
 prod = [
     "psycopg2",

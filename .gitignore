@@ -14,8 +14,8 @@ __pycache__/
 /debian/files
 
 # Python testing
-/.tox/
 /.coverage
+/htmlcov/
 
 # Go examples
 /examples/checker/example_checker_go/example_checker
