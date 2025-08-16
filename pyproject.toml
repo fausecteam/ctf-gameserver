@@ -1,0 +1,79 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ctf_gameserver"
+description = "FAUST Gameserver for attack-defense CTFs"
+version = "1.0"
+authors = [
+    {name = "Christoph Egger", email = "christoph.egger@fau.de"},
+    {name = "Felix Dreissig", email = "f30@f30.me"},
+    {name = "Simon Ruderich", email = "simon@ruderich.org"},
+]
+license = "ISC"
+readme = "README.md"
+requires-python = ">= 3.13"
+
+dependencies = [
+    "argon2-cffi",
+    "ConfigArgParse",
+    "Django == 4.2.*",
+    "Markdown",
+    "Pillow",
+    "prometheus_client",
+    "requests",
+]
+
+[project.optional-dependencies]
+dev = [
+    "bandit",
+    "mkdocs",
+    "psycopg2-binary",
+    "pycodestyle",
+    "pylint",
+    "pytest",
+    "pytest-cov",
+    "tox",
+]
+prod = [
+    "psycopg2",
+    "systemd",
+]
+
+[project.urls]
+homepage = "https://ctf-gameserver.org"
+repository = "https://github.com/fausecteam/ctf-gameserver.git"
+issues = "https://github.com/fausecteam/ctf-gameserver/issues"
+
+[options.packages.find]
+where = "src"
+
+[tool.setuptools]
+script-files = [
+    'scripts/checker/ctf-checkermaster',
+    'scripts/checker/ctf-logviewer',
+    'scripts/controller/ctf-controller',
+    'scripts/submission/ctf-submission',
+    'scripts/vpnstatus/ctf-vpnstatus',
+]
+
+[tool.setuptools.package-data]
+"ctf_gameserver.web" = [
+    "*/templates/*.html",
+    "*/templates/*.txt",
+    "templates/*.html",
+    "templates/*.txt",
+    "static/robots.txt",
+    "static/*.css",
+    "static/*.gif",
+    "static/*.js",
+    "static/ext/jquery.min.js",
+    "static/ext/bootstrap/**/*",
+    "static/ext/fontawesome-free/css/*",
+    "static/ext/fontawesome-free/webfonts/*",
+    "static/ext/fontawesome-free/LICENSE.txt",
+]
+"ctf_gameserver.web.registration" = [
+    "countries.csv",
+]

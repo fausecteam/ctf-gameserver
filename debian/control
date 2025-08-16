@@ -6,6 +6,7 @@ Build-Depends:
  debhelper (>= 10),
  dh-python,
  curl,
+ pybuild-plugin-pyproject,
  python3,
  python3-all,
  python3-argon2,
