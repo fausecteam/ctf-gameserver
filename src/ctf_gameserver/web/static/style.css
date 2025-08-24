@@ -95,3 +95,17 @@ img#load-spinner {
 #check-list {
     padding-left: 20px;
 }
+
+.navbar-brand img {
+    margin-right: 15px;
+    height: 35px;
+}
+
+.navbar-brand {
+    padding: 5px 15px;
+}
+
+#supporter-column img {
+    margin-top: 10px;
+    margin-bottom: 25px;
+}
