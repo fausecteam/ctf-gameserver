@@ -18,7 +18,7 @@ from .decorators import registration_closed_required, services_public_required
 def scoreboard(request):
 
     return render(request, 'scoreboard.html', {
-        'services': models.Service.objects.all()
+        'services': models.Service.objects.all().order_by('name')
     })
 
 
@@ -37,7 +37,7 @@ def scoreboard_json(_):
     scores = calculations.scores(['team', 'team__user', 'service'],
                                  ['team__image', 'team__user__username', 'service__name'])
     statuses = calculations.team_statuses(to_tick, to_tick, only_team_fields=['user_id'])
-    services = models.Service.objects.all()
+    services = models.Service.objects.all().order_by('name')
 
     response = {
         'tick': to_tick,
