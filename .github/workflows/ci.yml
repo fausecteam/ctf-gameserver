@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     container: python:3.13-trixie
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: pip install -e .[dev]
       - run: make lint
 
@@ -23,7 +23,7 @@ jobs:
       # Required for "EnricoMi/publish-unit-test-result-action"
       checks: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Setup dependencies
         run: |
           pip install -e .[dev]
@@ -58,7 +58,7 @@ jobs:
     runs-on: ubuntu-latest
     container: debian:trixie
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: apt-get --yes update
       - run: apt-get --yes install --no-install-recommends devscripts dpkg-dev equivs
       # Add `--yes` to mk-build-deps' default options for apt-get
@@ -79,8 +79,8 @@ jobs:
     container: debian:trixie
     needs: build_deb_package
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v5
         with:
           name: deb-package
       - run: apt-get --yes update
@@ -109,7 +109,7 @@ jobs:
     runs-on: ubuntu-latest
     container: python:3.13-trixie
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: pip install mkdocs
       - run: mkdocs build --strict
       - name: Store docs build
@@ -130,7 +130,7 @@ jobs:
       - test_debian
       - build_docs
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: docs_site
           path: docs_site
