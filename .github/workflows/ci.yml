@@ -103,3 +103,41 @@ jobs:
           name: debian-code-coverage-report
           path: htmlcov
           if-no-files-found: error
+
+  build_docs:
+    name: Build documentation
+    runs-on: ubuntu-latest
+    container: python:3.13-trixie
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install mkdocs
+      - run: mkdocs build --strict
+      - name: Store docs build
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs_site
+          path: docs_site
+          if-no-files-found: error
+
+  deploy_docs:
+    name: Deploy docs to ctf-gameserver.org
+    runs-on: ubuntu-latest
+    environment: ctf-gameserver.org
+    if: github.ref == 'refs/heads/master'
+    needs:
+      - lint
+      - test_pypi
+      - test_debian
+      - build_docs
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: docs_site
+          path: docs_site
+      - run: sudo apt-get --yes update
+      - run: sudo apt-get --yes install --no-install-recommends openssh-client rsync
+      - run: mkdir ~/.ssh
+      - run: echo "${{ vars.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+      - run: echo "${{ secrets.SSH_KEY_PRIVATE }}" > ~/.ssh/id_ed25519
+      - run: chmod 600 ~/.ssh/id_ed25519
+      - run: rsync -a --delete --delete-delay --delay-updates docs_site/ gameserver-docs-upload@www.faust.cs.fau.de:site/
