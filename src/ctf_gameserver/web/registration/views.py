@@ -17,7 +17,7 @@ from ctf_gameserver.web.scoring.decorators import before_competition_required, r
 import ctf_gameserver.web.scoring.models as scoring_models
 from . import forms
 from .models import Team, TeamDownload
-from .util import email_token_generator
+from .util import EmailConfirmationTokenGenerator, send_confirmation_mail
 
 User = get_user_model()    # pylint: disable=invalid-name
 
@@ -40,7 +40,7 @@ def register(request):
         if user_form.is_valid() and team_form.is_valid():
             user = user_form.save()
             team_form.save(user)
-            user_form.send_confirmation_mail(request)
+            send_confirmation_mail(user, request)
 
             messages.success(request,
                              mark_safe(_('Successful registration! A confirmation mail has been sent to '
@@ -75,7 +75,7 @@ def edit_team(request):
             team_form.save(user)
 
             if 'email' in user_form.changed_data:
-                user_form.send_confirmation_mail(request)
+                send_confirmation_mail(user, request)
                 logout(request)
 
                 messages.warning(request, _('A confirmation mail has been sent to your new formal email '
@@ -164,6 +164,7 @@ def confirm_email(request):
         messages.error(request, error_message)
         return render(request, '400.html', status=400)
 
+    email_token_generator = EmailConfirmationTokenGenerator()
     if not email_token_generator.check_token(user, token):
         messages.error(request, error_message)
         return render(request, '400.html', status=400)

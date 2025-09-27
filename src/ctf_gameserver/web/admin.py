@@ -6,6 +6,7 @@ from django.contrib.auth.admin import UserAdmin
 
 from .registration.models import Team
 from .registration.admin_inline import InlineTeamAdmin
+from .registration.util import send_confirmation_mail
 from .scoring.models import GameControl
 from .util import format_lazy
 
@@ -30,6 +31,13 @@ class CTFAdminSite(admin.AdminSite):
 
 
 admin_site = CTFAdminSite()    # pylint: disable=invalid-name
+
+
+@admin.action(description=_('Resend email confirmation mail'))
+def resend_confirmation_mail(_model_admin, request, queryset):
+
+    for user in queryset:
+        send_confirmation_mail(user, request)
 
 
 @admin.register(User, site=admin_site)
@@ -79,6 +87,7 @@ class CTFUserAdmin(UserAdmin):
     list_filter = ('is_active', 'is_staff', 'is_superuser', TeamListFilter, 'date_joined')
     search_fields = ('username', 'email', 'team__net_number', 'team__informal_email', 'team__affiliation',
                      'team__country')
+    actions = [resend_confirmation_mail]
 
     fieldsets = (
         (None, {'fields': ('username', 'password', 'email')}),

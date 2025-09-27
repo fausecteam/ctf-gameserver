@@ -2,7 +2,37 @@ import os
 import locale
 import csv
 
+from django.conf import settings
+from django.core.mail import send_mail
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.contrib.sites.shortcuts import get_current_site
+from django.template import loader
+
+import ctf_gameserver.web.scoring.models as scoring_models
+
+
+def send_confirmation_mail(user, request):
+    """
+    Sends an email containing the email address confirmation link to the given user. As it requires a User
+    instance, it should only be called after the User object has initially been saved.
+
+    Args:
+        request: An HttpRequest from which this function is being called
+    """
+
+    email_token_generator = EmailConfirmationTokenGenerator()
+    competition_name = scoring_models.GameControl.get_instance().competition_name
+
+    context = {
+        'competition_name': competition_name,
+        'protocol': 'https' if request.is_secure() else 'http',
+        'domain': get_current_site(request),
+        'user': user.pk,
+        'token': email_token_generator.make_token(user)
+    }
+    message = loader.render_to_string('confirmation_mail.txt', context)
+
+    send_mail(competition_name+' email confirmation', message, settings.DEFAULT_FROM_EMAIL, [user.email])
 
 
 class EmailConfirmationTokenGenerator(PasswordResetTokenGenerator):
@@ -21,9 +51,6 @@ class EmailConfirmationTokenGenerator(PasswordResetTokenGenerator):
         login_timestamp = '' if user.last_login is None else user.last_login.replace(microsecond=0,
                                                                                      tzinfo=None)
         return str(user.pk) + user.email + str(login_timestamp) + str(timestamp)
-
-
-email_token_generator = EmailConfirmationTokenGenerator()    # pylint: disable=invalid-name
 
 
 def get_country_names():

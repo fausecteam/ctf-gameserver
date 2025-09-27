@@ -1,17 +1,13 @@
 from django import forms
-from django.core.mail import send_mail
-from django.template import loader
-from django.conf import settings
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
-from django.contrib.sites.shortcuts import get_current_site
 
 import ctf_gameserver.web.scoring.models as scoring_models
 
 from .models import Team
 from .fields import ClearableThumbnailImageInput
-from .util import email_token_generator, get_country_names
+from .util import get_country_names
 
 FIVE_MB = 5 * 1024**2
 
@@ -84,28 +80,6 @@ class UserForm(forms.ModelForm):
             user.save()
 
         return user
-
-    def send_confirmation_mail(self, request):
-        """
-        Sends an email containing the address confirmation link to the user associated with this form. As it
-        requires a User instance, it should only be called after the object has initially been saved.
-
-        Args:
-            request: The HttpRequest from which this function is being called
-        """
-        competition_name = scoring_models.GameControl.get_instance().competition_name
-
-        context = {
-            'competition_name': competition_name,
-            'protocol': 'https' if request.is_secure() else 'http',
-            'domain': get_current_site(request),
-            'user': self.instance.pk,
-            'token': email_token_generator.make_token(self.instance)
-        }
-        message = loader.render_to_string('confirmation_mail.txt', context)
-
-        send_mail(competition_name+' email confirmation', message, settings.DEFAULT_FROM_EMAIL,
-                  [self.instance.email])
 
 
 class TeamForm(forms.ModelForm):
