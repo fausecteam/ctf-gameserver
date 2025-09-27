@@ -52,3 +52,19 @@ enables both alerting and dashboarding with [Grafana](https://grafana.com/grafan
 
 To enable metrics, configure `CTF_METRICS_LISTEN` (the Ansible roles do that by default). For the available
 metrics and their description, manually request the metrics via HTTP.
+
+### First Blood Alerts
+To automatically receive a notification when a service has been exploited for the first time *(first blood)*, you may set up a Prometheus alerting rule like the following one:
+
+```
+rules:
+  - alert: CTF service first blood
+    expr: 'increase(ctf_controller_is_exploited[15m]) > 0'
+    labels:
+      severity: warning
+    annotations:
+      summary: '{{ $labels.service }} service: First blood'
+      description: 'CTF service "{{ $labels.service }}" has been exploited for the first time.'
+```
+
+The metrics do not contain the team that executed the first exploit. To get this information, view the list of Captures in the Web admin interface (`/admin/scoring/capture/`).
