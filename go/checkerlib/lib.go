@@ -5,6 +5,7 @@ package checkerlib
 import (
 	"bufio"
 	"bytes"
+	"crypto/sha3"
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/json"
@@ -17,8 +18,6 @@ import (
 	"strconv"
 	"syscall"
 	"time"
-
-	"golang.org/x/crypto/sha3"
 )
 
 const (
