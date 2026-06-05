@@ -1,7 +1,3 @@
----
-applyTo: "**"
----
-
 This repository implements a Gameserver for attack-defense CTFs (IT security competitions).
 Development happens with a specific focus on correctness, security, and long-term maintainability.
 
@@ -18,10 +14,12 @@ The software consists of multiple components, all written in Python:
 More information on the architecture can be found in the `docs` directory, especially in `docs/index.md` and `docs/architecture.md`.
 
 ## General Conduct
+* Generate concise, comprehensible code. Always scrutinize which complexity is really necessary.
 * Do not make more changes than necessary at once.
 * Don't be too eager. Prefer a step-wise, iterative approach.
 * In doubt, ask the user for more details or clarification. Do not make too many assumptions.
 * In the (text-based) chat, provide short, precise responses.
+* For tasks such as file lookups, text searches, etc., prefer to use the built-in tools available to you instead of invoking shell commands
 
 ## Coding Style
 * Code mostly follows PEP 8 with some minor deviations.
@@ -55,6 +53,7 @@ For the Django-based Web component (`src/ctf_gameserver/web`):
 * We do not support long-living databases and therefore do not need to do database migrations. Never generate migration files.
 * We generally use function-based views so far. Unless they provide a clear benefit, do not introduce class-based views to the codebase.
 * Primarily for historic reasons, the URLconf uses regex-based patterns (`re_path` instead of `path`). This is fine, no need to change it.
+* The Web component can be launched through `make run_web`. This does start the Django development server on port 8000. You do **not** need to run any `manage.py` or `django-admin` commands in addition to the Makefile invocation. Those cannot succeed if you already executed `make run_web` because the server is already running on the port.
 
 ## Testing
 * Tests are executed using pytest through `make test` or by invoking `pytest` directly.
@@ -62,3 +61,4 @@ For the Django-based Web component (`src/ctf_gameserver/web`):
 * Even for the non-Web components, the test database is provided by invoking Django's database setup code. This is handled by the `DatabaseTestCase` base class.
 * Consequently, test data is always provided through Django fixtures.
 * There currently are no test cases for the Web component. When writing Django code, do not add tests unless explicitly asked to.
+* When validating your changes, always ask yourself if the checks you're performing are likely to catch real bugs or if they just take up time for little value. Don't just check for very basic functionality such as working imports. Do not write lengthy check/test scripts to validate your changes.
