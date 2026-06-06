@@ -303,6 +303,7 @@ async def check_pings(ip_pattern, teams):
         if proc.returncode == 0:
             if rtt is None:
                 logging.error('"%s" call returned 0, but could not parse result', ' '.join(cmd))
+                return None
             if rtt > NETWORK_TIMEOUT * 1000:
                 # RTT values are unreliable because time is stored in the ICMP data field, which is
                 # controlled by the ping target in Reply packets:
