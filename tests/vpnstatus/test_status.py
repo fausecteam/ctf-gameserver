@@ -48,6 +48,8 @@ class VPNStatusTest(DatabaseTestCase):
 
     @patch('ctf_gameserver.vpnstatus.status.NETWORK_TIMEOUT', 1)
     def test_ping(self):
+        # Note: This test might fail in a Podman container on macOS, because all IPs are ping-able there
+        # Workaround: Do `sudo ip route add blackhole 169.254.0.0/16` on the Podman VM (`podman machine ssh`)
         asyncio.run(loop_step(self.connection, self.metrics, gateway_ip_pattern='127.0.%s.1',
                               demo_ip_pattern='127.0.%s.2', vulnbox_ip_pattern='169.254.%s.42'))
 
