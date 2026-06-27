@@ -90,10 +90,11 @@ def team_statuses(from_tick, to_tick, select_related_team_fields=None, only_team
         statuses[team] = defaultdict(lambda: {})
         teams[team.pk] = team
 
-    status_checks = models.StatusCheck.objects.filter(tick__gte=from_tick, tick__lte=to_tick) \
-                                              .exclude(status=models.StatusCheck.STATUSES[_('timeout')])
+    status_checks = models.StatusCheck.objects.filter(task__tick__gte=from_tick, task__tick__lte=to_tick) \
+                                              .exclude(status=models.StatusCheck.STATUSES[_('timeout')]) \
+                                              .select_related('task')
     for check in status_checks:
-        statuses[teams[check.team_id]][check.tick][check.service_id] = check.status
+        statuses[teams[check.task.team_id]][check.task.tick][check.task.service_id] = check.status
 
     # Convert defaultdicts to dicts because serialization in `cache.set()` can't handle them otherwise
     for key, val in statuses.items():

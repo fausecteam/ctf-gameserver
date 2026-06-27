@@ -44,12 +44,14 @@ class IntegrationTest(DatabaseTestCase):
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
             cursor.execute('UPDATE scoring_gamecontrol SET current_tick=0')
-            cursor.execute('INSERT INTO scoring_flag (service_id, protecting_team_id, tick)'
-                           '    VALUES (1, 2, 0)')
+            cursor.execute('INSERT INTO scoring_checkertask (service_id, team_id, tick)'
+                           '    VALUES (1, 2, 0) RETURNING id')
+            task_ids = cursor.fetchall()
+            cursor.executemany('INSERT INTO scoring_flag (task_id) VALUES (%s)', task_ids)
         # Checker won't get started because interval is not yet over
         self.assertFalse(master_loop.step())
         with transaction_cursor(self.connection) as cursor:
-            cursor.execute('SELECT COUNT(*) FROM scoring_flag WHERE placement_start IS NOT NULL')
+            cursor.execute('SELECT COUNT(*) FROM scoring_checkertask WHERE exec_start IS NOT NULL')
             self.assertEqual(cursor.fetchone()[0], 0)
             cursor.execute('SELECT COUNT(*) FROM scoring_statuscheck')
             self.assertEqual(cursor.fetchone()[0], 0)
@@ -59,7 +61,7 @@ class IntegrationTest(DatabaseTestCase):
         # Will return False because no messages yet
         self.assertFalse(master_loop.step())
         with transaction_cursor(self.connection) as cursor:
-            cursor.execute('SELECT COUNT(*) FROM scoring_flag WHERE placement_start IS NOT NULL')
+            cursor.execute('SELECT COUNT(*) FROM scoring_checkertask WHERE exec_start IS NOT NULL')
             self.assertEqual(cursor.fetchone()[0], 1)
 
         master_loop.supervisor.queue_timeout = 10
@@ -67,15 +69,17 @@ class IntegrationTest(DatabaseTestCase):
         while master_loop.step():
             pass
         with transaction_cursor(self.connection) as cursor:
-            cursor.execute('SELECT COUNT(*) FROM scoring_flag WHERE placement_end IS NOT NULL')
+            cursor.execute('SELECT COUNT(*) FROM scoring_checkertask WHERE exec_end IS NOT NULL')
             self.assertEqual(cursor.fetchone()[0], 1)
             cursor.execute('SELECT COUNT(*) FROM scoring_statuscheck')
             self.assertEqual(cursor.fetchone()[0], 1)
-            cursor.execute('SELECT status FROM scoring_statuscheck'
-                           '    WHERE service_id=1 AND team_id=2 AND tick=0')
+            cursor.execute('SELECT check_.status FROM scoring_statuscheck check_, scoring_checkertask task'
+                           '    WHERE check_.task_id = task.id AND task.service_id=1'
+                           '        AND task.team_id=2 AND task.tick=0')
             self.assertEqual(cursor.fetchone()[0], CheckResult.OK.value)
-            cursor.execute('SELECT flagid FROM scoring_flag'
-                           '    WHERE service_id=1 AND protecting_team_id=2 AND tick=0')
+            cursor.execute('SELECT flag.flagid FROM scoring_flag flag, scoring_checkertask task'
+                           '    WHERE flag.task_id = task.id AND task.service_id=1'
+                           '        AND task.team_id=2 AND task.tick=0')
             self.assertEqual(cursor.fetchone()[0], 'value identifier')
 
     @patch('ctf_gameserver.checker.master.get_monotonic_time')
@@ -89,8 +93,10 @@ class IntegrationTest(DatabaseTestCase):
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
             cursor.execute('UPDATE scoring_gamecontrol SET current_tick=0')
-            cursor.execute('INSERT INTO scoring_flag (service_id, protecting_team_id, tick)'
-                           '    VALUES (1, 2, 0)')
+            cursor.execute('INSERT INTO scoring_checkertask (service_id, team_id, tick)'
+                           '    VALUES (1, 2, 0) RETURNING id')
+            task_ids = cursor.fetchall()
+            cursor.executemany('INSERT INTO scoring_flag (task_id) VALUES (%s)', task_ids)
         monotonic_mock.return_value = 20
 
         master_loop.supervisor.queue_timeout = 0.01
@@ -101,8 +107,8 @@ class IntegrationTest(DatabaseTestCase):
         while master_loop.step():
             pass
         with transaction_cursor(self.connection) as cursor:
-            cursor.execute('SELECT COUNT(*) FROM scoring_flag'
-                           '    WHERE placement_start IS NOT NULL AND placement_end IS NULL')
+            cursor.execute('SELECT COUNT(*) FROM scoring_checkertask'
+                           '    WHERE exec_start IS NOT NULL AND exec_end IS NULL')
             self.assertEqual(cursor.fetchone()[0], 1)
             cursor.execute('SELECT COUNT(*) FROM scoring_statuscheck')
             self.assertEqual(cursor.fetchone()[0], 0)
@@ -119,8 +125,10 @@ class IntegrationTest(DatabaseTestCase):
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
             cursor.execute('UPDATE scoring_gamecontrol SET current_tick=0')
-            cursor.execute('INSERT INTO scoring_flag (service_id, protecting_team_id, tick)'
-                           '    VALUES (1, 2, 0)')
+            cursor.execute('INSERT INTO scoring_checkertask (service_id, team_id, tick)'
+                           '    VALUES (1, 2, 0) RETURNING id')
+            task_ids = cursor.fetchall()
+            cursor.executemany('INSERT INTO scoring_flag (task_id) VALUES (%s)', task_ids)
         monotonic_mock.return_value = 20
 
         master_loop.supervisor.queue_timeout = 0.01
@@ -131,8 +139,8 @@ class IntegrationTest(DatabaseTestCase):
         while master_loop.step():
             pass
         with transaction_cursor(self.connection) as cursor:
-            cursor.execute('SELECT COUNT(*) FROM scoring_flag'
-                           '    WHERE placement_start IS NOT NULL AND placement_end IS NULL')
+            cursor.execute('SELECT COUNT(*) FROM scoring_checkertask'
+                           '    WHERE exec_start IS NOT NULL AND exec_end IS NULL')
             self.assertEqual(cursor.fetchone()[0], 1)
             cursor.execute('SELECT COUNT(*) FROM scoring_statuscheck')
             self.assertEqual(cursor.fetchone()[0], 0)
@@ -149,8 +157,10 @@ class IntegrationTest(DatabaseTestCase):
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
             cursor.execute('UPDATE scoring_gamecontrol SET current_tick=0')
-            cursor.execute('INSERT INTO scoring_flag (service_id, protecting_team_id, tick)'
-                           '    VALUES (1, 2, 0)')
+            cursor.execute('INSERT INTO scoring_checkertask (service_id, team_id, tick)'
+                           '    VALUES (1, 2, 0) RETURNING id')
+            task_ids = cursor.fetchall()
+            cursor.executemany('INSERT INTO scoring_flag (task_id) VALUES (%s)', task_ids)
         monotonic_mock.return_value = 20
 
         master_loop.supervisor.queue_timeout = 0.01
@@ -161,12 +171,13 @@ class IntegrationTest(DatabaseTestCase):
         while master_loop.step():
             pass
         with transaction_cursor(self.connection) as cursor:
-            cursor.execute('SELECT COUNT(*) FROM scoring_flag WHERE placement_end IS NOT NULL')
+            cursor.execute('SELECT COUNT(*) FROM scoring_checkertask WHERE exec_end IS NOT NULL')
             self.assertEqual(cursor.fetchone()[0], 1)
             cursor.execute('SELECT COUNT(*) FROM scoring_statuscheck')
             self.assertEqual(cursor.fetchone()[0], 1)
-            cursor.execute('SELECT status FROM scoring_statuscheck'
-                           '    WHERE service_id=1 AND team_id=2 AND tick=0')
+            cursor.execute('SELECT check_.status FROM scoring_statuscheck check_, scoring_checkertask task'
+                           '    WHERE check_.task_id = task.id AND task.service_id=1'
+                           '        AND task.team_id=2 AND task.tick=0')
             self.assertEqual(cursor.fetchone()[0], CheckResult.DOWN.value)
 
     @patch('logging.warning')
@@ -185,8 +196,10 @@ class IntegrationTest(DatabaseTestCase):
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
             cursor.execute('UPDATE scoring_gamecontrol SET current_tick=0')
-            cursor.execute('INSERT INTO scoring_flag (service_id, protecting_team_id, tick)'
-                           '    VALUES (1, 2, 0)')
+            cursor.execute('INSERT INTO scoring_checkertask (service_id, team_id, tick)'
+                           '    VALUES (1, 2, 0) RETURNING id')
+            task_ids = cursor.fetchall()
+            cursor.executemany('INSERT INTO scoring_flag (task_id) VALUES (%s)', task_ids)
         monotonic_mock.return_value = 20
 
         master_loop.supervisor.queue_timeout = 0.01
@@ -226,13 +239,14 @@ class IntegrationTest(DatabaseTestCase):
             os.kill(checkerscript_pid, 0)
 
         with transaction_cursor(self.connection) as cursor:
-            cursor.execute('SELECT COUNT(*) FROM scoring_flag'
-                           '    WHERE placement_start IS NOT NULL AND placement_end IS NULL')
+            cursor.execute('SELECT COUNT(*) FROM scoring_checkertask'
+                           '    WHERE exec_start IS NOT NULL AND exec_end IS NULL')
             self.assertEqual(cursor.fetchone()[0], 1)
             cursor.execute('SELECT COUNT(*) FROM scoring_statuscheck')
             self.assertEqual(cursor.fetchone()[0], 1)
-            cursor.execute('SELECT status FROM scoring_statuscheck'
-                           '    WHERE service_id=1 AND team_id=2 AND tick=0')
+            cursor.execute('SELECT check_.status FROM scoring_statuscheck check_, scoring_checkertask task'
+                           '    WHERE check_.task_id = task.id AND task.service_id=1'
+                           '        AND task.team_id=2 AND task.tick=0')
             self.assertEqual(cursor.fetchone()[0], 5)
 
         warning_mock.assert_called_with('Terminating all %d Runner processes', 1)
@@ -256,8 +270,10 @@ class IntegrationTest(DatabaseTestCase):
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
             cursor.execute('UPDATE scoring_gamecontrol SET current_tick=0')
-            cursor.execute('INSERT INTO scoring_flag (service_id, protecting_team_id, tick)'
-                           '    VALUES (1, 2, 0)')
+            cursor.execute('INSERT INTO scoring_checkertask (service_id, team_id, tick)'
+                           '    VALUES (1, 2, 0) RETURNING id')
+            task_ids = cursor.fetchall()
+            cursor.executemany('INSERT INTO scoring_flag (task_id) VALUES (%s)', task_ids)
         monotonic_mock.return_value = 20
 
         master_loop.supervisor.queue_timeout = 0.01
@@ -311,8 +327,10 @@ class IntegrationTest(DatabaseTestCase):
             cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
             cursor.execute('UPDATE scoring_gamecontrol SET current_tick=0')
             # Also add flags for service 2 (which does not get checked) to make sure it won't get touched
-            cursor.execute('INSERT INTO scoring_flag (service_id, protecting_team_id, tick)'
-                           '    VALUES (1, 2, 0), (1, 3, 0), (2, 2, 0), (2, 3, 0)')
+            cursor.execute('INSERT INTO scoring_checkertask (service_id, team_id, tick)'
+                           '    VALUES (1, 2, 0), (1, 3, 0), (2, 2, 0), (2, 3, 0) RETURNING id')
+            task_ids = cursor.fetchall()
+            cursor.executemany('INSERT INTO scoring_flag (task_id) VALUES (%s)', task_ids)
         monotonic_mock.return_value = 20
         master_loop.supervisor.queue_timeout = 0.01
         self.assertFalse(master_loop.step())
@@ -321,23 +339,27 @@ class IntegrationTest(DatabaseTestCase):
         while master_loop.step() or master_loop.get_running_script_count() > 0:
             pass
         with transaction_cursor(self.connection) as cursor:
-            cursor.execute('SELECT COUNT(*) FROM scoring_flag'
-                           '    WHERE placement_end IS NOT NULL')
+            cursor.execute('SELECT COUNT(*) FROM scoring_checkertask'
+                           '    WHERE exec_end IS NOT NULL')
             self.assertEqual(cursor.fetchone()[0], 2)
             cursor.execute('SELECT COUNT(*) FROM scoring_statuscheck')
             self.assertEqual(cursor.fetchone()[0], 2)
-            cursor.execute('SELECT status FROM scoring_statuscheck'
-                           '    WHERE service_id=1 AND team_id=2 AND tick=0')
+            cursor.execute('SELECT check_.status FROM scoring_statuscheck check_, scoring_checkertask task'
+                           '    WHERE check_.task_id = task.id AND task.service_id=1'
+                           '        AND task.team_id=2 AND task.tick=0')
             self.assertEqual(cursor.fetchone()[0], CheckResult.FAULTY.value)
-            cursor.execute('SELECT status FROM scoring_statuscheck'
-                           '    WHERE service_id=1 AND team_id=3 AND tick=0')
+            cursor.execute('SELECT check_.status FROM scoring_statuscheck check_, scoring_checkertask task'
+                           '    WHERE check_.task_id = task.id AND task.service_id=1'
+                           '        AND task.team_id=3 AND task.tick=0')
             self.assertEqual(cursor.fetchone()[0], CheckResult.OK.value)
 
         # Tick 1
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET current_tick=1')
-            cursor.execute('INSERT INTO scoring_flag (service_id, protecting_team_id, tick)'
-                           '    VALUES (1, 2, 1), (1, 3, 1), (2, 2, 1), (2, 3, 1)')
+            cursor.execute('INSERT INTO scoring_checkertask (service_id, team_id, tick)'
+                           '    VALUES (1, 2, 1), (1, 3, 1), (2, 2, 1), (2, 3, 1) RETURNING id')
+            task_ids = cursor.fetchall()
+            cursor.executemany('INSERT INTO scoring_flag (task_id) VALUES (%s)', task_ids)
         monotonic_mock.return_value = 200
         master_loop.supervisor.queue_timeout = 0.01
         self.assertFalse(master_loop.step())
@@ -346,29 +368,35 @@ class IntegrationTest(DatabaseTestCase):
         while master_loop.step() or master_loop.get_running_script_count() > 0:
             pass
         with transaction_cursor(self.connection) as cursor:
-            cursor.execute('SELECT COUNT(*) FROM scoring_flag'
-                           '    WHERE placement_end IS NOT NULL')
+            cursor.execute('SELECT COUNT(*) FROM scoring_checkertask'
+                           '    WHERE exec_end IS NOT NULL')
             self.assertEqual(cursor.fetchone()[0], 4)
             cursor.execute('SELECT COUNT(*) FROM scoring_statuscheck')
             self.assertEqual(cursor.fetchone()[0], 4)
-            cursor.execute('SELECT status FROM scoring_statuscheck'
-                           '    WHERE service_id=1 AND team_id=2 AND tick=0')
+            cursor.execute('SELECT check_.status FROM scoring_statuscheck check_, scoring_checkertask task'
+                           '    WHERE check_.task_id = task.id AND task.service_id=1'
+                           '        AND task.team_id=2 AND task.tick=0')
             self.assertEqual(cursor.fetchone()[0], CheckResult.FAULTY.value)
-            cursor.execute('SELECT status FROM scoring_statuscheck'
-                           '    WHERE service_id=1 AND team_id=3 AND tick=0')
+            cursor.execute('SELECT check_.status FROM scoring_statuscheck check_, scoring_checkertask task'
+                           '    WHERE check_.task_id = task.id AND task.service_id=1'
+                           '        AND task.team_id=3 AND task.tick=0')
             self.assertEqual(cursor.fetchone()[0], CheckResult.OK.value)
-            cursor.execute('SELECT status FROM scoring_statuscheck'
-                           '    WHERE service_id=1 AND team_id=2 AND tick=1')
+            cursor.execute('SELECT check_.status FROM scoring_statuscheck check_, scoring_checkertask task'
+                           '    WHERE check_.task_id = task.id AND task.service_id=1'
+                           '        AND task.team_id=2 AND task.tick=1')
             self.assertEqual(cursor.fetchone()[0], CheckResult.DOWN.value)
-            cursor.execute('SELECT status FROM scoring_statuscheck'
-                           '    WHERE service_id=1 AND team_id=3 AND tick=1')
+            cursor.execute('SELECT check_.status FROM scoring_statuscheck check_, scoring_checkertask task'
+                           '    WHERE check_.task_id = task.id AND task.service_id=1'
+                           '        AND task.team_id=3 AND task.tick=1')
             self.assertEqual(cursor.fetchone()[0], CheckResult.FAULTY.value)
 
         # Tick 2
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET current_tick=2')
-            cursor.execute('INSERT INTO scoring_flag (service_id, protecting_team_id, tick)'
-                           '    VALUES (1, 2, 2), (1, 3, 2), (2, 2, 2), (2, 3, 2)')
+            cursor.execute('INSERT INTO scoring_checkertask (service_id, team_id, tick)'
+                           '    VALUES (1, 2, 2), (1, 3, 2), (2, 2, 2), (2, 3, 2) RETURNING id')
+            task_ids = cursor.fetchall()
+            cursor.executemany('INSERT INTO scoring_flag (task_id) VALUES (%s)', task_ids)
         monotonic_mock.return_value = 380
         master_loop.supervisor.queue_timeout = 0.01
         self.assertFalse(master_loop.step())
@@ -377,16 +405,18 @@ class IntegrationTest(DatabaseTestCase):
         while master_loop.step() or master_loop.get_running_script_count() > 0:
             pass
         with transaction_cursor(self.connection) as cursor:
-            cursor.execute('SELECT COUNT(*) FROM scoring_flag'
-                           '    WHERE placement_end IS NOT NULL')
+            cursor.execute('SELECT COUNT(*) FROM scoring_checkertask'
+                           '    WHERE exec_end IS NOT NULL')
             self.assertEqual(cursor.fetchone()[0], 6)
             cursor.execute('SELECT COUNT(*) FROM scoring_statuscheck')
             self.assertEqual(cursor.fetchone()[0], 6)
-            cursor.execute('SELECT status FROM scoring_statuscheck'
-                           '    WHERE service_id=1 AND team_id=2 AND tick=2')
+            cursor.execute('SELECT check_.status FROM scoring_statuscheck check_, scoring_checkertask task'
+                           '    WHERE check_.task_id = task.id AND task.service_id=1'
+                           '        AND task.team_id=2 AND task.tick=2')
             self.assertEqual(cursor.fetchone()[0], CheckResult.RECOVERING.value)
-            cursor.execute('SELECT status FROM scoring_statuscheck'
-                           '    WHERE service_id=1 AND team_id=3 AND tick=2')
+            cursor.execute('SELECT check_.status FROM scoring_statuscheck check_, scoring_checkertask task'
+                           '    WHERE check_.task_id = task.id AND task.service_id=1'
+                           '        AND task.team_id=3 AND task.tick=2')
             self.assertEqual(cursor.fetchone()[0], CheckResult.OK.value)
 
     @patch('ctf_gameserver.checker.master.get_monotonic_time')
@@ -408,8 +438,10 @@ class IntegrationTest(DatabaseTestCase):
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
             cursor.execute('UPDATE scoring_gamecontrol SET current_tick=0')
-            cursor.execute('INSERT INTO scoring_flag (service_id, protecting_team_id, tick)'
-                           '    VALUES (1, 2, 0), (1, 3, 0)')
+            cursor.execute('INSERT INTO scoring_checkertask (service_id, team_id, tick)'
+                           '    VALUES (1, 2, 0), (1, 3, 0) RETURNING id')
+            task_ids = cursor.fetchall()
+            cursor.executemany('INSERT INTO scoring_flag (task_id) VALUES (%s)', task_ids)
         monotonic_mock.return_value = 20
         master_loop.supervisor.queue_timeout = 0.01
         self.assertFalse(master_loop.step())
@@ -418,21 +450,24 @@ class IntegrationTest(DatabaseTestCase):
         while master_loop.step() or master_loop.get_running_script_count() > 0:
             pass
         with transaction_cursor(self.connection) as cursor:
-            cursor.execute('SELECT COUNT(*) FROM scoring_flag'
-                           '    WHERE placement_end IS NOT NULL')
+            cursor.execute('SELECT COUNT(*) FROM scoring_checkertask'
+                           '    WHERE exec_end IS NOT NULL')
             self.assertEqual(cursor.fetchone()[0], 2)
             cursor.execute('SELECT COUNT(*) FROM scoring_statuscheck WHERE status=%s',
                            (CheckResult.OK.value,))
             self.assertEqual(cursor.fetchone()[0], 2)
-            cursor.execute('SELECT flagid FROM scoring_flag'
-                           '    WHERE service_id=1 AND protecting_team_id=3 AND tick=0')
+            cursor.execute('SELECT flag.flagid FROM scoring_flag flag, scoring_checkertask task'
+                           '    WHERE flag.task_id = task.id AND task.service_id=1'
+                           '        AND task.team_id=3 AND task.tick=0')
             self.assertIsNone(cursor.fetchone()[0])
 
         # Tick 1
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET current_tick=1')
-            cursor.execute('INSERT INTO scoring_flag (service_id, protecting_team_id, tick)'
-                           '    VALUES (1, 2, 1), (1, 3, 1)')
+            cursor.execute('INSERT INTO scoring_checkertask (service_id, team_id, tick)'
+                           '    VALUES (1, 2, 1), (1, 3, 1) RETURNING id')
+            task_ids = cursor.fetchall()
+            cursor.executemany('INSERT INTO scoring_flag (task_id) VALUES (%s)', task_ids)
         monotonic_mock.return_value = 200
         master_loop.supervisor.queue_timeout = 0.01
         self.assertFalse(master_loop.step())
@@ -441,21 +476,24 @@ class IntegrationTest(DatabaseTestCase):
         while master_loop.step() or master_loop.get_running_script_count() > 0:
             pass
         with transaction_cursor(self.connection) as cursor:
-            cursor.execute('SELECT COUNT(*) FROM scoring_flag'
-                           '    WHERE placement_end IS NOT NULL')
+            cursor.execute('SELECT COUNT(*) FROM scoring_checkertask'
+                           '    WHERE exec_end IS NOT NULL')
             self.assertEqual(cursor.fetchone()[0], 4)
             cursor.execute('SELECT COUNT(*) FROM scoring_statuscheck WHERE status=%s',
                            (CheckResult.OK.value,))
             self.assertEqual(cursor.fetchone()[0], 4)
-            cursor.execute('SELECT flagid FROM scoring_flag'
-                           '    WHERE service_id=1 AND protecting_team_id=3 AND tick=1')
+            cursor.execute('SELECT flag.flagid FROM scoring_flag flag, scoring_checkertask task'
+                           '    WHERE flag.task_id = task.id AND task.service_id=1'
+                           '        AND task.team_id=3 AND task.tick=1')
             self.assertEqual(cursor.fetchone()[0], 'value identifier')
 
         # Tick 2
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET current_tick=2')
-            cursor.execute('INSERT INTO scoring_flag (service_id, protecting_team_id, tick)'
-                           '    VALUES (1, 2, 2), (1, 3, 2)')
+            cursor.execute('INSERT INTO scoring_checkertask (service_id, team_id, tick)'
+                           '    VALUES (1, 2, 2), (1, 3, 2) RETURNING id')
+            task_ids = cursor.fetchall()
+            cursor.executemany('INSERT INTO scoring_flag (task_id) VALUES (%s)', task_ids)
         monotonic_mock.return_value = 380
         master_loop.supervisor.queue_timeout = 0.01
         self.assertFalse(master_loop.step())
@@ -464,14 +502,15 @@ class IntegrationTest(DatabaseTestCase):
         while master_loop.step() or master_loop.get_running_script_count() > 0:
             pass
         with transaction_cursor(self.connection) as cursor:
-            cursor.execute('SELECT COUNT(*) FROM scoring_flag'
-                           '    WHERE placement_end IS NOT NULL')
+            cursor.execute('SELECT COUNT(*) FROM scoring_checkertask'
+                           '    WHERE exec_end IS NOT NULL')
             self.assertEqual(cursor.fetchone()[0], 6)
             cursor.execute('SELECT COUNT(*) FROM scoring_statuscheck WHERE status=%s',
                            (CheckResult.OK.value,))
             self.assertEqual(cursor.fetchone()[0], 6)
-            cursor.execute('SELECT flagid FROM scoring_flag'
-                           '    WHERE service_id=1 AND protecting_team_id=3 AND tick=2')
+            cursor.execute('SELECT flag.flagid FROM scoring_flag flag, scoring_checkertask task'
+                           '    WHERE flag.task_id = task.id AND task.service_id=1'
+                           '        AND task.team_id=3 AND task.tick=2')
             self.assertIsNone(cursor.fetchone()[0])
 
     @patch('ctf_gameserver.checker.master.get_monotonic_time')
@@ -485,8 +524,10 @@ class IntegrationTest(DatabaseTestCase):
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
             cursor.execute('UPDATE scoring_gamecontrol SET current_tick=0')
-            cursor.execute('INSERT INTO scoring_flag (service_id, protecting_team_id, tick)'
-                           '    VALUES (1, 2, 0)')
+            cursor.execute('INSERT INTO scoring_checkertask (service_id, team_id, tick)'
+                           '    VALUES (1, 2, 0) RETURNING id')
+            task_ids = cursor.fetchall()
+            cursor.executemany('INSERT INTO scoring_flag (task_id) VALUES (%s)', task_ids)
 
         master_loop.shutting_down = True
         master_loop.supervisor.queue_timeout = 0.01
@@ -494,7 +535,7 @@ class IntegrationTest(DatabaseTestCase):
         # Will return False because no messages yet
         self.assertFalse(master_loop.step())
         with transaction_cursor(self.connection) as cursor:
-            cursor.execute('SELECT COUNT(*) FROM scoring_flag WHERE placement_start IS NOT NULL')
+            cursor.execute('SELECT COUNT(*) FROM scoring_checkertask WHERE exec_start IS NOT NULL')
             self.assertEqual(cursor.fetchone()[0], 0)
             cursor.execute('SELECT COUNT(*) FROM scoring_statuscheck')
             self.assertEqual(cursor.fetchone()[0], 0)
@@ -514,8 +555,10 @@ class IntegrationTest(DatabaseTestCase):
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
             cursor.execute('UPDATE scoring_gamecontrol SET current_tick=0')
-            cursor.execute('INSERT INTO scoring_flag (service_id, protecting_team_id, tick)'
-                           '    VALUES (1, 2, 0)')
+            cursor.execute('INSERT INTO scoring_checkertask (service_id, team_id, tick)'
+                           '    VALUES (1, 2, 0) RETURNING id')
+            task_ids = cursor.fetchall()
+            cursor.executemany('INSERT INTO scoring_flag (task_id) VALUES (%s)', task_ids)
         monotonic_mock.return_value = 20
 
         master_loop.supervisor.queue_timeout = 0.01
@@ -526,12 +569,13 @@ class IntegrationTest(DatabaseTestCase):
         while master_loop.step():
             pass
         with transaction_cursor(self.connection) as cursor:
-            cursor.execute('SELECT COUNT(*) FROM scoring_flag WHERE placement_end IS NOT NULL')
+            cursor.execute('SELECT COUNT(*) FROM scoring_checkertask WHERE exec_end IS NOT NULL')
             self.assertEqual(cursor.fetchone()[0], 1)
             cursor.execute('SELECT COUNT(*) FROM scoring_statuscheck')
             self.assertEqual(cursor.fetchone()[0], 1)
-            cursor.execute('SELECT status FROM scoring_statuscheck'
-                           '    WHERE service_id=1 AND team_id=2 AND tick=0')
+            cursor.execute('SELECT check_.status FROM scoring_statuscheck check_, scoring_checkertask task'
+                           '    WHERE check_.task_id = task.id AND task.service_id=1'
+                           '        AND task.team_id=2 AND task.tick=0')
             self.assertEqual(cursor.fetchone()[0], CheckResult.OK.value)
 
     @patch('logging.warning')
@@ -555,8 +599,10 @@ class IntegrationTest(DatabaseTestCase):
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
             cursor.execute('UPDATE scoring_gamecontrol SET current_tick=0')
-            cursor.execute('INSERT INTO scoring_flag (service_id, protecting_team_id, tick)'
-                           '    VALUES (1, 2, 0)')
+            cursor.execute('INSERT INTO scoring_checkertask (service_id, team_id, tick)'
+                           '    VALUES (1, 2, 0) RETURNING id')
+            task_ids = cursor.fetchall()
+            cursor.executemany('INSERT INTO scoring_flag (task_id) VALUES (%s)', task_ids)
         monotonic_mock.return_value = 20
 
         master_loop.supervisor.queue_timeout = 0.01
@@ -596,11 +642,12 @@ class IntegrationTest(DatabaseTestCase):
             signal_script()
 
         with transaction_cursor(self.connection) as cursor:
-            cursor.execute('SELECT COUNT(*) FROM scoring_flag'
-                           '    WHERE placement_start IS NOT NULL AND placement_end IS NULL')
+            cursor.execute('SELECT COUNT(*) FROM scoring_checkertask'
+                           '    WHERE exec_start IS NOT NULL AND exec_end IS NULL')
             self.assertEqual(cursor.fetchone()[0], 1)
-            cursor.execute('SELECT status FROM scoring_statuscheck'
-                           '    WHERE service_id=1 AND team_id=2 AND tick=0')
+            cursor.execute('SELECT check_.status FROM scoring_statuscheck check_, scoring_checkertask task'
+                           '    WHERE check_.task_id = task.id AND task.service_id=1'
+                           '        AND task.team_id=2 AND task.tick=0')
             self.assertEqual(cursor.fetchone()[0], 5)
 
         warning_mock.assert_called_with('Terminating all %d Runner processes', 1)

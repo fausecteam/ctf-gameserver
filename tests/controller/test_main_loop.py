@@ -80,19 +80,42 @@ class MainLoopTest(DatabaseTestCase):
         self.assertEqual(total_flag_count, 6)
 
         with transaction_cursor(self.connection) as cursor:
-            cursor.execute('SELECT COUNT(*) FROM scoring_flag WHERE service_id=1')
+            cursor.execute('SELECT COUNT(*) FROM scoring_flag flag, scoring_checkertask task'
+                           '    WHERE flag.task_id = task.id AND task.service_id=1')
             service_flag_count = cursor.fetchone()[0]
         self.assertEqual(service_flag_count, 3)
 
         with transaction_cursor(self.connection) as cursor:
-            cursor.execute('SELECT COUNT(*) FROM scoring_flag WHERE protecting_team_id=4')
+            cursor.execute('SELECT COUNT(*) FROM scoring_flag flag, scoring_checkertask task'
+                           '    WHERE flag.task_id = task.id AND task.team_id=4')
             team_flag_count = cursor.fetchone()[0]
         self.assertEqual(team_flag_count, 2)
 
         with transaction_cursor(self.connection) as cursor:
-            cursor.execute('SELECT COUNT(*) FROM scoring_flag WHERE tick=0')
+            cursor.execute('SELECT COUNT(*) FROM scoring_flag flag, scoring_checkertask task'
+                           '    WHERE flag.task_id = task.id AND task.tick=0')
             tick_flag_count = cursor.fetchone()[0]
         self.assertEqual(tick_flag_count, 6)
+
+        with transaction_cursor(self.connection) as cursor:
+            cursor.execute('SELECT COUNT(*) FROM scoring_checkertask')
+            total_task_count = cursor.fetchone()[0]
+        self.assertEqual(total_task_count, 6)
+
+        with transaction_cursor(self.connection) as cursor:
+            cursor.execute('SELECT COUNT(*) FROM scoring_checkertask WHERE service_id=1')
+            service_task_count = cursor.fetchone()[0]
+        self.assertEqual(service_task_count, 3)
+
+        with transaction_cursor(self.connection) as cursor:
+            cursor.execute('SELECT COUNT(*) FROM scoring_checkertask WHERE team_id=4')
+            team_task_count = cursor.fetchone()[0]
+        self.assertEqual(team_task_count, 2)
+
+        with transaction_cursor(self.connection) as cursor:
+            cursor.execute('SELECT COUNT(*) FROM scoring_checkertask WHERE tick=0')
+            tick_task_count = cursor.fetchone()[0]
+        self.assertEqual(tick_task_count, 6)
 
     @patch('time.sleep')
     def test_next_tick_undue(self, sleep_mock):
@@ -117,6 +140,11 @@ class MainLoopTest(DatabaseTestCase):
             cursor.execute('SELECT COUNT(*) FROM scoring_flag')
             tick_flag_count = cursor.fetchone()[0]
         self.assertEqual(tick_flag_count, 0)
+
+        with transaction_cursor(self.connection) as cursor:
+            cursor.execute('SELECT COUNT(*) FROM scoring_checkertask')
+            tick_task_count = cursor.fetchone()[0]
+        self.assertEqual(tick_task_count, 0)
 
     @patch('time.sleep')
     def test_next_tick_overdue(self, sleep_mock):
@@ -145,9 +173,15 @@ class MainLoopTest(DatabaseTestCase):
         self.assertEqual(scoreboard_count, 4)
 
         with transaction_cursor(self.connection) as cursor:
-            cursor.execute('SELECT COUNT(*) FROM scoring_flag WHERE tick=6')
+            cursor.execute('SELECT COUNT(*) FROM scoring_flag flag, scoring_checkertask task'
+                           '    WHERE flag.task_id = task.id AND task.tick=6')
             tick_flag_count = cursor.fetchone()[0]
         self.assertEqual(tick_flag_count, 6)
+
+        with transaction_cursor(self.connection) as cursor:
+            cursor.execute('SELECT COUNT(*) FROM scoring_checkertask WHERE tick=6')
+            tick_task_count = cursor.fetchone()[0]
+        self.assertEqual(tick_task_count, 6)
 
     @patch('time.sleep')
     def test_last_tick(self, sleep_mock):
@@ -165,9 +199,15 @@ class MainLoopTest(DatabaseTestCase):
         self.assertEqual(new_tick, 480)
 
         with transaction_cursor(self.connection) as cursor:
-            cursor.execute('SELECT COUNT(*) FROM scoring_flag WHERE tick=480')
+            cursor.execute('SELECT COUNT(*) FROM scoring_flag flag, scoring_checkertask task'
+                           '    WHERE flag.task_id = task.id AND task.tick=480')
             tick_flag_count = cursor.fetchone()[0]
         self.assertEqual(tick_flag_count, 6)
+
+        with transaction_cursor(self.connection) as cursor:
+            cursor.execute('SELECT COUNT(*) FROM scoring_checkertask WHERE tick=480')
+            tick_task_count = cursor.fetchone()[0]
+        self.assertEqual(tick_task_count, 6)
 
     @patch('time.sleep')
     def test_shortly_after_game(self, sleep_mock):
@@ -196,6 +236,11 @@ class MainLoopTest(DatabaseTestCase):
             total_flag_count = cursor.fetchone()[0]
         self.assertEqual(total_flag_count, 0)
 
+        with transaction_cursor(self.connection) as cursor:
+            cursor.execute('SELECT COUNT(*) FROM scoring_checkertask')
+            tick_task_count = cursor.fetchone()[0]
+        self.assertEqual(tick_task_count, 0)
+
     @patch('time.sleep')
     def test_long_after_game(self, sleep_mock):
         with transaction_cursor(self.connection) as cursor:
@@ -223,6 +268,11 @@ class MainLoopTest(DatabaseTestCase):
             total_flag_count = cursor.fetchone()[0]
         self.assertEqual(total_flag_count, 0)
 
+        with transaction_cursor(self.connection) as cursor:
+            cursor.execute('SELECT COUNT(*) FROM scoring_checkertask')
+            tick_task_count = cursor.fetchone()[0]
+        self.assertEqual(tick_task_count, 0)
+
     @patch('time.sleep')
     def test_after_game_nonstop(self, sleep_mock):
         with transaction_cursor(self.connection) as cursor:
@@ -244,9 +294,15 @@ class MainLoopTest(DatabaseTestCase):
         self.assertFalse(cancel_checks)
 
         with transaction_cursor(self.connection) as cursor:
-            cursor.execute('SELECT COUNT(*) FROM scoring_flag WHERE tick=480')
+            cursor.execute('SELECT COUNT(*) FROM scoring_flag flag, scoring_checkertask task'
+                           '    WHERE flag.task_id = task.id AND task.tick=480')
             tick_flag_count = cursor.fetchone()[0]
         self.assertEqual(tick_flag_count, 6)
+
+        with transaction_cursor(self.connection) as cursor:
+            cursor.execute('SELECT COUNT(*) FROM scoring_checkertask WHERE tick=480')
+            tick_task_count = cursor.fetchone()[0]
+        self.assertEqual(tick_task_count, 6)
 
 
 class DatabaseTest(DatabaseTestCase):

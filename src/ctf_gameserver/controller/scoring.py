@@ -21,13 +21,16 @@ def calculate_scoreboard(db_conn, prohibit_changes=False):
         cursor.execute('SELECT user_id FROM registration_team WHERE nop_team = true')
         nop_team_ids = set(t[0] for t in cursor.fetchall())
 
-        cursor.execute('SELECT f.service_id, c.capturing_team_id, f.protecting_team_id, f.id'
-                       '    FROM scoring_capture c, scoring_flag f WHERE c.flag_id = f.id')
+        cursor.execute('SELECT t.service_id, c.capturing_team_id, t.team_id, f.id'
+                       '    FROM scoring_capture c, scoring_flag f, scoring_checkertask t'
+                       '    WHERE c.flag_id = f.id AND f.task_id = t.id')
         # The submission server does not prevent NOP teams from submitting flags, even though it usually
         # shouldn't happen
         captures = [c for c in cursor.fetchall() if c[1] not in nop_team_ids]
 
-        cursor.execute('SELECT id, service_id, protecting_team_id FROM scoring_flag')
+        cursor.execute('SELECT f.id, t.service_id, t.team_id'
+                       '    FROM scoring_flag f, scoring_checkertask t'
+                       '    WHERE f.task_id = t.id')
         flags = [f for f in cursor.fetchall() if f[2] not in nop_team_ids]
 
         service_ids = set(f[1] for f in flags)
@@ -57,8 +60,10 @@ def calculate_scoreboard(db_conn, prohibit_changes=False):
                        '    WHERE t.user_id = u.id AND u.is_active = true AND t.nop_team = false')
         team_count = cursor.fetchone()[0]
 
-        checks_select = ('SELECT team_id, service_id, COUNT(*) FROM scoring_statuscheck'
-                         '    WHERE status = %s GROUP BY team_id, service_id')
+        checks_select = ('SELECT t.team_id, t.service_id, COUNT(*)'
+                         '    FROM scoring_statuscheck c, scoring_checkertask t'
+                         '    WHERE c.task_id = t.id AND c.status = %s'
+                         '    GROUP BY t.team_id, t.service_id')
         cursor.execute(checks_select, (CheckResult.OK.value,))
         ok_checks = [c for c in cursor.fetchall() if c[0] not in nop_team_ids]
         cursor.execute(checks_select, (CheckResult.RECOVERING.value,))

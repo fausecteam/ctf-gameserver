@@ -184,10 +184,11 @@ def teams_json(_):
     flag_ids = defaultdict(lambda: defaultdict(lambda: []))
     for flag in models.Flag.objects.exclude(flagid=None) \
                                    .exclude(flagid='') \
-                                   .filter(tick__gte=flagid_min_tick, tick__lte=flagid_max_tick) \
-                                   .select_related('service', 'protecting_team') \
-                                   .only('service__name', 'protecting_team__net_number', 'flagid'):
-        flag_ids[flag.service.name][flag.protecting_team.net_number].append(flag.flagid)
+                                   .filter(task__tick__gte=flagid_min_tick,
+                                           task__tick__lte=flagid_max_tick) \
+                                   .select_related('task__service', 'task__team') \
+                                   .only('task__service__name', 'task__team__net_number', 'flagid'):
+        flag_ids[flag.task.service.name][flag.task.team.net_number].append(flag.flagid)
 
     response = {
         'teams': sorted(list(teams)),
@@ -234,11 +235,12 @@ def service_history_json(request):
     except ValueError:
         return JsonResponse({'error': 'Ticks must be integers'})
 
-    status_checks = models.StatusCheck.objects.filter(service=service) \
-                                              .filter(tick__gte=from_tick, tick__lt=to_tick) \
-                                              .select_related('team', 'team__user') \
-                                              .only('tick', 'status', 'team__user__id', 'team__net_number') \
-                                              .order_by('team__user__id', 'tick')
+    status_checks = models.StatusCheck.objects.filter(task__service=service) \
+                                              .filter(task__tick__gte=from_tick, task__tick__lt=to_tick) \
+                                              .select_related('task', 'task__team', 'task__team__user') \
+                                              .only('task__tick', 'status', 'task__team__user__id',
+                                                    'task__team__net_number') \
+                                              .order_by('task__team__user__id', 'task__tick')
 
     # Get teams separately to reduce size of "status_checks" result
     teams = registration_models.Team.active_objects.select_related('user').only('net_number',
@@ -274,19 +276,20 @@ def service_history_json(request):
 
     for check in status_checks:
         # Status checks are ordered by team ID, finalize result for a team when it changes
-        if current_team['id'] != check.team.user.id:
-            append_result(check.team.user.id)
-            current_team = {'id': check.team.user.id, 'name': teams[check.team.user.id].user.username,
-                            'checks': [], 'net_number': teams[check.team.user.id].net_number}
+        if current_team['id'] != check.task.team.user.id:
+            append_result(check.task.team.user.id)
+            current_team = {'id': check.task.team.user.id,
+                            'name': teams[check.task.team.user.id].user.username,
+                            'checks': [], 'net_number': teams[check.task.team.user.id].net_number}
             current_tick = from_tick
 
         # Fill up missing ticks
-        while current_tick < check.tick:
+        while current_tick < check.task.tick:
             current_team['checks'].append(-1)
             current_tick += 1
 
         current_team['checks'].append(check.status)
-        current_tick = check.tick + 1
+        current_tick = check.task.tick + 1
 
     # Add result from last iteration
     append_result(max_team_id+1)
@@ -355,20 +358,21 @@ def missing_checks_json(request):
 
     status_timeout = models.StatusCheck.STATUSES[_('timeout')]
 
-    all_flags = models.Flag.objects.filter(service=service) \
-                                   .filter(tick__gte=from_tick, tick__lt=to_tick) \
-                                   .values_list('tick', 'protecting_team')
-    all_status_checks = models.StatusCheck.objects.filter(service=service) \
-                                                  .filter(tick__gte=from_tick, tick__lt=to_tick) \
+    all_tasks = models.CheckerTask.objects.filter(service=service) \
+                                          .filter(tick__gte=from_tick, tick__lt=to_tick) \
+                                          .values_list('tick', 'team')
+    all_status_checks = models.StatusCheck.objects.filter(task__service=service) \
+                                                  .filter(task__tick__gte=from_tick,
+                                                          task__tick__lt=to_tick) \
                                                   .exclude(status=status_timeout) \
-                                                  .values_list('tick', 'team')
-    checks_missing = all_flags.difference(all_status_checks).order_by('-tick', 'protecting_team')
+                                                  .values_list('task__tick', 'task__team')
+    checks_missing = all_tasks.difference(all_status_checks).order_by('-tick', 'team')
 
     checks_timeout = defaultdict(set)
-    for tick, team in models.StatusCheck.objects.filter(service=service) \
-                                                .filter(tick__gte=from_tick, tick__lt=to_tick) \
+    for tick, team in models.StatusCheck.objects.filter(task__service=service) \
+                                                .filter(task__tick__gte=from_tick, task__tick__lt=to_tick) \
                                                 .filter(status=status_timeout) \
-                                                .values_list('tick', 'team'):
+                                                .values_list('task__tick', 'task__team'):
         checks_timeout[tick].add(team)
 
     result = []

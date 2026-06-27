@@ -22,33 +22,76 @@ class Service(models.Model):
         return self.name
 
 
+class CheckerTask(models.Model):
+    """
+    Task for a Checker to run the Checker Script for a particular service, team, and tick.
+    """
+
+    service = models.ForeignKey(Service, on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    tick = models.PositiveIntegerField()
+    # NULL means the task has been generated, but not yet started
+    exec_start = models.DateTimeField(null=True, blank=True, default=None)
+    exec_end = models.DateTimeField(null=True, blank=True, default=None)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['service', 'team', 'tick'],
+                                    name='scoring_checkertask_service_team_tick_uniq')
+        ]
+        indexes = [
+            models.Index(fields=['service', 'tick']),
+            models.Index(fields=['service', 'team', 'tick'])
+        ]
+
+    def __str__(self):
+        return 'Checker Task {:d}'.format(self.id)
+
+
 class Flag(models.Model):
     """
     Database representation of a flag. The actual flag string needn't be stored, as its relevant parts can be
     reconstructed from this information.
     """
 
-    service = models.ForeignKey(Service, on_delete=models.CASCADE)
-    protecting_team = models.ForeignKey(Team, on_delete=models.CASCADE)
-    tick = models.PositiveIntegerField()
-    # NULL means the flag has been generated, but not yet placed
-    placement_start = models.DateTimeField(null=True, blank=True, default=None)
-    placement_end = models.DateTimeField(null=True, blank=True, default=None)
+    task = models.ForeignKey(CheckerTask, on_delete=models.CASCADE)
     # Optional identifier to help Teams retrieve the Flag, we don't enforce this to uniquely identify a Flag
     flagid = models.CharField(max_length=200, null=True, blank=True, default=None)
 
+    def __str__(self):
+        return 'Flag {:d}'.format(self.id)
+
+
+class StatusCheck(models.Model):
+    """
+    Storage for the result from a status check. We store the checker script's result for every Task.
+    """
+
+    # Mapping from human-readable status texts to their integer values in the database
+    # For a discussion on the plural form of "status", refer to https://english.stackexchange.com/q/877
+    STATUSES = {
+        # "up" maps to "OK" from the checkers' perspective
+        _('up'): 0,
+        _('down'): 1,
+        _('faulty'): 2,
+        _('flag not found'): 3,
+        _('recovering'): 4,
+        # Script has been forcefully terminated at end of tick, publicly displayed as "Not checked"
+        _('timeout'): 5
+    }
+
+    task = models.ForeignKey(CheckerTask, on_delete=models.CASCADE)
+    # REVISIT: Add check constraint for the values as soon as we have Django >= 2.2
+    status = models.SmallIntegerField(choices=[(i, t) for t, i in STATUSES.items()])
+    timestamp = models.DateTimeField(auto_now_add=True)
+
     class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['service', 'protecting_team', 'tick'],
-                                    name='scoring_flag_service_protecting_team_tick_uniq')
-        ]
         indexes = [
-            models.Index(fields=['service', 'tick']),
-            models.Index(fields=['service', 'protecting_team', 'tick'])
+            models.Index(fields=['task', 'status']),
         ]
 
     def __str__(self):
-        return 'Flag {:d}'.format(self.id)
+        return 'Status check {:d}'.format(self.id)
 
 
 class Capture(models.Model):
@@ -73,46 +116,6 @@ class Capture(models.Model):
 
     def __str__(self):
         return 'Capture {:d}'.format(self.id)
-
-
-class StatusCheck(models.Model):
-    """
-    Storage for the result from a status check. We store the checker script's result for every service and
-    team per tick.
-    """
-
-    # Mapping from human-readable status texts to their integer values in the database
-    # For a discussion on the plural form of "status", refer to https://english.stackexchange.com/q/877
-    STATUSES = {
-        # "up" maps to "OK" from the checkers' perspective
-        _('up'): 0,
-        _('down'): 1,
-        _('faulty'): 2,
-        _('flag not found'): 3,
-        _('recovering'): 4,
-        # Script has been forcefully terminated at end of tick, publicly displayed as "Not checked"
-        _('timeout'): 5
-    }
-
-    service = models.ForeignKey(Service, on_delete=models.CASCADE)
-    team = models.ForeignKey(Team, on_delete=models.CASCADE)
-    tick = models.PositiveIntegerField(db_index=True)
-    # REVISIT: Add check constraint for the values as soon as we have Django >= 2.2
-    status = models.SmallIntegerField(choices=[(i, t) for t, i in STATUSES.items()])
-    timestamp = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['service', 'team', 'tick'],
-                                    name='scoring_statuscheck_service_team_tick_uniq')
-        ]
-        indexes = [
-            models.Index(fields=['service', 'tick', 'status']),
-            models.Index(fields=['service', 'team', 'status'])
-        ]
-
-    def __str__(self):
-        return 'Status check {:d}'.format(self.id)
 
 
 class ScoreBoard(models.Model):

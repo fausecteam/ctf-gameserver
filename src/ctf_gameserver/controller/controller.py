@@ -120,27 +120,27 @@ def make_metrics(db_conn, registry=prometheus_client.REGISTRY):
             yield exploiting_teams
             yield is_exploited
 
-            unplaced_flags = prometheus_client.core.CounterMetricFamily(
-                metric_prefix+'unplaced_flags',
-                'Flags whose placement was not started by a checker',
+            open_tasks = prometheus_client.core.CounterMetricFamily(
+                metric_prefix+'open_tasks',
+                'Checker tasks whose execution was not started',
                 labels=['service', 'ticks']
             )
-            for service, count in database.get_unplaced_flags_counts_cur(db_conn).items():
-                unplaced_flags.add_metric([service, 'cur'], count)
-            for service, count in database.get_unplaced_flags_counts_old(db_conn).items():
-                unplaced_flags.add_metric([service, 'old'], count)
-            yield unplaced_flags
+            for service, count in database.get_open_tasks_counts_cur(db_conn).items():
+                open_tasks.add_metric([service, 'cur'], count)
+            for service, count in database.get_open_tasks_counts_old(db_conn).items():
+                open_tasks.add_metric([service, 'old'], count)
+            yield open_tasks
 
-            incomplete_flags = prometheus_client.core.CounterMetricFamily(
-                metric_prefix+'incomplete_flags',
-                'Flags whose placement by a checker was started, but has not finished',
+            incomplete_tasks = prometheus_client.core.CounterMetricFamily(
+                metric_prefix+'incomplete_tasks',
+                'Checker tasks whose execution was started, but has not finished',
                 labels=['service', 'ticks']
             )
-            for service, count in database.get_incomplete_flags_counts_cur(db_conn).items():
-                incomplete_flags.add_metric([service, 'cur'], count)
-            for service, count in database.get_incomplete_flags_counts_old(db_conn).items():
-                incomplete_flags.add_metric([service, 'old'], count)
-            yield incomplete_flags
+            for service, count in database.get_incomplete_tasks_counts_cur(db_conn).items():
+                incomplete_tasks.add_metric([service, 'cur'], count)
+            for service, count in database.get_incomplete_tasks_counts_old(db_conn).items():
+                incomplete_tasks.add_metric([service, 'old'], count)
+            yield incomplete_tasks
 
     registry.register(DatabaseCollector())
 

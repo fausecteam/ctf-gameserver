@@ -83,9 +83,9 @@ def get_check_duration(db_conn, service_id, std_dev_count, prohibit_changes=Fals
     """
 
     with transaction_cursor(db_conn, prohibit_changes) as cursor:
-        cursor.execute('SELECT (avg(extract(epoch from (placement_end - placement_start))) + %s *'
-                       '        stddev_pop(extract(epoch from (placement_end - placement_start))))::float'
-                       '    FROM scoring_flag, scoring_gamecontrol'
+        cursor.execute('SELECT (avg(extract(epoch from (exec_end - exec_start))) + %s *'
+                       '        stddev_pop(extract(epoch from (exec_end - exec_start))))::float'
+                       '    FROM scoring_checkertask, scoring_gamecontrol'
                        '    WHERE service_id = %s AND tick < current_tick', (std_dev_count, service_id))
         result = cursor.fetchone()
 
@@ -100,9 +100,9 @@ def get_task_count(db_conn, service_id, prohibit_changes=False):
 
     with transaction_cursor(db_conn, prohibit_changes) as cursor:
         cursor.execute('SELECT COUNT(*)'
-                       '    FROM scoring_flag flag, scoring_gamecontrol control'
-                       '    WHERE flag.tick = control.current_tick'
-                       '        AND flag.service_id = %s', (service_id,))
+                       '    FROM scoring_checkertask task, scoring_gamecontrol control'
+                       '    WHERE task.tick = control.current_tick'
+                       '        AND task.service_id = %s', (service_id,))
         result = cursor.fetchone()
 
     return result[0]
@@ -117,21 +117,22 @@ def get_new_tasks(db_conn, service_id, task_count, prohibit_changes=False):
         # We need a lock on the whole table to prevent deadlocks because of `ORDER BY RANDOM`
         # See https://github.com/fausecteam/ctf-gameserver/issues/62
         # "There is no UNLOCK TABLE command; locks are always released at transaction end"
-        cursor.execute('LOCK TABLE scoring_flag IN EXCLUSIVE MODE')
+        cursor.execute('LOCK TABLE scoring_checkertask IN EXCLUSIVE MODE')
 
-        cursor.execute('SELECT flag.id, flag.protecting_team_id, flag.tick, team.net_number'
-                       '    FROM scoring_flag flag, scoring_gamecontrol control, registration_team team'
-                       '    WHERE flag.placement_start is NULL'
-                       '        AND flag.tick = control.current_tick'
-                       '        AND flag.service_id = %s'
-                       '        AND flag.protecting_team_id = team.user_id'
+        cursor.execute('SELECT task.id, task.team_id, task.tick, team.net_number'
+                       '    FROM scoring_checkertask task, scoring_gamecontrol control,'
+                       '         registration_team team'
+                       '    WHERE task.exec_start is NULL'
+                       '        AND task.tick = control.current_tick'
+                       '        AND task.service_id = %s'
+                       '        AND task.team_id = team.user_id'
                        '    ORDER BY RANDOM()'
                        '    LIMIT %s', (service_id, task_count))
         tasks = cursor.fetchall()
 
-        # Mark placement as in progress
-        cursor.executemany('UPDATE scoring_flag'
-                           '    SET placement_start = NOW()'
+        # Mark execution as in progress
+        cursor.executemany('UPDATE scoring_checkertask'
+                           '    SET exec_start = NOW()'
                            '    WHERE id = %s', [(task[0],) for task in tasks])
 
     return [{
@@ -144,10 +145,11 @@ def get_new_tasks(db_conn, service_id, task_count, prohibit_changes=False):
 def get_flag_id(db_conn, service_id, team_id, tick, prohibit_changes=False, fake_flag_id=None):
 
     with transaction_cursor(db_conn, prohibit_changes) as cursor:
-        cursor.execute('SELECT id FROM scoring_flag'
-                       '    WHERE tick = %s'
-                       '        AND service_id = %s'
-                       '        AND protecting_team_id = %s', (tick, service_id, team_id))
+        cursor.execute('SELECT flag.id FROM scoring_flag flag, scoring_checkertask task'
+                       '    WHERE flag.task_id = task.id'
+                       '        AND task.tick = %s'
+                       '        AND task.service_id = %s'
+                       '        AND task.team_id = %s', (tick, service_id, team_id))
         data = cursor.fetchone()
         if fake_flag_id is not None:
             data = (fake_flag_id,)
@@ -179,15 +181,18 @@ def commit_result(db_conn, service_id, team_net_no, tick, result, prohibit_chang
             logging.error('No team found with net number %d, cannot commit result', team_net_no)
             return
 
-        cursor.execute('INSERT INTO scoring_statuscheck'
-                       '    (service_id, team_id, tick, status, timestamp)'
-                       '    VALUES (%s, %s, %s, %s, NOW())', (service_id, team_id, tick, result))
+        cursor.execute('INSERT INTO scoring_statuscheck (task_id, status, timestamp)'
+                       '    VALUES ('
+                       '        (SELECT id FROM scoring_checkertask'
+                       '              WHERE service_id = %s AND team_id = %s AND tick = %s),'
+                       '        %s, NOW())',
+                       (service_id, team_id, tick, result))
         if result != STATUS_TIMEOUT:
             # (In case of `prohibit_changes`,) PostgreSQL checks the database grants even if nothing is
             # matched by `WHERE`
-            cursor.execute('UPDATE scoring_flag'
-                           '    SET placement_end = NOW()'
-                           '    WHERE service_id = %s AND protecting_team_id = %s AND tick = %s',
+            cursor.execute('UPDATE scoring_checkertask'
+                           '    SET exec_end = NOW()'
+                           '    WHERE service_id = %s AND team_id = %s AND tick = %s',
                            (service_id, team_id, tick))
 
 
@@ -207,10 +212,12 @@ def set_flagid(db_conn, service_id, team_net_no, tick, flagid, prohibit_changes=
         # by `WHERE`
         cursor.execute('UPDATE scoring_flag'
                        '    SET flagid = %s'
-                       '    WHERE service_id = %s AND protecting_team_id = %s AND tick = %s', (flagid,
-                                                                                               service_id,
-                                                                                               team_id,
-                                                                                               tick))
+                       '    WHERE task_id = ('
+                       '        SELECT id FROM scoring_checkertask WHERE service_id = %s'
+                       '                                                AND team_id = %s'
+                       '                                                AND tick = %s'
+                       '    )',
+                       (flagid, service_id, team_id, tick))
 
 
 def load_state(db_conn, service_id, team_net_no, key, prohibit_changes=False):

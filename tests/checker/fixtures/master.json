@@ -38,14 +38,43 @@
     }
 },
 {
-    "model": "scoring.flag",
+    "model": "scoring.checkertask",
     "pk": 1,
     "fields": {
         "service": 1,
-        "protecting_team": 2,
+        "team": 2,
         "tick": 1,
-        "placement_start": null,
-        "placement_end": null,
+        "exec_start": null,
+        "exec_end": null
+    }
+},
+{
+    "model": "scoring.checkertask",
+    "pk": 2,
+    "fields": {
+        "service": 1,
+        "team": 2,
+        "tick": 2,
+        "exec_start": null,
+        "exec_end": null
+    }
+},
+{
+    "model": "scoring.checkertask",
+    "pk": 3,
+    "fields": {
+        "service": 1,
+        "team": 2,
+        "tick": 3,
+        "exec_start": null,
+        "exec_end": null
+    }
+},
+{
+    "model": "scoring.flag",
+    "pk": 1,
+    "fields": {
+        "task": 1,
         "flagid": null
     }
 },
@@ -53,11 +82,7 @@
     "model": "scoring.flag",
     "pk": 2,
     "fields": {
-        "service": 1,
-        "protecting_team": 2,
-        "tick": 2,
-        "placement_start": null,
-        "placement_end": null,
+        "task": 2,
         "flagid": null
     }
 },
@@ -65,11 +90,7 @@
     "model": "scoring.flag",
     "pk": 3,
     "fields": {
-        "service": 1,
-        "protecting_team": 2,
-        "tick": 3,
-        "placement_start": null,
-        "placement_end": null,
+        "task": 3,
         "flagid": null
     }
 },

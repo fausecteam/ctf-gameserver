@@ -12,12 +12,38 @@ class ServiceAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
 
 
+@admin.register(models.CheckerTask, site=admin_site)
+class CheckerTaskAdmin(admin.ModelAdmin):
+
+    list_display = ('id', 'service', 'team', 'tick', 'exec_start', 'exec_end')
+    list_filter = ('service', 'tick')
+    search_fields = ('service__name', 'team__user__username', 'tick')
+
+
 @admin.register(models.Flag, site=admin_site)
 class FlagAdmin(admin.ModelAdmin):
 
+    def service(self, flag):
+        """
+        Returns the service of the flag's task for usage in `list_display`.
+        """
+        return flag.task.service
+
+    def protecting_team(self, flag):
+        """
+        Returns the protecting team of the flag's task for usage in `list_display`.
+        """
+        return flag.task.team
+
+    def tick(self, flag):
+        """
+        Returns the tick of the flag's task for usage in `list_display`.
+        """
+        return flag.task.tick
+
     list_display = ('id', 'service', 'protecting_team', 'tick')
-    list_filer = ('service', 'tick')
-    search_fields = ('service__name', 'protecting_team__user__username', 'tick')
+    list_filter = ('task__service', 'task__tick')
+    search_fields = ('task__service__name', 'task__team__user__username', 'task__tick')
 
 
 @admin.register(models.Capture, site=admin_site)
@@ -35,7 +61,7 @@ class CaptureAdmin(admin.ModelAdmin):
 
         def queryset(self, request, queryset):
             if self.value():
-                return queryset.filter(flag__service__slug=self.value())
+                return queryset.filter(flag__task__service__slug=self.value())
             else:
                 return queryset
 
@@ -43,24 +69,24 @@ class CaptureAdmin(admin.ModelAdmin):
         """
         Returns the protecing team of the capture's flag for usage in `list_display`.
         """
-        return capture.flag.protecting_team
+        return capture.flag.task.team
 
     def service(self, capture):
         """
         Returns the service of the capture's flag for usage in `list_display`.
         """
-        return capture.flag.service
+        return capture.flag.task.service
 
     def flag_tick(self, capture):
         """
         Returns the tick of the capture's flag for usage in `list_display`.
         """
-        return capture.flag.tick
+        return capture.flag.task.tick
 
     list_display = ('id', 'capturing_team', 'protecting_team', 'service', 'flag_tick', 'timestamp')
     list_filter = (ServiceFilter,)
-    search_fields = ('capturing_team__user__username', 'flag__protecting_team__user__username',
-                     'flag__service__name')
+    search_fields = ('capturing_team__user__username', 'flag__task__team__user__username',
+                     'flag__task__service__name')
     ordering = ('timestamp',)
     # A giant dropdown of *all* flags made the admin page unusably slow
     raw_id_fields = ('flag',)
@@ -69,10 +95,28 @@ class CaptureAdmin(admin.ModelAdmin):
 @admin.register(models.StatusCheck, site=admin_site)
 class StatusCheckAdmin(admin.ModelAdmin):
 
+    def service(self, status_check):
+        """
+        Returns the service of the status check's task for usage in `list_display`.
+        """
+        return status_check.task.service
+
+    def team(self, status_check):
+        """
+        Returns the team of the status check's task for usage in `list_display`.
+        """
+        return status_check.task.team
+
+    def tick(self, status_check):
+        """
+        Returns the tick of the status check's task for usage in `list_display`.
+        """
+        return status_check.task.tick
+
     list_display = ('id', 'service', 'team', 'tick', 'status')
-    list_filter = ('service', 'tick', 'status')
-    search_fields = ('service__name', 'team__user__username')
-    ordering = ('tick', 'timestamp')
+    list_filter = ('task__service', 'task__tick', 'status')
+    search_fields = ('task__service__name', 'task__team__user__username')
+    ordering = ('task__tick', 'timestamp')
 
 
 @admin.register(models.GameControl, site=admin_site)
