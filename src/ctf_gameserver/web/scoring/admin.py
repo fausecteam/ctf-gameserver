@@ -17,7 +17,7 @@ class CheckerTaskAdmin(admin.ModelAdmin):
 
     list_display = ('id', 'service', 'team', 'tick', 'exec_start', 'exec_end')
     list_filter = ('service', 'tick')
-    search_fields = ('service__name', 'team__user__username', 'tick')
+    search_fields = ('service__name', 'service__slug', 'team__user__username')
 
 
 @admin.register(models.Flag, site=admin_site)
@@ -43,7 +43,7 @@ class FlagAdmin(admin.ModelAdmin):
 
     list_display = ('id', 'service', 'protecting_team', 'tick')
     list_filter = ('task__service', 'task__tick')
-    search_fields = ('task__service__name', 'task__team__user__username', 'task__tick')
+    search_fields = ('task__service__name', 'task__service__slug', 'task__team__user__username')
 
 
 @admin.register(models.Capture, site=admin_site)
@@ -86,7 +86,7 @@ class CaptureAdmin(admin.ModelAdmin):
     list_display = ('id', 'capturing_team', 'protecting_team', 'service', 'flag_tick', 'timestamp')
     list_filter = (ServiceFilter,)
     search_fields = ('capturing_team__user__username', 'flag__task__team__user__username',
-                     'flag__task__service__name')
+                     'flag__task__service__name', 'flag__task__service__slug')
     ordering = ('timestamp',)
     # A giant dropdown of *all* flags made the admin page unusably slow
     raw_id_fields = ('flag',)
@@ -115,7 +115,7 @@ class StatusCheckAdmin(admin.ModelAdmin):
 
     list_display = ('id', 'service', 'team', 'tick', 'status')
     list_filter = ('task__service', 'task__tick', 'status')
-    search_fields = ('task__service__name', 'task__team__user__username')
+    search_fields = ('task__service__name', 'task__service__slug', 'task__team__user__username')
     ordering = ('task__tick', 'timestamp')
 
 
