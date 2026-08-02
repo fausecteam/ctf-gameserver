@@ -288,10 +288,8 @@ class MasterLoop:
         return req is not None
 
     def handle_flag_request(self, task_info, params):
-        try:
-            tick = int(params['tick'])
-        except (KeyError, ValueError):
-            return None
+        # Missing/invalid param raises an exception which is handled generically in step()
+        tick = int(params['tick'])
 
         # We need current value for self.contest_start which might have changed
         self.refresh_control_info()

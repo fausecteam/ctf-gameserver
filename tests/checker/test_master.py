@@ -59,7 +59,8 @@ class MasterTest(DatabaseTestCase):
         self.assertEqual(team5, 92)
 
         params6 = {}
-        self.assertIsNone(self.master_loop.handle_flag_request(task_info, params6))
+        with self.assertRaises(KeyError):
+            self.master_loop.handle_flag_request(task_info, params6)
 
         # Changing the start time changes all flags
         with transaction_cursor(self.connection) as cursor:
