@@ -182,6 +182,11 @@ def commit_result(db_conn, service_id, team_net_no, tick, result, prohibit_chang
             logging.error('No team found with net number %d, cannot commit result', team_net_no)
             return
 
+        if fake_team_id is not None:
+            # Ensure the task exists before the following (nested) SELECT
+            cursor.execute('INSERT INTO scoring_checkertask (service_id, team_id, tick) VALUES (%s, %s, %s)',
+                           (service_id, team_id, tick))
+
         cursor.execute('INSERT INTO scoring_statuscheck (task_id, status, timestamp)'
                        '    VALUES ('
                        '        (SELECT id FROM scoring_checkertask'
