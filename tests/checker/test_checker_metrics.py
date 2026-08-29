@@ -23,7 +23,7 @@ else:
 
 class MetricsTest(TestCase):
 
-    metrics_url = 'http://127.0.0.1:9002/metrics'
+    metrics_url = 'http://127.0.0.1:9010/metrics'
 
     def setUp(self):
         def metrics_factory(registry, service):
@@ -50,7 +50,7 @@ class MetricsTest(TestCase):
                                                          args=('test', metrics_factory, self.queue, send))
         self.collector_process.start()
         self.http_server_process = multiprocessing.Process(target=metrics.run_http_server,
-                                                           args=('127.0.0.1', 9002, socket.AF_INET,
+                                                           args=('127.0.0.1', 9010, socket.AF_INET,
                                                                  self.queue, recv))
         self.http_server_process.start()
 
