@@ -17,6 +17,10 @@ class Service(models.Model):
                                          help_text=_('Safety margin (in seconds) for checker scheduling, '
                                                      'gets added to the automatically determined check '
                                                      'duration'))
+    num_flagstores = models.PositiveSmallIntegerField(default=1,
+                                                      help_text=_('Number of independent flags per tick and '
+                                                                  'team, i.e. independently exploitable '
+                                                                  'vulnerabilities'))
 
     def __str__(self):    # pylint: disable=invalid-str-returned
         return self.name
@@ -57,6 +61,7 @@ class Flag(models.Model):
     task = models.ForeignKey(CheckerTask, on_delete=models.CASCADE)
     # Optional identifier to help Teams retrieve the Flag, we don't enforce this to uniquely identify a Flag
     flagid = models.CharField(max_length=200, null=True, blank=True, default=None)
+    flagstore = models.PositiveSmallIntegerField()
 
     def __str__(self):
         return 'Flag {:d}'.format(self.id)
@@ -125,6 +130,8 @@ class ScoreBoard(models.Model):
     """
     team = models.ForeignKey(Team, editable=False, on_delete=models.PROTECT)
     service = models.ForeignKey(Service, editable=False, on_delete=models.PROTECT)
+    # NULL identifies the aggregate row per (team, service); non-NULL rows carry the per-flagstore breakdown
+    flagstore = models.PositiveSmallIntegerField(null=True, editable=False)
     attack = models.FloatField(editable=False)
     defense = models.FloatField(editable=False)
     sla = models.FloatField(editable=False)

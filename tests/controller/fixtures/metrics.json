@@ -145,7 +145,8 @@
     "pk": 1,
     "fields": {
         "task": 1,
-        "flagid": null
+        "flagid": null,
+        "flagstore": 0
     }
 },
 {
@@ -153,7 +154,8 @@
     "pk": 2,
     "fields": {
         "task": 2,
-        "flagid": null
+        "flagid": null,
+        "flagstore": 0
     }
 },
 {
@@ -161,7 +163,8 @@
     "pk": 3,
     "fields": {
         "task": 3,
-        "flagid": null
+        "flagid": null,
+        "flagstore": 0
     }
 },
 {
@@ -169,7 +172,8 @@
     "pk": 4,
     "fields": {
         "task": 4,
-        "flagid": null
+        "flagid": null,
+        "flagstore": 0
     }
 },
 {

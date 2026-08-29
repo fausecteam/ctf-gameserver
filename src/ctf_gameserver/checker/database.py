@@ -142,14 +142,15 @@ def get_new_tasks(db_conn, service_id, task_count, prohibit_changes=False):
     } for task in tasks]
 
 
-def get_flag_id(db_conn, service_id, team_id, tick, prohibit_changes=False, fake_flag_id=None):
+def get_flag_id(db_conn, service_id, team_id, tick, flagstore, prohibit_changes=False, fake_flag_id=None):
 
     with transaction_cursor(db_conn, prohibit_changes) as cursor:
         cursor.execute('SELECT flag.id FROM scoring_flag flag, scoring_checkertask task'
                        '    WHERE flag.task_id = task.id'
                        '        AND task.tick = %s'
                        '        AND task.service_id = %s'
-                       '        AND task.team_id = %s', (tick, service_id, team_id))
+                       '        AND task.team_id = %s'
+                       '        AND flag.flagstore = %s', (tick, service_id, team_id, flagstore))
         data = cursor.fetchone()
         if fake_flag_id is not None:
             data = (fake_flag_id,)
@@ -196,7 +197,8 @@ def commit_result(db_conn, service_id, team_net_no, tick, result, prohibit_chang
                            (service_id, team_id, tick))
 
 
-def set_flagid(db_conn, service_id, team_net_no, tick, flagid, prohibit_changes=False, fake_team_id=None):
+def set_flagid(db_conn, service_id, team_net_no, tick, flagid, flagstore, prohibit_changes=False,
+               fake_team_id=None):
     """
     Stores a Flag ID in database.
     In case of conflict, the previous Flag ID gets overwritten.
@@ -212,12 +214,13 @@ def set_flagid(db_conn, service_id, team_net_no, tick, flagid, prohibit_changes=
         # by `WHERE`
         cursor.execute('UPDATE scoring_flag'
                        '    SET flagid = %s'
-                       '    WHERE task_id = ('
-                       '        SELECT id FROM scoring_checkertask WHERE service_id = %s'
-                       '                                                AND team_id = %s'
-                       '                                                AND tick = %s'
-                       '    )',
-                       (flagid, service_id, team_id, tick))
+                       '    WHERE flagstore = %s'
+                       '        AND task_id = ('
+                       '            SELECT id FROM scoring_checkertask WHERE service_id = %s'
+                       '                                                    AND team_id = %s'
+                       '                                                    AND tick = %s'
+                       '        )',
+                       (flagid, flagstore, service_id, team_id, tick))
 
 
 def load_state(db_conn, service_id, team_net_no, key, prohibit_changes=False):

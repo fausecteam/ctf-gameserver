@@ -29,11 +29,11 @@ class MasterTest(DatabaseTestCase):
             'tick': 2
         }
 
-        params1 = {'tick': 2}
+        params1 = {'tick': 2, 'flagstore': 0}
         resp1 = self.master_loop.handle_flag_request(task_info, params1)
         flag_id1, team1 = verify(resp1, self.secret)
 
-        params2 = {'tick': 2}
+        params2 = {'tick': 2, 'flagstore': 0}
         resp2 = self.master_loop.handle_flag_request(task_info, params2)
         flag_id2, team2 = verify(resp2, self.secret)
         # "params3" and "resp3" don't exist anymore
@@ -44,10 +44,10 @@ class MasterTest(DatabaseTestCase):
         self.assertEqual(flag_id2, 2)
         self.assertEqual(team2, 92)
 
-        params4 = {'tick': 1}
+        params4 = {'tick': 1, 'flagstore': 0}
         resp4 = self.master_loop.handle_flag_request(task_info, params4)
         flag_id4, team4 = verify(resp4, self.secret)
-        params5 = {'tick': 1}
+        params5 = {'tick': 1, 'flagstore': 0}
         resp5 = self.master_loop.handle_flag_request(task_info, params5)
         flag_id5, team5 = verify(resp5, self.secret)
 
@@ -70,6 +70,56 @@ class MasterTest(DatabaseTestCase):
         resp4_again = self.master_loop.handle_flag_request(task_info, params4)
         self.assertNotEqual(resp1, resp1_again)
         self.assertNotEqual(resp4, resp4_again)
+
+    def test_handle_flag_request_flagstores(self):
+        with transaction_cursor(self.connection) as cursor:
+            cursor.execute('UPDATE scoring_gamecontrol SET start=NOW()')
+            cursor.execute('INSERT INTO scoring_flag (id, task_id, flagid, flagstore)'
+                           '    VALUES (4, 1, NULL, 1)')
+
+        task_info = {
+            'service': 'service1',
+            '_team_id': 2,
+            'team': 92,
+            'tick': 1
+        }
+
+        params_store0 = {'tick': 1, 'flagstore': 0}
+        resp_store0 = self.master_loop.handle_flag_request(task_info, params_store0)
+        flag_id_store0, team_store0 = verify(resp_store0, self.secret)
+
+        params_store1 = {'tick': 1, 'flagstore': 1}
+        resp_store1 = self.master_loop.handle_flag_request(task_info, params_store1)
+        flag_id_store1, team_store1 = verify(resp_store1, self.secret)
+
+        self.assertNotEqual(resp_store0, resp_store1)
+        self.assertEqual(flag_id_store0, 1)
+        self.assertEqual(flag_id_store1, 4)
+        self.assertEqual(team_store0, 92)
+        self.assertEqual(team_store1, 92)
+
+    def test_handle_flagid_request(self):
+        with transaction_cursor(self.connection) as cursor:
+            cursor.execute('INSERT INTO scoring_flag (id, task_id, flagid, flagstore)'
+                           '    VALUES (4, 1, NULL, 1)')
+
+        task_info = {
+            'service': 'service1',
+            '_team_id': 2,
+            'team': 92,
+            'tick': 1
+        }
+
+        self.master_loop.handle_flagid_request(task_info, {'data': 'flagid-store1', 'flagstore': 1})
+
+        with transaction_cursor(self.connection) as cursor:
+            cursor.execute('SELECT flagid FROM scoring_flag WHERE id = 1')
+            flagid_store0 = cursor.fetchone()[0]
+            cursor.execute('SELECT flagid FROM scoring_flag WHERE id = 4')
+            flagid_store1 = cursor.fetchone()[0]
+
+        self.assertIsNone(flagid_store0)
+        self.assertEqual(flagid_store1, 'flagid-store1')
 
     def test_handle_result_request(self):
         task_info = {

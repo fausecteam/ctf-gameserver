@@ -78,6 +78,55 @@ class ServerTest(DatabaseTestCase):
         asyncio.run(coroutine())
 
     @patch('ctf_gameserver.submission.submission._match_net_number')
+    def test_flagstores(self, net_number_mock):
+        async def coroutine():
+            net_number_mock.return_value = 103
+
+            with transaction_cursor(self.connection) as cursor:
+                cursor.execute('UPDATE scoring_gamecontrol SET start = datetime("now"), '
+                               '                               end = datetime("now", "+1 hour")')
+                cursor.execute('INSERT INTO scoring_flag (id, task_id, flagid, flagstore)'
+                               '    VALUES (6, 4, NULL, 1)')
+
+            task, reader, writer = await self.connect()
+            await reader.readuntil(b'\n\n')
+
+            expiration_time = datetime.datetime.now() + datetime.timedelta(seconds=60)
+
+            flag_store0 = generate_flag(expiration_time, 4, 102, self.flag_secret,
+                                        self.flag_prefix).encode('ascii')
+            writer.write(flag_store0 + b'\n')
+            response = await reader.readline()
+            self.assertEqual(response, flag_store0 + b' OK\n')
+
+            flag_store1 = generate_flag(expiration_time, 6, 102, self.flag_secret,
+                                        self.flag_prefix).encode('ascii')
+            writer.write(flag_store1 + b'\n')
+            response = await reader.readline()
+            self.assertEqual(response, flag_store1 + b' OK\n')
+
+            with transaction_cursor(self.connection) as cursor:
+                cursor.execute('SELECT COUNT(*) FROM scoring_capture')
+                self.assertEqual(cursor.fetchone()[0], 2)
+
+                cursor.execute('SELECT flag_id, capturing_team_id, tick FROM scoring_capture'
+                               '    ORDER BY flag_id')
+                captured_flag, capturing_team, capture_tick = cursor.fetchone()
+                self.assertEqual(captured_flag, 4)
+                self.assertEqual(capturing_team, 3)
+                self.assertEqual(capture_tick, 6)
+
+                captured_flag, capturing_team, capture_tick = cursor.fetchone()
+                self.assertEqual(captured_flag, 6)
+                self.assertEqual(capturing_team, 3)
+                self.assertEqual(capture_tick, 6)
+
+            writer.close()
+            task.cancel()
+
+        asyncio.run(coroutine())
+
+    @patch('ctf_gameserver.submission.submission._match_net_number')
     def test_multiple_flags(self, net_number_mock):
         async def coroutine():
             net_number_mock.return_value = 103

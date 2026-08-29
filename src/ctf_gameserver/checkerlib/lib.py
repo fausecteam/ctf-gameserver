@@ -114,14 +114,16 @@ class BaseChecker:
         raise NotImplementedError('check_flag() must be implemented by the subclass')
 
 
-def get_flag(tick: int) -> str:
+def get_flag(tick: int, flagstore: int = 0) -> str:
     """
-    May be called by Checker Scripts to get the flag for a given tick, for the team and service of the
-    current run. The returned flag can be used for both placement and checks.
+    May be called by Checker Scripts to get the flag for a given tick and flag store, for the team and
+    service of the current run. The returned flag can be used for both placement and checks.
     """
 
     if not isinstance(tick, int):
         raise TypeError('tick must be of type int')
+    if not isinstance(flagstore, int):
+        raise TypeError('flagstore must be of type int')
 
     # Return dummy flag when launched locally
     if _launched_without_runner():
@@ -131,25 +133,28 @@ def get_flag(tick: int) -> str:
             raise Exception('get_flag() must be called through run_check()') from None
         expiration = datetime.datetime(1970, 1, 1, 0, 0, tzinfo=datetime.timezone.utc)
         expiration += datetime.timedelta(minutes=tick)
-        return ctf_gameserver.lib.flag.generate(expiration, 42, team, b'TOPSECRET')
+        # Fold the flagstore into the dummy flag ID so that different stores yield different flags
+        return ctf_gameserver.lib.flag.generate(expiration, 42 + flagstore, team, b'TOPSECRET')
 
-    _send_ctrl_message({'action': 'FLAG', 'param': {'tick': tick}})
+    _send_ctrl_message({'action': 'FLAG', 'param': {'tick': tick, 'flagstore': flagstore}})
     result = _recv_ctrl_message()
     return result['response']
 
 
-def set_flagid(data: str) -> None:
+def set_flagid(data: str, flagstore: int = 0) -> None:
     """
-    Stores the Flag ID for the current team and tick.
+    Stores the Flag ID for the current team, tick, and flag store.
     """
 
     if not isinstance(data, str):
         raise TypeError('data must be of type str')
+    if not isinstance(flagstore, int):
+        raise TypeError('flagstore must be of type int')
     if len(data) > 200:
         raise AttributeError('data must not be longer than 200 bytes')
 
     if not _launched_without_runner():
-        _send_ctrl_message({'action': 'FLAGID', 'param': data})
+        _send_ctrl_message({'action': 'FLAGID', 'param': {'data': data, 'flagstore': flagstore}})
         # Wait for acknowledgement
         _recv_ctrl_message()
     else:

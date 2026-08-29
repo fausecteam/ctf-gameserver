@@ -35,11 +35,16 @@ def increase_tick(db_conn, prohibit_changes=False):
                        '    FROM scoring_service service, auth_user, registration_team team,'
                        '         scoring_gamecontrol control'
                        '    WHERE auth_user.id = team.user_id AND auth_user.is_active')
-        # Create a flag for every newly created checker task
-        cursor.execute('INSERT INTO scoring_flag (task_id)'
-                       '    SELECT task.id'
-                       '    FROM scoring_checkertask task, scoring_gamecontrol control'
-                       '    WHERE task.tick = control.current_tick')
+        # Create a flag for every flagstore of every newly created checker task
+        cursor.execute('SELECT task.id, service.num_flagstores'
+                       '    FROM scoring_checkertask task, scoring_service service,'
+                       '         scoring_gamecontrol control'
+                       '    WHERE task.service_id = service.id AND task.tick = control.current_tick')
+        flag_rows = []
+        for task_id, num_flagstores in cursor.fetchall():
+            for flagstore in range(num_flagstores):
+                flag_rows.append((task_id, flagstore))
+        cursor.executemany('INSERT INTO scoring_flag (task_id, flagstore) VALUES (%s, %s)', flag_rows)
 
 
 def cancel_checks(db_conn, prohibit_changes=False):

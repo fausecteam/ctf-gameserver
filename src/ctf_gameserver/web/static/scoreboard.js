@@ -47,6 +47,19 @@ function buildTable(data) {
             service_node.querySelector('.points-defense').textContent = service['defense'].toFixed(2)
             service_node.querySelector('.points-sla').textContent = service['sla'].toFixed(2)
 
+            // Per-flagstore breakdown (only present for multi-store services)
+            const flagstore_breakdown = service_node.querySelector('.flagstores-breakdown')
+            const flagstore_template = service_node.querySelector('.flagstore-template')
+            service['flagstores'].forEach(function(flagstore, index) {
+                const flagstore_node = flagstore_template.cloneNode(true)
+                flagstore_node.querySelector('.flagstore-index').textContent = index
+                flagstore_node.querySelector('.flagstore-offense').textContent = flagstore['offense'].toFixed(2)
+                flagstore_node.querySelector('.flagstore-defense').textContent = flagstore['defense'].toFixed(2)
+                flagstore_node.removeAttribute('hidden')
+                flagstore_breakdown.appendChild(flagstore_node)
+            })
+            flagstore_template.parentNode.removeChild(flagstore_template)
+
             service_node.querySelector('a').href += `#team-${team.id}-row`
 
             if (service['status'] !== '') {

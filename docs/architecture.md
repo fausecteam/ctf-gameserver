@@ -46,6 +46,12 @@ flag secret. It consists of a configurable static prefix, followed by the encode
 
 Using a prefix of `FAUST_`, a valid flag could look like this: `FAUST_Q1RGLRml7uVTRVJBRXdsFhEI3jhxey9I`
 
+Flag Stores
+-----------
+A service can define multiple **Flag Stores**, i.e. multiple independent Flags per team and tick, typically
+used to represent several independently exploitable vulnerabilities in a single service. The number of Flag
+Stores is configured per service and defaults to one.
+
 Flag IDs
 --------
 In some cases, you want to provide teams with an identifier which helps retrieve an individual Flag. For
@@ -78,9 +84,15 @@ following format:
         "teams": [123, 456, 789],
         "flag_ids": {
             "service1": {
-    			// Keys are net numbers from above as strings
-                "123": ["abc123", "def456"],
-                "789": ["xxx", "yyy"]
+                // Keys are net numbers from above as strings
+                "123": {
+                    // Keys are Flag Store numbers as strings
+                    "0": ["abc123", "def456"]
+                },
+                "789": {
+                    "0": ["xxx"],
+                    "1": ["yyy"]
+                }
             }
         }
     }

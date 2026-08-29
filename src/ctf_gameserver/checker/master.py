@@ -154,9 +154,9 @@ def main():
 
         database.get_task_count(db_conn, service_id, prohibit_changes=True)
         database.get_new_tasks(db_conn, service_id, 1, prohibit_changes=True)
-        database.get_flag_id(db_conn, service_id, 1, 1, prohibit_changes=True, fake_flag_id=42)
+        database.get_flag_id(db_conn, service_id, 1, 1, 0, prohibit_changes=True, fake_flag_id=42)
         database.commit_result(db_conn, service_id, 1, 2147483647, 0, prohibit_changes=True, fake_team_id=1)
-        database.set_flagid(db_conn, service_id, 1, 0, 'id', prohibit_changes=True, fake_team_id=1)
+        database.set_flagid(db_conn, service_id, 1, 0, 'id', 0, prohibit_changes=True, fake_team_id=1)
         database.load_state(db_conn, service_id, 1, 'key', prohibit_changes=True)
         database.store_state(db_conn, service_id, 1, 'key', 'data', prohibit_changes=True, fake_team_id=1)
     except psycopg2.ProgrammingError as e:
@@ -290,18 +290,21 @@ class MasterLoop:
     def handle_flag_request(self, task_info, params):
         # Missing/invalid param raises an exception which is handled generically in step()
         tick = int(params['tick'])
+        flagstore = int(params['flagstore'])
 
         # We need current value for self.contest_start which might have changed
         self.refresh_control_info()
 
-        flag_id = database.get_flag_id(self.db_conn, self.service['id'], task_info['_team_id'], tick)
+        flag_id = database.get_flag_id(self.db_conn, self.service['id'], task_info['_team_id'], tick,
+                                       flagstore)
 
         expiration = self.contest_start + (self.flag_valid_ticks + tick) * self.tick_duration
         return flag_lib.generate(expiration, flag_id, task_info['team'], self.flag_secret,
                                  self.flag_prefix)
 
     def handle_flagid_request(self, task_info, param):
-        database.set_flagid(self.db_conn, self.service['id'], task_info['team'], task_info['tick'], param)
+        database.set_flagid(self.db_conn, self.service['id'], task_info['team'], task_info['tick'],
+                            param['data'], int(param['flagstore']))
 
     def handle_load_request(self, task_info, param):
         return database.load_state(self.db_conn, self.service['id'], task_info['team'], param)

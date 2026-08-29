@@ -45,8 +45,9 @@ In your `__main__` code, call `checkerlib.run_check()` with your class as argume
 care of calling your methods, merging the results, and submitting them to the Checker Master.
 
 ### Functions
-* `get_flag(tick: int) -> str`: Get the flag for the given tick (for the checked team).
-* `set_flagid(data: str) -> None`: Store the Flag ID for the current tick.
+* `get_flag(tick: int, flagstore: int = 0) -> str`: Get the flag for the given tick and flag store (for the
+  checked team).
+* `set_flagid(data: str, flagstore: int = 0) -> None`: Store the Flag ID for the current tick and flag store.
 * `store_state(key: str, data: Any) -> None`: Store arbitrary Python data persistently across runs.
 * `load_state(key: str) -> Any`: Retrieve data stored through `store_state()`.
 * `run_check(checker_cls: Type[BaseChecker]) -> None`: Start the check.

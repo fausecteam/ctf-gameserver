@@ -1,4 +1,5 @@
 import csv
+from math import sqrt
 import os
 
 from ctf_gameserver.controller import scoring
@@ -23,10 +24,57 @@ class ScoringTest(DatabaseTestCase):
 
         with transaction_cursor(self.connection) as cursor:
             cursor.execute('SELECT team_id, service_id, attack, defense, sla, total'
-                           '    FROM scoring_scoreboard ORDER BY team_id, service_id')
+                           '    FROM scoring_scoreboard WHERE flagstore IS NULL'
+                           '    ORDER BY team_id, service_id')
             values = [(v[0], v[1], r(v[2]), r(v[3]), r(v[4]), r(v[5])) for v in cursor.fetchall()]
 
         self.assertEqual(values, ref_values)
+
+
+class FlagstoreScoringTest(DatabaseTestCase):
+    """
+    Verifies the per-flagstore scoreboard breakdown: A single-store service (Service A) and a
+    multi-store service (Service B, two stores) with the multi-store factor applied.
+    """
+
+    fixtures = ['tests/controller/fixtures/scoring_flagstores.json']
+
+    def test_scoreboard(self):
+        def r(val):
+            return round(val, 6)
+
+        factor = 0.7
+
+        scoring.calculate_scoreboard(self.connection)
+
+        with transaction_cursor(self.connection) as cursor:
+            cursor.execute('SELECT team_id, service_id, attack, defense, sla, total'
+                           '    FROM scoring_scoreboard WHERE flagstore IS NULL'
+                           '    ORDER BY team_id, service_id')
+            aggregate_values = [(v[0], v[1], r(v[2]), r(v[3]), r(v[4]), r(v[5])) for v in cursor.fetchall()]
+
+        self.assertEqual(aggregate_values, [
+            (2, 1, 0.0, -1.0, r(sqrt(2)), r(-1.0 + sqrt(2))),
+            (2, 2, 0.0, r(-2 * factor), r(sqrt(2)), r(-2 * factor + sqrt(2))),
+            (3, 1, 2.0, 0.0, 0.0, 2.0),
+            (3, 2, r(4 * factor), 0.0, 0.0, r(4 * factor)),
+        ])
+
+        with transaction_cursor(self.connection) as cursor:
+            cursor.execute('SELECT team_id, service_id, flagstore, attack, defense, sla, total'
+                           '    FROM scoring_scoreboard WHERE flagstore IS NOT NULL'
+                           '    ORDER BY team_id, service_id, flagstore')
+            per_store_values = [(v[0], v[1], v[2], r(v[3]), r(v[4]), r(v[5]), r(v[6]))
+                                for v in cursor.fetchall()]
+
+        self.assertEqual(per_store_values, [
+            (2, 1, 0, 0.0, -1.0, 0.0, 0.0),
+            (2, 2, 0, 0.0, r(-1 * factor), 0.0, 0.0),
+            (2, 2, 1, 0.0, r(-1 * factor), 0.0, 0.0),
+            (3, 1, 0, 2.0, 0.0, 0.0, 0.0),
+            (3, 2, 0, r(2 * factor), 0.0, 0.0, 0.0),
+            (3, 2, 1, r(2 * factor), 0.0, 0.0, 0.0),
+        ])
 
 
 class EmptyScoringTest(DatabaseTestCase):

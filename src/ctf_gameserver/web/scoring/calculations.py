@@ -40,7 +40,10 @@ def scores(select_related_fields=None, only_fields=None):
 
     team_scores = defaultdict(lambda: {'offense': [{}, 0], 'defense': [{}, 0], 'sla': [{}, 0], 'total': 0})
 
-    for score in models.ScoreBoard.objects.select_related(*select_related_fields).only(*only_fields).all():
+    # Only the aggregate rows (flagstore IS NULL) carry per-service totals; per-store rows are read
+    # separately
+    for score in models.ScoreBoard.objects.filter(flagstore__isnull=True) \
+                                          .select_related(*select_related_fields).only(*only_fields).all():
         team_scores[score.team]['offense'][0][score.service] = score.attack
         team_scores[score.team]['offense'][1] += score.attack
         team_scores[score.team]['defense'][0][score.service] = score.defense
@@ -53,6 +56,42 @@ def scores(select_related_fields=None, only_fields=None):
     cache.set(cache_key, sorted_team_scores, 10)
 
     return sorted_team_scores
+
+
+def flagstore_scores():
+    """
+    Returns the per-flagstore offense/defense breakdown as currently stored in the database as a dict in this
+    format:
+
+        {team: {service: {flagstore: {'offense': offense_points, 'defense': defense_points}}}}
+
+    Every service has per-store rows (single-store services just have flagstore 0), so this covers all
+    services. The aggregate rows (flagstore IS NULL) are excluded.
+    """
+
+    # No good way to invalidate the cache, so use a generic key with a short timeout
+    cache_key = 'flagstore-scores'
+    cached_scores = cache.get(cache_key)
+
+    if cached_scores is not None:
+        return cached_scores
+
+    flagstore_team_scores = defaultdict(lambda: defaultdict(dict))
+
+    for score in models.ScoreBoard.objects.filter(flagstore__isnull=False) \
+                                          .only('team__user__id', 'service__id', 'flagstore', 'attack',
+                                                'defense'):
+        flagstore_team_scores[score.team_id][score.service_id][score.flagstore] = {
+            'offense': score.attack,
+            'defense': score.defense
+        }
+
+    # Convert defaultdicts to dicts because serialization in `cache.set()` can't handle them otherwise
+    flagstore_team_scores = {team_id: dict(service_scores)
+                             for team_id, service_scores in flagstore_team_scores.items()}
+    cache.set(cache_key, flagstore_team_scores, 10)
+
+    return flagstore_team_scores
 
 
 def team_statuses(from_tick, to_tick, select_related_team_fields=None, only_team_fields=None):

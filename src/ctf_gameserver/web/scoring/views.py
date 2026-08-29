@@ -36,6 +36,7 @@ def scoreboard_json(_):
 
     scores = calculations.scores(['team', 'team__user', 'service'],
                                  ['team__image', 'team__user__username', 'service__name'])
+    flagstore_scores = calculations.flagstore_scores()
     statuses = calculations.team_statuses(to_tick, to_tick, only_team_fields=['user_id'])
     services = models.Service.objects.all().order_by('name')
 
@@ -73,12 +74,23 @@ def scoreboard_json(_):
                 status = statuses[team][to_tick][service.pk]
             except KeyError:
                 status = ''
-            team_entry['services'].append({
+            service_entry = {
                 'status': status,
                 'offense': offense,
                 'defense': defense,
-                'sla': sla
-            })
+                'sla': sla,
+                'flagstores': []
+            }
+            # Only expose the per-store breakdown for multi-store services to avoid redundant UI
+            if service.num_flagstores > 1:
+                team_flagstores = flagstore_scores.get(team.pk, {}).get(service.pk, {})
+                for flagstore in sorted(team_flagstores):
+                    store_points = team_flagstores[flagstore]
+                    service_entry['flagstores'].append({
+                        'offense': store_points['offense'],
+                        'defense': store_points['defense']
+                    })
+            team_entry['services'].append(service_entry)
 
         response['teams'].append(team_entry)
 
@@ -181,14 +193,15 @@ def teams_json(_):
     flagid_max_tick = game_control.current_tick - 1
     flagid_min_tick = flagid_max_tick - game_control.valid_ticks
 
-    flag_ids = defaultdict(lambda: defaultdict(lambda: []))
+    flag_ids = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: [])))
     for flag in models.Flag.objects.exclude(flagid=None) \
                                    .exclude(flagid='') \
                                    .filter(task__tick__gte=flagid_min_tick,
                                            task__tick__lte=flagid_max_tick) \
                                    .select_related('task__service', 'task__team') \
-                                   .only('task__service__name', 'task__team__net_number', 'flagid'):
-        flag_ids[flag.task.service.name][flag.task.team.net_number].append(flag.flagid)
+                                   .only('task__service__name', 'task__team__net_number', 'flagstore',
+                                         'flagid'):
+        flag_ids[flag.task.service.name][flag.task.team.net_number][flag.flagstore].append(flag.flagid)
 
     response = {
         'teams': sorted(list(teams)),

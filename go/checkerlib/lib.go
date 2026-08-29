@@ -98,13 +98,14 @@ type Checker interface {
 
 var teamId int // for local runner only
 
-// GetFlag may be called by Checker Scripts to get the flag for a given tick,
-// for the team and service of the current run. The returned flag can be used
-// for both placement and checks.
-func GetFlag(tick int) string {
+// GetFlag may be called by Checker Scripts to get the flag for a given tick
+// and flag store, for the team and service of the current run. The returned
+// flag can be used for both placement and checks.
+func GetFlag(tick int, flagstore int) string {
 	if ipc.in != nil {
 		x := ipc.SendRecv("FLAG", map[string]interface{}{
-			"tick": tick,
+			"tick":      tick,
+			"flagstore": flagstore,
 		})
 		return x.(string)
 	}
@@ -113,7 +114,8 @@ func GetFlag(tick int) string {
 	if teamId == 0 {
 		panic("GetFlag() must be called through RunCheck()")
 	}
-	return genFlag(tick, 42, teamId, []byte("TOPSECRET"))
+	// Fold the flagstore into the dummy flag ID so that different stores yield different flags
+	return genFlag(tick, 42+flagstore, teamId, []byte("TOPSECRET"))
 }
 
 func genFlag(timestamp, flag, team int, secret []byte) string {
@@ -133,10 +135,13 @@ func genFlag(timestamp, flag, team int, secret []byte) string {
 	return "FLAG_" + base64.StdEncoding.EncodeToString(b.Bytes())
 }
 
-// SetFlagID stores the Flag ID for the current team and tick.
-func SetFlagID(data string) {
+// SetFlagID stores the Flag ID for the current team, tick, and flag store.
+func SetFlagID(data string, flagstore int) {
 	if ipc.in != nil {
-		ipc.SendRecv("FLAGID", data)
+		ipc.SendRecv("FLAGID", map[string]interface{}{
+			"data":      data,
+			"flagstore": flagstore,
+		})
 		// Wait for acknowledgement, result is ignored
 	} else {
 		log.Printf("Storing Flag ID: %q", data)

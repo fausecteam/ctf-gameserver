@@ -1,0 +1,257 @@
+[
+{
+    "model": "auth.user",
+    "pk": 2,
+    "fields": {
+        "password": "pbkdf2_sha256$36000$kHAF2GkRGCyG$qm+7EyJr0b8E9VbQWp3ZtfxaV0A5wIJSV/ABWEML6II=",
+        "last_login": null,
+        "is_superuser": false,
+        "username": "Team1",
+        "first_name": "",
+        "last_name": "",
+        "email": "",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2019-04-03T18:21:28.622Z",
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "auth.user",
+    "pk": 3,
+    "fields": {
+        "password": "pbkdf2_sha256$36000$xOKKVRJp772Y$YbUoJ0N2rDg3xndTwZv+jHKrIWcJ209dOUZij007eXg=",
+        "last_login": null,
+        "is_superuser": false,
+        "username": "Team2",
+        "first_name": "",
+        "last_name": "",
+        "email": "",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2019-04-03T18:21:46.918Z",
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "registration.team",
+    "pk": 2,
+    "fields": {
+        "informal_email": "team1@example.org",
+        "image": "",
+        "affiliation": "",
+        "country": "World",
+        "nop_team": false
+    }
+},
+{
+    "model": "registration.team",
+    "pk": 3,
+    "fields": {
+        "informal_email": "team2@example.org",
+        "image": "",
+        "affiliation": "",
+        "country": "World",
+        "nop_team": false
+    }
+},
+{
+    "model": "scoring.service",
+    "pk": 1,
+    "fields": {
+        "name": "Service A",
+        "slug": "service-a",
+        "num_flagstores": 1
+    }
+},
+{
+    "model": "scoring.service",
+    "pk": 2,
+    "fields": {
+        "name": "Service B",
+        "slug": "service-b",
+        "num_flagstores": 2
+    }
+},
+{
+    "model": "scoring.checkertask",
+    "pk": 1,
+    "fields": {
+        "service": 1,
+        "team": 2,
+        "tick": 0,
+        "exec_start": "2019-04-03T18:30:05Z",
+        "exec_end": "2019-04-03T18:30:06Z"
+    }
+},
+{
+    "model": "scoring.checkertask",
+    "pk": 2,
+    "fields": {
+        "service": 2,
+        "team": 2,
+        "tick": 0,
+        "exec_start": "2019-04-03T18:30:05Z",
+        "exec_end": "2019-04-03T18:30:06Z"
+    }
+},
+{
+    "model": "scoring.checkertask",
+    "pk": 3,
+    "fields": {
+        "service": 1,
+        "team": 3,
+        "tick": 0,
+        "exec_start": "2019-04-03T18:30:05Z",
+        "exec_end": "2019-04-03T18:30:06Z"
+    }
+},
+{
+    "model": "scoring.checkertask",
+    "pk": 4,
+    "fields": {
+        "service": 2,
+        "team": 3,
+        "tick": 0,
+        "exec_start": "2019-04-03T18:30:05Z",
+        "exec_end": "2019-04-03T18:30:06Z"
+    }
+},
+{
+    "model": "scoring.flag",
+    "pk": 1,
+    "fields": {
+        "task": 1,
+        "flagid": null,
+        "flagstore": 0
+    }
+},
+{
+    "model": "scoring.flag",
+    "pk": 2,
+    "fields": {
+        "task": 2,
+        "flagid": null,
+        "flagstore": 0
+    }
+},
+{
+    "model": "scoring.flag",
+    "pk": 3,
+    "fields": {
+        "task": 2,
+        "flagid": null,
+        "flagstore": 1
+    }
+},
+{
+    "model": "scoring.flag",
+    "pk": 4,
+    "fields": {
+        "task": 3,
+        "flagid": null,
+        "flagstore": 0
+    }
+},
+{
+    "model": "scoring.flag",
+    "pk": 5,
+    "fields": {
+        "task": 4,
+        "flagid": null,
+        "flagstore": 0
+    }
+},
+{
+    "model": "scoring.flag",
+    "pk": 6,
+    "fields": {
+        "task": 4,
+        "flagid": null,
+        "flagstore": 1
+    }
+},
+{
+    "model": "scoring.capture",
+    "pk": 1,
+    "fields": {
+        "flag": 1,
+        "capturing_team": 3,
+        "tick": 0,
+        "timestamp": "2019-04-03T18:31:00Z"
+    }
+},
+{
+    "model": "scoring.capture",
+    "pk": 2,
+    "fields": {
+        "flag": 2,
+        "capturing_team": 3,
+        "tick": 0,
+        "timestamp": "2019-04-03T18:31:00Z"
+    }
+},
+{
+    "model": "scoring.capture",
+    "pk": 3,
+    "fields": {
+        "flag": 3,
+        "capturing_team": 3,
+        "tick": 0,
+        "timestamp": "2019-04-03T18:31:00Z"
+    }
+},
+{
+    "model": "scoring.gamecontrol",
+    "pk": 1,
+    "fields": {
+        "competition_name": "Test CTF",
+        "services_public": null,
+        "start": "2019-04-03T18:30:00Z",
+        "end": "2019-04-03T19:30:00Z",
+        "tick_duration": 180,
+        "valid_ticks": 5,
+        "current_tick": 0,
+        "flag_prefix": "FAUST_",
+        "registration_open": false
+    }
+},
+{
+    "model": "scoring.statuscheck",
+    "pk": 1,
+    "fields": {
+        "status": 0,
+        "timestamp": "2019-04-03T18:30:06Z",
+        "task": 1
+    }
+},
+{
+    "model": "scoring.statuscheck",
+    "pk": 2,
+    "fields": {
+        "status": 0,
+        "timestamp": "2019-04-03T18:30:06Z",
+        "task": 2
+    }
+},
+{
+    "model": "scoring.statuscheck",
+    "pk": 3,
+    "fields": {
+        "status": 1,
+        "timestamp": "2019-04-03T18:30:06Z",
+        "task": 3
+    }
+},
+{
+    "model": "scoring.statuscheck",
+    "pk": 4,
+    "fields": {
+        "status": 2,
+        "timestamp": "2019-04-03T18:30:06Z",
+        "task": 4
+    }
+}
+]

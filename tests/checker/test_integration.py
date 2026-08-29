@@ -47,7 +47,7 @@ class IntegrationTest(DatabaseTestCase):
             cursor.execute('INSERT INTO scoring_checkertask (service_id, team_id, tick)'
                            '    VALUES (1, 2, 0) RETURNING id')
             task_ids = cursor.fetchall()
-            cursor.executemany('INSERT INTO scoring_flag (task_id) VALUES (%s)', task_ids)
+            cursor.executemany('INSERT INTO scoring_flag (task_id, flagstore) VALUES (%s, 0)', task_ids)
         # Checker won't get started because interval is not yet over
         self.assertFalse(master_loop.step())
         with transaction_cursor(self.connection) as cursor:
@@ -96,7 +96,7 @@ class IntegrationTest(DatabaseTestCase):
             cursor.execute('INSERT INTO scoring_checkertask (service_id, team_id, tick)'
                            '    VALUES (1, 2, 0) RETURNING id')
             task_ids = cursor.fetchall()
-            cursor.executemany('INSERT INTO scoring_flag (task_id) VALUES (%s)', task_ids)
+            cursor.executemany('INSERT INTO scoring_flag (task_id, flagstore) VALUES (%s, 0)', task_ids)
         monotonic_mock.return_value = 20
 
         master_loop.supervisor.queue_timeout = 0.01
@@ -128,7 +128,7 @@ class IntegrationTest(DatabaseTestCase):
             cursor.execute('INSERT INTO scoring_checkertask (service_id, team_id, tick)'
                            '    VALUES (1, 2, 0) RETURNING id')
             task_ids = cursor.fetchall()
-            cursor.executemany('INSERT INTO scoring_flag (task_id) VALUES (%s)', task_ids)
+            cursor.executemany('INSERT INTO scoring_flag (task_id, flagstore) VALUES (%s, 0)', task_ids)
         monotonic_mock.return_value = 20
 
         master_loop.supervisor.queue_timeout = 0.01
@@ -160,7 +160,7 @@ class IntegrationTest(DatabaseTestCase):
             cursor.execute('INSERT INTO scoring_checkertask (service_id, team_id, tick)'
                            '    VALUES (1, 2, 0) RETURNING id')
             task_ids = cursor.fetchall()
-            cursor.executemany('INSERT INTO scoring_flag (task_id) VALUES (%s)', task_ids)
+            cursor.executemany('INSERT INTO scoring_flag (task_id, flagstore) VALUES (%s, 0)', task_ids)
         monotonic_mock.return_value = 20
 
         master_loop.supervisor.queue_timeout = 0.01
@@ -199,7 +199,7 @@ class IntegrationTest(DatabaseTestCase):
             cursor.execute('INSERT INTO scoring_checkertask (service_id, team_id, tick)'
                            '    VALUES (1, 2, 0) RETURNING id')
             task_ids = cursor.fetchall()
-            cursor.executemany('INSERT INTO scoring_flag (task_id) VALUES (%s)', task_ids)
+            cursor.executemany('INSERT INTO scoring_flag (task_id, flagstore) VALUES (%s, 0)', task_ids)
         monotonic_mock.return_value = 20
 
         master_loop.supervisor.queue_timeout = 0.01
@@ -273,7 +273,7 @@ class IntegrationTest(DatabaseTestCase):
             cursor.execute('INSERT INTO scoring_checkertask (service_id, team_id, tick)'
                            '    VALUES (1, 2, 0) RETURNING id')
             task_ids = cursor.fetchall()
-            cursor.executemany('INSERT INTO scoring_flag (task_id) VALUES (%s)', task_ids)
+            cursor.executemany('INSERT INTO scoring_flag (task_id, flagstore) VALUES (%s, 0)', task_ids)
         monotonic_mock.return_value = 20
 
         master_loop.supervisor.queue_timeout = 0.01
@@ -330,7 +330,7 @@ class IntegrationTest(DatabaseTestCase):
             cursor.execute('INSERT INTO scoring_checkertask (service_id, team_id, tick)'
                            '    VALUES (1, 2, 0), (1, 3, 0), (2, 2, 0), (2, 3, 0) RETURNING id')
             task_ids = cursor.fetchall()
-            cursor.executemany('INSERT INTO scoring_flag (task_id) VALUES (%s)', task_ids)
+            cursor.executemany('INSERT INTO scoring_flag (task_id, flagstore) VALUES (%s, 0)', task_ids)
         monotonic_mock.return_value = 20
         master_loop.supervisor.queue_timeout = 0.01
         self.assertFalse(master_loop.step())
@@ -359,7 +359,7 @@ class IntegrationTest(DatabaseTestCase):
             cursor.execute('INSERT INTO scoring_checkertask (service_id, team_id, tick)'
                            '    VALUES (1, 2, 1), (1, 3, 1), (2, 2, 1), (2, 3, 1) RETURNING id')
             task_ids = cursor.fetchall()
-            cursor.executemany('INSERT INTO scoring_flag (task_id) VALUES (%s)', task_ids)
+            cursor.executemany('INSERT INTO scoring_flag (task_id, flagstore) VALUES (%s, 0)', task_ids)
         monotonic_mock.return_value = 200
         master_loop.supervisor.queue_timeout = 0.01
         self.assertFalse(master_loop.step())
@@ -396,7 +396,7 @@ class IntegrationTest(DatabaseTestCase):
             cursor.execute('INSERT INTO scoring_checkertask (service_id, team_id, tick)'
                            '    VALUES (1, 2, 2), (1, 3, 2), (2, 2, 2), (2, 3, 2) RETURNING id')
             task_ids = cursor.fetchall()
-            cursor.executemany('INSERT INTO scoring_flag (task_id) VALUES (%s)', task_ids)
+            cursor.executemany('INSERT INTO scoring_flag (task_id, flagstore) VALUES (%s, 0)', task_ids)
         monotonic_mock.return_value = 380
         master_loop.supervisor.queue_timeout = 0.01
         self.assertFalse(master_loop.step())
@@ -441,7 +441,7 @@ class IntegrationTest(DatabaseTestCase):
             cursor.execute('INSERT INTO scoring_checkertask (service_id, team_id, tick)'
                            '    VALUES (1, 2, 0), (1, 3, 0) RETURNING id')
             task_ids = cursor.fetchall()
-            cursor.executemany('INSERT INTO scoring_flag (task_id) VALUES (%s)', task_ids)
+            cursor.executemany('INSERT INTO scoring_flag (task_id, flagstore) VALUES (%s, 0)', task_ids)
         monotonic_mock.return_value = 20
         master_loop.supervisor.queue_timeout = 0.01
         self.assertFalse(master_loop.step())
@@ -467,7 +467,7 @@ class IntegrationTest(DatabaseTestCase):
             cursor.execute('INSERT INTO scoring_checkertask (service_id, team_id, tick)'
                            '    VALUES (1, 2, 1), (1, 3, 1) RETURNING id')
             task_ids = cursor.fetchall()
-            cursor.executemany('INSERT INTO scoring_flag (task_id) VALUES (%s)', task_ids)
+            cursor.executemany('INSERT INTO scoring_flag (task_id, flagstore) VALUES (%s, 0)', task_ids)
         monotonic_mock.return_value = 200
         master_loop.supervisor.queue_timeout = 0.01
         self.assertFalse(master_loop.step())
@@ -493,7 +493,7 @@ class IntegrationTest(DatabaseTestCase):
             cursor.execute('INSERT INTO scoring_checkertask (service_id, team_id, tick)'
                            '    VALUES (1, 2, 2), (1, 3, 2) RETURNING id')
             task_ids = cursor.fetchall()
-            cursor.executemany('INSERT INTO scoring_flag (task_id) VALUES (%s)', task_ids)
+            cursor.executemany('INSERT INTO scoring_flag (task_id, flagstore) VALUES (%s, 0)', task_ids)
         monotonic_mock.return_value = 380
         master_loop.supervisor.queue_timeout = 0.01
         self.assertFalse(master_loop.step())
@@ -527,7 +527,7 @@ class IntegrationTest(DatabaseTestCase):
             cursor.execute('INSERT INTO scoring_checkertask (service_id, team_id, tick)'
                            '    VALUES (1, 2, 0) RETURNING id')
             task_ids = cursor.fetchall()
-            cursor.executemany('INSERT INTO scoring_flag (task_id) VALUES (%s)', task_ids)
+            cursor.executemany('INSERT INTO scoring_flag (task_id, flagstore) VALUES (%s, 0)', task_ids)
 
         master_loop.shutting_down = True
         master_loop.supervisor.queue_timeout = 0.01
@@ -558,7 +558,7 @@ class IntegrationTest(DatabaseTestCase):
             cursor.execute('INSERT INTO scoring_checkertask (service_id, team_id, tick)'
                            '    VALUES (1, 2, 0) RETURNING id')
             task_ids = cursor.fetchall()
-            cursor.executemany('INSERT INTO scoring_flag (task_id) VALUES (%s)', task_ids)
+            cursor.executemany('INSERT INTO scoring_flag (task_id, flagstore) VALUES (%s, 0)', task_ids)
         monotonic_mock.return_value = 20
 
         master_loop.supervisor.queue_timeout = 0.01
@@ -602,7 +602,7 @@ class IntegrationTest(DatabaseTestCase):
             cursor.execute('INSERT INTO scoring_checkertask (service_id, team_id, tick)'
                            '    VALUES (1, 2, 0) RETURNING id')
             task_ids = cursor.fetchall()
-            cursor.executemany('INSERT INTO scoring_flag (task_id) VALUES (%s)', task_ids)
+            cursor.executemany('INSERT INTO scoring_flag (task_id, flagstore) VALUES (%s, 0)', task_ids)
         monotonic_mock.return_value = 20
 
         master_loop.supervisor.queue_timeout = 0.01

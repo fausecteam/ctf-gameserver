@@ -41,8 +41,8 @@ class FlagAdmin(admin.ModelAdmin):
         """
         return flag.task.tick
 
-    list_display = ('id', 'service', 'protecting_team', 'tick')
-    list_filter = ('task__service', 'task__tick')
+    list_display = ('id', 'service', 'flagstore', 'protecting_team', 'tick')
+    list_filter = ('task__service', 'flagstore', 'task__tick')
     search_fields = ('task__service__name', 'task__service__slug', 'task__team__user__username')
 
 

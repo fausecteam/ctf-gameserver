@@ -23,13 +23,13 @@ API
 To create a Checker Script, implement the `checkerlib.Checker` interface with the following methods:
 
 * `PlaceFlag(ip string, team int, tick int) (checkerlib.Result, error)`: Called once per Script execution to
-  place a flag for the current tick. Use `checkerlib.GetFlag(tick, nil)` to get the flag and (optionally)
-  `SetFlagID(data string)` to store the flag ID.
+  place a flag for the current tick. Use `checkerlib.GetFlag(tick, flagstore)` to get the flag and
+  (optionally) `SetFlagID(data string, flagstore int)` to store the flag ID.
 * `CheckService(ip string, team int) (Result, error)`: Called once per Script execution to determine general
   service health.
 * `CheckFlag(ip string, team int, tick int) (checkerlib.Result, error)`: Determine if the flag for the given
-  tick can be retrieved. Use `checkerlib.GetFlag(tick, nil)` to get the flag to check for. Called multiple
-  times per Script execution, for the current and preceding ticks.
+  tick can be retrieved. Use `checkerlib.GetFlag(tick, flagstore)` to get the flag to check for. Called
+  multiple times per Script execution, for the current and preceding ticks.
 
 In your `main()`, call `checkerlib.RunCheck()` with your implementation as argument. The library will take
 care of calling your methods, merging the results, and submitting them to the Checker Master.

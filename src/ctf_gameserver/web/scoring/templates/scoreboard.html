@@ -84,6 +84,19 @@
                         <span class="points-sla"><!-- SLA --></span> <br/>
                     </span>
 
+                    <!-- Per-flagstore breakdown, populated via JavaScript for multi-store services -->
+                    <span class="flagstores-breakdown"></span>
+                    <span class="flagstore-template text-nowrap text-muted" hidden="hidden">
+                        <small>
+                            #<span class="flagstore-index"><!-- Store --></span>:
+                            <i class="fa-solid fa-fire" aria-label="Offense"></i>
+                            <span class="flagstore-offense"><!-- Offense --></span>
+                            <i class="fa-solid fa-chess-rook" aria-label="Defense"></i>
+                            <span class="flagstore-defense"><!-- Defense --></span>
+                        </small>
+                        <br/>
+                    </span>
+
                     <a href="{% url 'service_status' %}">
                     <!-- Status -->
                     <span class="text-muted service-status">{% trans 'not checked' %}</span>
