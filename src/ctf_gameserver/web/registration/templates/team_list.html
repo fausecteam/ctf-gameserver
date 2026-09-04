@@ -16,6 +16,9 @@
                 <th scope="col">{% trans 'Name' %}</th>
                 <th scope="col">{% trans 'Affiliation' %}</th>
                 <th scope="col">{% trans 'Country' %}</th>
+                {% if low_llm_enabled %}
+                <th scope="col">{% trans 'Low-LLM' %}</th>
+                {% endif %}
             </tr>
         </thead>
 
@@ -33,6 +36,13 @@
                 <td>{{ team.user.username }}</td>
                 <td>{% if team.affiliation %}{{ team.affiliation }}{% endif %}</td>
                 <td>{{ team.country }}</td>
+                {% if low_llm_enabled %}
+                <td>
+                    {% if team.low_llm %}
+                    <i class="fa-solid fa-check" aria-label="{% trans 'Low-LLM' %}"></i>
+                    {% endif %}
+                </td>
+                {% endif %}
             </tr>
             {% endfor %}
         </tbody>

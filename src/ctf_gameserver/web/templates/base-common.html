@@ -102,7 +102,7 @@
                                 <li><hr class="dropdown-divider" /></li>
                                 <li><a class="dropdown-item" href="{% url 'list_team_downloads' %}">{% trans 'Downloads' %}</a></li>
                                 {% endif %}
-                                {% if registration_open %}
+                                {% if registration_open or low_llm_enabled and user.team %}
                                 <li><a class="dropdown-item" href="{% url 'edit_team' %}">{% trans 'Edit Team' %}</a></li>
                                 <li><hr class="dropdown-divider" /></li>
                                 {% endif %}

@@ -57,9 +57,22 @@ def register(request):
 
 
 @login_required
-@registration_open_required
-@transaction.atomic
 def edit_team(request):
+    """
+    View to edit one's own Team. While registration is open, the whole Team (and User) can be edited. After
+    that, only the 'low_llm' option remains editable.
+    """
+
+    game_control = scoring_models.GameControl.get_instance()
+
+    if game_control.registration_open:
+        return _edit_team_full(request, game_control)
+
+    return _edit_team_low_llm(request, game_control)
+
+
+@transaction.atomic
+def _edit_team_full(request, game_control):
 
     try:
         team = request.user.team
@@ -90,7 +103,6 @@ def edit_team(request):
         user_form = forms.UserForm(prefix='user', instance=request.user)
         team_form = forms.TeamForm(prefix='team', instance=team)
 
-    game_control = scoring_models.GameControl.get_instance()
     # Theoretically, there can be cases where registration is still open (meaning Teams can be edited) after
     # the competition has begun; this is usually not much of a problem, but deleting a Team in that situation
     # will break scoring
@@ -101,6 +113,36 @@ def edit_team(request):
         'user_form': user_form,
         'team_form': team_form,
         'show_delete_button': show_delete_button,
+        'delete_form': None
+    })
+
+
+@transaction.atomic
+def _edit_team_low_llm(request, game_control):
+
+    if not game_control.low_llm_text:
+        messages.error(request, _('Sorry, registration is currently closed.'))
+        return redirect(settings.HOME_URL)
+
+    try:
+        team = request.user.team
+    except Team.DoesNotExist as e:
+        raise Http404('User has no team') from e
+
+    if request.method == 'POST':
+        team_form = forms.LowLlmTeamForm(request.POST, prefix='team', instance=team)
+
+        if team_form.is_valid():
+            team_form.save()
+            messages.success(request, _('Your changes have been saved.'))
+    else:
+        team_form = forms.LowLlmTeamForm(prefix='team', instance=team)
+
+    return render(request, 'edit_team.html', {
+        'team': team,
+        'user_form': None,
+        'team_form': team_form,
+        'show_delete_button': False,
         'delete_form': None
     })
 

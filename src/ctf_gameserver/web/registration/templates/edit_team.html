@@ -16,7 +16,11 @@
 <form enctype="multipart/form-data" method="post" class="mt-4">
     {% csrf_token %}
 
+    {% if user_form %}
     {{ user_form|as_bs_div }}
+    {% else %}
+    <p>{% trans 'Registration is closed, so only the following option can still be changed.' %}</p>
+    {% endif %}
     {{ team_form|as_bs_div }}
 
     <button type="submit" class="btn btn-primary">{% trans 'Save' %}</button>

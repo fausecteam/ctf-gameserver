@@ -12,6 +12,18 @@ from .util import get_country_names
 FIVE_MB = 5 * 1024**2
 
 
+def _apply_low_llm_text(form, game_control):
+    """
+    Sets the configurable help text for the 'low_llm' field of the given form. The field is removed
+    completely if no such text is configured, which also prevents it from being modified.
+    """
+
+    if game_control.low_llm_text:
+        form.fields['low_llm'].help_text = mark_safe(game_control.low_llm_text)
+    else:
+        del form.fields['low_llm']
+
+
 class UserForm(forms.ModelForm):
     """
     The portion of the registration form which ends up in the 'User' model. Designed to be used in
@@ -92,7 +104,7 @@ class TeamForm(forms.ModelForm):
 
     class Meta:
         model = Team
-        fields = ['informal_email', 'image', 'affiliation', 'country']
+        fields = ['informal_email', 'image', 'affiliation', 'country', 'low_llm']
         labels = {
             'informal_email': _('Informal email')
         }
@@ -114,7 +126,10 @@ class TeamForm(forms.ModelForm):
         # Editing the existing list in place doesn't work since choices are stored in the widget as well
         self.fields['country'].choices = [('', '----------')] + self.fields['country'].choices
 
-        confirm_text = scoring_models.GameControl.get_instance().registration_confirm_text
+        game_control = scoring_models.GameControl.get_instance()
+        _apply_low_llm_text(self, game_control)
+
+        confirm_text = game_control.registration_confirm_text
         if confirm_text and not self.instance.pk:
             self.fields['confirm_text'] = forms.BooleanField(label=mark_safe(confirm_text), required=True)
 
@@ -135,6 +150,21 @@ class TeamForm(forms.ModelForm):
             team.save()
 
         return team
+
+
+class LowLlmTeamForm(forms.ModelForm):
+    """
+    Form to edit only a Team's 'low_llm' option, for use after registration has closed.
+    """
+
+    class Meta:
+        model = Team
+        fields = ['low_llm']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        _apply_low_llm_text(self, scoring_models.GameControl.get_instance())
 
 
 class AdminTeamForm(forms.ModelForm):

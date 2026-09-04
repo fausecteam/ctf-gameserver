@@ -35,7 +35,7 @@ def scoreboard_json(_):
         to_tick = game_control.current_tick - 1
 
     scores = calculations.scores(['team', 'team__user', 'service'],
-                                 ['team__image', 'team__user__username', 'service__name'])
+                                 ['team__image', 'team__low_llm', 'team__user__username', 'service__name'])
     flagstore_scores = calculations.flagstore_scores()
     statuses = calculations.team_statuses(to_tick, to_tick, only_team_fields=['user_id'])
     services = models.Service.objects.all().order_by('name')
@@ -51,6 +51,7 @@ def scoreboard_json(_):
             'rank': rank,
             'id': team.user.pk,
             'name': team.user.username,
+            'low-llm': team.low_llm,
             'services': [],
             'offense': points['offense'][1],
             'defense': points['defense'][1],

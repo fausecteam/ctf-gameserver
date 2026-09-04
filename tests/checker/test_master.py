@@ -200,8 +200,8 @@ class MasterTest(DatabaseTestCase):
                                '    VALUES (%s, %s, %s, %s, %s, %s, false, false, true, NOW())',
                                (i, username, '', '', '', 'password'))
                 cursor.execute('INSERT INTO registration_team (user_id, informal_email, image, affiliation,'
-                               '                               country, nop_team)'
-                               '    VALUES (%s, %s, %s, %s, %s, false)', (i, email, '', '', 'World'))
+                               '                               country, nop_team, low_llm)'
+                               '    VALUES (%s, %s, %s, %s, %s, false, false)', (i, email, '', '', 'World'))
                 cursor.execute('INSERT INTO scoring_checkertask (service_id, team_id, tick)'
                                '    VALUES (1, %s, 1)', (i,))
         self.master_loop.update_launch_params(1)

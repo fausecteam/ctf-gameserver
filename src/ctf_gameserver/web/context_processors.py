@@ -14,6 +14,7 @@ def game_control(_):
     return {
         'competition_name': control_instance.competition_name,
         'registration_open': control_instance.registration_open,
+        'low_llm_enabled': control_instance.low_llm_text != '',
         'services_public': control_instance.are_services_public()
     }
 

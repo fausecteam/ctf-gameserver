@@ -31,6 +31,8 @@ class Team(models.Model):
     country = models.CharField(max_length=100)
     # NOP teams don't get included in the scoring
     nop_team = models.BooleanField(default=False, db_index=True)
+    # Teams that (mostly) refrain from using LLMs
+    low_llm = models.BooleanField(_('Low-LLM'), default=False)
 
     class ActiveObjectsManager(models.Manager):
         def get_queryset(self):

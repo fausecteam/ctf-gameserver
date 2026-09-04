@@ -38,6 +38,14 @@ function buildTable(data) {
         // Name
         tds[2].querySelector('strong').textContent = team['name']
 
+        // Low-LLM badge
+        const lowLlmBadge = tds[2].querySelector('.low-llm-badge')
+        if (team['low-llm']) {
+            lowLlmBadge.removeAttribute('hidden')
+        } else {
+            lowLlmBadge.parentNode.removeChild(lowLlmBadge)
+        }
+
         // Service
         const service_template = tds[3]
         for (const service of team['services']) {

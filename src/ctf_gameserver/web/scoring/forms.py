@@ -25,6 +25,8 @@ class GameControlAdminForm(forms.ModelForm):
             'flag_prefix': _('Static text prepended to every flag'),
             'registration_confirm_text': _('If set, teams will have to confirm to this text (e.g. a link to '
                                            'T&C) when signing up. May contain HTML.'),
+            'low_llm_text': _('If set, teams can mark themselves as "Low-LLM" and this text is shown as '
+                              'explanation for that option. May contain HTML.'),
             'min_net_number': _('If unset, team IDs will be used as net numbers'),
             'max_net_number': _('(Inclusive) If unset, team IDs will be used as net numbers'),
         }
