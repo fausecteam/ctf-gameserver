@@ -36,24 +36,6 @@
     }
 },
 {
-    "model": "auth.user",
-    "pk": 4,
-    "fields": {
-        "password": "pbkdf2_sha256$36000$UGfl968SDB0l$rnxu7pLZUqwvYXk14QBjwjddYFTBrpw99PcH2FxtaKo=",
-        "last_login": null,
-        "is_superuser": false,
-        "username": "NOP",
-        "first_name": "",
-        "last_name": "",
-        "email": "",
-        "is_staff": false,
-        "is_active": true,
-        "date_joined": "2019-04-03T18:22:02Z",
-        "groups": [],
-        "user_permissions": []
-    }
-},
-{
     "model": "registration.team",
     "pk": 2,
     "fields": {
@@ -76,24 +58,43 @@
     }
 },
 {
-    "model": "registration.team",
-    "pk": 4,
+    "model": "scoring.capture",
+    "pk": 1,
     "fields": {
-        "informal_email": "nop@example.org",
-        "image": "",
-        "affiliation": "",
-        "country": "World",
-        "nop_team": true
+        "flag": 5,
+        "capturing_team": 2,
+        "tick": 0,
+        "timestamp": "2019-04-03T18:25:30Z"
     }
 },
 {
     "model": "scoring.capture",
-    "pk": 1,
+    "pk": 2,
     "fields": {
-        "flag": 4,
+        "flag": 6,
         "capturing_team": 2,
-        "tick": 3,
-        "timestamp": "2019-04-03T18:31:00Z"
+        "tick": 0,
+        "timestamp": "2019-04-03T18:25:40Z"
+    }
+},
+{
+    "model": "scoring.capture",
+    "pk": 3,
+    "fields": {
+        "flag": 9,
+        "capturing_team": 3,
+        "tick": 1,
+        "timestamp": "2019-04-03T18:27:40Z"
+    }
+},
+{
+    "model": "scoring.capture",
+    "pk": 4,
+    "fields": {
+        "flag": 11,
+        "capturing_team": 2,
+        "tick": 1,
+        "timestamp": "2019-04-03T18:28:00Z"
     }
 },
 {
@@ -102,9 +103,9 @@
     "fields": {
         "service": 1,
         "team": 2,
-        "tick": 3,
-        "exec_start": null,
-        "exec_end": null
+        "tick": 0,
+        "exec_start": "2019-04-03T18:24:10Z",
+        "exec_end": "2019-04-03T18:24:15Z"
     }
 },
 {
@@ -113,9 +114,9 @@
     "fields": {
         "service": 1,
         "team": 3,
-        "tick": 3,
-        "exec_start": "2019-04-03T18:30:00Z",
-        "exec_end": null
+        "tick": 0,
+        "exec_start": "2019-04-03T18:24:20Z",
+        "exec_end": "2019-04-03T18:24:24Z"
     }
 },
 {
@@ -124,7 +125,7 @@
     "fields": {
         "service": 2,
         "team": 2,
-        "tick": 2,
+        "tick": 0,
         "exec_start": null,
         "exec_end": null
     }
@@ -135,9 +136,53 @@
     "fields": {
         "service": 2,
         "team": 3,
-        "tick": 2,
-        "exec_start": "2019-04-03T18:27:00Z",
-        "exec_end": "2019-04-03T18:27:05Z"
+        "tick": 0,
+        "exec_start": "2019-04-03T18:24:30Z",
+        "exec_end": "2019-04-03T18:24:37Z"
+    }
+},
+{
+    "model": "scoring.checkertask",
+    "pk": 5,
+    "fields": {
+        "service": 1,
+        "team": 2,
+        "tick": 1,
+        "exec_start": null,
+        "exec_end": null
+    }
+},
+{
+    "model": "scoring.checkertask",
+    "pk": 6,
+    "fields": {
+        "service": 1,
+        "team": 3,
+        "tick": 1,
+        "exec_start": "2019-04-03T18:27:30Z",
+        "exec_end": null
+    }
+},
+{
+    "model": "scoring.checkertask",
+    "pk": 7,
+    "fields": {
+        "service": 2,
+        "team": 2,
+        "tick": 1,
+        "exec_start": "2019-04-03T18:27:10Z",
+        "exec_end": "2019-04-03T18:27:16Z"
+    }
+},
+{
+    "model": "scoring.checkertask",
+    "pk": 8,
+    "fields": {
+        "service": 2,
+        "team": 3,
+        "tick": 1,
+        "exec_start": "2019-04-03T18:27:20Z",
+        "exec_end": null
     }
 },
 {
@@ -171,9 +216,81 @@
     "model": "scoring.flag",
     "pk": 4,
     "fields": {
+        "task": 3,
+        "flagid": null,
+        "flagstore": 1
+    }
+},
+{
+    "model": "scoring.flag",
+    "pk": 5,
+    "fields": {
         "task": 4,
         "flagid": null,
         "flagstore": 0
+    }
+},
+{
+    "model": "scoring.flag",
+    "pk": 6,
+    "fields": {
+        "task": 4,
+        "flagid": null,
+        "flagstore": 1
+    }
+},
+{
+    "model": "scoring.flag",
+    "pk": 7,
+    "fields": {
+        "task": 5,
+        "flagid": null,
+        "flagstore": 0
+    }
+},
+{
+    "model": "scoring.flag",
+    "pk": 8,
+    "fields": {
+        "task": 6,
+        "flagid": null,
+        "flagstore": 0
+    }
+},
+{
+    "model": "scoring.flag",
+    "pk": 9,
+    "fields": {
+        "task": 7,
+        "flagid": null,
+        "flagstore": 0
+    }
+},
+{
+    "model": "scoring.flag",
+    "pk": 10,
+    "fields": {
+        "task": 7,
+        "flagid": null,
+        "flagstore": 1
+    }
+},
+{
+    "model": "scoring.flag",
+    "pk": 11,
+    "fields": {
+        "task": 8,
+        "flagid": null,
+        "flagstore": 0
+    }
+},
+{
+    "model": "scoring.flag",
+    "pk": 12,
+    "fields": {
+        "task": 8,
+        "flagid": null,
+        "flagstore": 1
     }
 },
 {
@@ -181,12 +298,12 @@
     "pk": 1,
     "fields": {
         "competition_name": "Test CTF",
-        "services_public": null,
-        "start": null,
-        "end": null,
+        "services_public": "2019-04-03T18:14:00Z",
+        "start": "2019-04-03T18:24:00Z",
+        "end": "2019-04-03T18:39:00Z",
         "tick_duration": 180,
         "valid_ticks": 5,
-        "current_tick": 3,
+        "current_tick": 1,
         "flag_prefix": "FAUST_",
         "registration_open": false
     }
@@ -196,7 +313,8 @@
     "pk": 1,
     "fields": {
         "name": "Service 1",
-        "slug": "service1"
+        "slug": "service1",
+        "num_flagstores": 1
     }
 },
 {
@@ -204,7 +322,8 @@
     "pk": 2,
     "fields": {
         "name": "Service 2",
-        "slug": "service2"
+        "slug": "service2",
+        "num_flagstores": 2
     }
 }
 ]

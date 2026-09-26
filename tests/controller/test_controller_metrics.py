@@ -49,10 +49,18 @@ class MetricsTest(DatabaseTestCase):
         self.assertIn('ctf_controller_open_tasks_total{service="service1",ticks="old"} 0.0', resp.text)
         self.assertIn('ctf_controller_open_tasks_total{service="service2",ticks="cur"} 0.0', resp.text)
         self.assertIn('ctf_controller_open_tasks_total{service="service2",ticks="old"} 1.0', resp.text)
+        self.assertIn('ctf_controller_incomplete_tasks_total{service="service1",ticks="cur"} 1.0',
+                      resp.text)
 
-        self.assertIn('ctf_controller_incomplete_tasks_total{service="service1",ticks="cur"} 1.0', resp.text)
-        self.assertIn('ctf_controller_exploiting_teams_total{service="service2"} 1.0', resp.text)
-        self.assertIn('ctf_controller_is_exploited{service="service2"} 1.0', resp.text)
+        self.assertIn('ctf_controller_exploiting_teams_total{flagstore="0",service="service1"} 0.0',
+                      resp.text)
+        self.assertIn('ctf_controller_exploiting_teams_total{flagstore="0",service="service2"} 2.0',
+                      resp.text)
+        self.assertIn('ctf_controller_exploiting_teams_total{flagstore="1",service="service2"} 1.0',
+                      resp.text)
+        self.assertIn('ctf_controller_is_exploited{flagstore="0",service="service1"} 0.0', resp.text)
+        self.assertIn('ctf_controller_is_exploited{flagstore="0",service="service2"} 1.0', resp.text)
+        self.assertIn('ctf_controller_is_exploited{flagstore="1",service="service2"} 1.0', resp.text)
 
     def test_manual_metric(self):
         self.metrics['current_tick'].set(5)
