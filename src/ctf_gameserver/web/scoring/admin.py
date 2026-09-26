@@ -91,7 +91,7 @@ class CaptureAdmin(admin.ModelAdmin):
 
     list_display = ('id', 'capturing_team', 'protecting_team', 'service', 'flagstore', 'flag_tick',
                     'timestamp')
-    list_filter = (ServiceFilter, 'flag__flagstore')
+    list_filter = (ServiceFilter, 'flag__flagstore', 'capturing_team__low_llm')
     search_fields = ('capturing_team__user__username', 'flag__task__team__user__username',
                      'flag__task__service__name', 'flag__task__service__slug')
     ordering = ('timestamp',)
