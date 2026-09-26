@@ -56,16 +56,16 @@ def cancel_checks(db_conn, prohibit_changes=False):
 def get_exploiting_teams_counts(db_conn, prohibit_changes=False):
 
     with transaction_cursor(db_conn, prohibit_changes) as cursor:
-        cursor.execute('SELECT service.slug, COUNT(DISTINCT capture.capturing_team_id)'
+        cursor.execute('SELECT service.slug, flag.flagstore, COUNT(DISTINCT capture.capturing_team_id)'
                        '    FROM scoring_service service'
                        '    JOIN scoring_checkertask task ON task.service_id = service.id'
                        '    JOIN scoring_flag flag ON flag.task_id = task.id'
                        '    LEFT JOIN (SELECT * FROM scoring_capture) AS capture'
                        '        ON capture.flag_id = flag.id'
-                       '    GROUP BY service.slug')
+                       '    GROUP BY service.slug, flag.flagstore')
         counts = cursor.fetchall()
 
-    return dict(counts)
+    return {(c[0], c[1]): c[2] for c in counts}
 
 
 def get_open_tasks_counts_cur(db_conn, prohibit_changes=False):

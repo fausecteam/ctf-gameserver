@@ -107,16 +107,16 @@ def make_metrics(db_conn, registry=prometheus_client.REGISTRY):
             exploiting_teams = prometheus_client.core.CounterMetricFamily(
                 metric_prefix+'exploiting_teams',
                 'Number of teams that submitted at least one flag',
-                labels=['service']
+                labels=['service', 'flagstore']
             )
             is_exploited = prometheus_client.core.GaugeMetricFamily(
                 metric_prefix+'is_exploited',
                 'Whether at least one team submitted at least one flag',
-                labels=['service']
+                labels=['service', 'flagstore']
             )
-            for service, count in database.get_exploiting_teams_counts(db_conn).items():
-                exploiting_teams.add_metric([service], count)
-                is_exploited.add_metric([service], int(count > 0))
+            for (service, flagstore), count in database.get_exploiting_teams_counts(db_conn).items():
+                exploiting_teams.add_metric([service, str(flagstore)], count)
+                is_exploited.add_metric([service, str(flagstore)], int(count > 0))
             yield exploiting_teams
             yield is_exploited
 
