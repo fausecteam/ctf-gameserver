@@ -17,9 +17,7 @@ from .decorators import registration_closed_required, services_public_required
 @services_public_required('html')
 def scoreboard(request):
 
-    return render(request, 'scoreboard.html', {
-        'services': models.Service.objects.all().order_by('name')
-    })
+    return render(request, 'scoreboard.html')
 
 
 # Short cache timeout only, because there is already caching going on in calculations
@@ -38,11 +36,14 @@ def scoreboard_json(_):
                                  ['team__image', 'team__low_llm', 'team__user__username', 'service__name'])
     flagstore_scores = calculations.flagstore_scores()
     statuses = calculations.team_statuses(to_tick, to_tick, only_team_fields=['user_id'])
+    first_bloods = calculations.first_bloods()
+    low_llm_first_bloods = calculations.first_bloods(low_llm_only=True)
     services = models.Service.objects.all().order_by('name')
 
     response = {
         'tick': to_tick,
         'teams': [],
+        'services': [],
         'status-descriptions': _get_status_descriptions()
     }
 
@@ -94,6 +95,17 @@ def scoreboard_json(_):
             team_entry['services'].append(service_entry)
 
         response['teams'].append(team_entry)
+
+    for service in services:
+        service_first_bloods = first_bloods.get(service.pk, {})
+        service_low_llm_first_bloods = low_llm_first_bloods.get(service.pk, {})
+        flagstores = range(service.num_flagstores)
+        response['services'].append({
+            'name': service.name,
+            'flagstores': service.num_flagstores,
+            'first-bloods': [service_first_bloods.get(flagstore) for flagstore in flagstores],
+            'low-llm-first-bloods': [service_low_llm_first_bloods.get(flagstore) for flagstore in flagstores]
+        })
 
     return JsonResponse(response)
 

@@ -94,6 +94,50 @@ def flagstore_scores():
     return flagstore_team_scores
 
 
+def first_bloods(low_llm_only=False):
+    """
+    Returns the first capture ("first blood") per service and flagstore as a dict in this format:
+
+        {service_id: {flagstore: {'id': team_id, 'name': team_name, 'tick': tick}}}
+
+    Flagstores without any capture are not contained.
+
+    Args:
+        low_llm_only: Only consider captures by low-LLM teams.
+    """
+
+    # First bloods never change once they exist and there is one query per flagstore, so use a longer timeout
+    cache_key = 'first-bloods-low-llm' if low_llm_only else 'first-bloods'
+    cached_first_bloods = cache.get(cache_key)
+
+    if cached_first_bloods is not None:
+        return cached_first_bloods
+
+    captures = models.Capture.objects.all()
+    if low_llm_only:
+        captures = captures.filter(capturing_team__low_llm=True)
+
+    result = {}
+    for service in models.Service.objects.all():
+        for flagstore in range(service.num_flagstores):
+            first_capture = captures.filter(flag__task__service=service, flag__flagstore=flagstore) \
+                                    .order_by('timestamp') \
+                                    .values_list('capturing_team_id', 'capturing_team__user__username',
+                                                 'tick') \
+                                    .first()
+            if first_capture is not None:
+                team_id, team_name, tick = first_capture
+                result.setdefault(service.pk, {})[flagstore] = {
+                    'id': team_id,
+                    'name': team_name,
+                    'tick': tick
+                }
+
+    cache.set(cache_key, result, 60)
+
+    return result
+
+
 def team_statuses(from_tick, to_tick, select_related_team_fields=None, only_team_fields=None):
     """
     Returns the statuses of all teams and all services in the specified range of ticks. The result is an

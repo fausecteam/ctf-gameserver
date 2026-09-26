@@ -1,0 +1,385 @@
+/*
+ * Styles for the scoreboard, applied on top of Bootstrap's table styles.
+ * All colors are derived from Bootstrap's CSS variables to stay consistent with the rest of the site.
+ */
+
+.sb-scoreboard {
+    --sb-gold: #d4a017;
+    --sb-silver: #8e99a4;
+    --sb-bronze: #b87333;
+    --sb-offense: var(--bs-orange);
+    --sb-defense: var(--bs-indigo);
+    --sb-sla: var(--bs-teal);
+
+    /* Limit height, so that the sticky header stays visible within this scroll container */
+    max-height: 85vh;
+}
+
+/* Separate borders are required for borders of sticky cells to move along when scrolling */
+.sb-scoreboard table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.sb-scoreboard thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: var(--bs-tertiary-bg);
+    color: var(--bs-secondary-color);
+    font-size: .72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    vertical-align: bottom;
+    white-space: nowrap;
+}
+
+/* Rank and team columns stay visible when scrolling horizontally */
+.sb-scoreboard .sb-col-rank {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    width: 3.5rem;
+    min-width: 3.5rem;
+    text-align: center;
+    border-left: 3px solid transparent;
+}
+
+.sb-scoreboard .sb-col-team {
+    position: sticky;
+    left: 3.5rem;
+    z-index: 1;
+    min-width: 13rem;
+    max-width: 16rem;
+    border-right: 1px solid var(--bs-border-color);
+}
+
+.sb-scoreboard thead .sb-col-rank, .sb-scoreboard thead .sb-col-team {
+    z-index: 3;
+}
+
+.sb-scoreboard .sb-col-service {
+    min-width: 10.5rem;
+    border-left: 1px solid var(--bs-border-color-translucent);
+}
+
+.sb-scoreboard .sb-col-total {
+    min-width: 9rem;
+    border-left: 1px solid var(--bs-border-color);
+    text-align: right;
+}
+
+.sb-scoreboard .sb-number {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.sb-scoreboard .sb-negative {
+    color: color-mix(in srgb, var(--bs-danger) 65%, var(--bs-secondary-color));
+}
+
+/* Rank and podium */
+.sb-scoreboard .sb-rank {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--bs-secondary-color);
+}
+
+.sb-scoreboard .sb-podium-1 .sb-rank {
+    background-color: color-mix(in srgb, var(--sb-gold) 18%, transparent);
+    color: var(--sb-gold);
+}
+
+.sb-scoreboard .sb-podium-2 .sb-rank {
+    background-color: color-mix(in srgb, var(--sb-silver) 20%, transparent);
+    color: var(--sb-silver);
+}
+
+.sb-scoreboard .sb-podium-3 .sb-rank {
+    background-color: color-mix(in srgb, var(--sb-bronze) 18%, transparent);
+    color: var(--sb-bronze);
+}
+
+.sb-scoreboard .sb-podium-1 .sb-col-rank {
+    border-left-color: var(--sb-gold);
+}
+
+.sb-scoreboard .sb-podium-2 .sb-col-rank {
+    border-left-color: var(--sb-silver);
+}
+
+.sb-scoreboard .sb-podium-3 .sb-col-rank {
+    border-left-color: var(--sb-bronze);
+}
+
+.sb-scoreboard .sb-rank-original:not([hidden]) {
+    display: block;
+    color: var(--bs-secondary-color);
+    font-size: .7rem;
+}
+
+/* Team */
+.sb-scoreboard .sb-team {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+}
+
+.sb-scoreboard .sb-team-image {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 2.25rem;
+}
+
+/* Uploaded images are displayed as they are, only scaled down to fit the box */
+.sb-scoreboard .sb-team-image img {
+    max-width: 3rem;
+    max-height: 2.25rem;
+}
+
+.sb-scoreboard .sb-initials {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    color: #fff;
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .02em;
+}
+
+.sb-scoreboard .sb-team-name {
+    font-weight: 600;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+
+.sb-scoreboard .sb-you {
+    margin-left: .35rem;
+    padding: .05rem .4rem;
+    border-radius: 999px;
+    background-color: var(--bs-primary);
+    color: #fff;
+    font-size: .65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    vertical-align: middle;
+}
+
+/* Low-LLM marker: prohibition sign overlaid on a robot */
+.sb-scoreboard .sb-low-llm:not([hidden]) {
+    display: inline-grid;
+    margin-left: .35rem;
+    font-size: .9rem;
+    line-height: 1;
+    vertical-align: middle;
+}
+
+.sb-scoreboard .sb-low-llm > span {
+    grid-area: 1 / 1;
+    place-self: center;
+}
+
+/*
+ * Scaling (unlike a smaller font size) keeps the robot centered on the ring, independent of glyph metrics.
+ * The small vertical translation compensates for the robot emoji's ink not being centered within its own
+ * em box (its glyph sits slightly above center).
+ */
+.sb-scoreboard .sb-low-llm > span:first-child {
+    transform: scale(.5) translateY(-2%);
+}
+
+/* The transform above paints the robot on top, positioning brings the prohibition sign back to the front */
+.sb-scoreboard .sb-low-llm > span:last-child {
+    position: relative;
+}
+
+/* Service header with first bloods */
+.sb-scoreboard .sb-service-name {
+    color: var(--bs-body-color);
+}
+
+.sb-scoreboard .sb-first-blood {
+    display: block;
+    max-width: 11rem;
+    margin-top: .2rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--bs-secondary-color);
+    font-size: .72rem;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    cursor: help;
+}
+
+.sb-scoreboard .sb-first-blood i {
+    width: 1em;
+    color: var(--bs-danger);
+}
+
+.sb-scoreboard .sb-first-blood.sb-first-blood-none i {
+    color: var(--bs-secondary-color);
+    opacity: .3;
+}
+
+.sb-scoreboard .sb-first-blood-store {
+    font-variant-numeric: tabular-nums;
+    opacity: .7;
+}
+
+/* Overall first blood, when it differs from the filtered one */
+.sb-scoreboard .sb-first-blood-original {
+    margin-left: .25rem;
+    opacity: .7;
+}
+
+/* Service cells */
+.sb-scoreboard .sb-service-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+}
+
+.sb-scoreboard .sb-service-total {
+    font-weight: 600;
+}
+
+.sb-scoreboard .sb-service-total.sb-multi-store {
+    cursor: help;
+}
+
+.sb-scoreboard .sb-stores-icon {
+    margin-right: .3rem;
+    color: var(--bs-secondary-color);
+    font-size: .7rem;
+}
+
+.sb-scoreboard .sb-breakdown {
+    display: flex;
+    gap: .6rem;
+    margin-top: .25rem;
+    color: var(--bs-secondary-color);
+    font-size: .72rem;
+    white-space: nowrap;
+}
+
+.sb-scoreboard .sb-breakdown i {
+    margin-right: .15rem;
+}
+
+.sb-scoreboard .sb-icon-offense {
+    color: var(--sb-offense);
+}
+
+.sb-scoreboard .sb-icon-defense {
+    color: var(--sb-defense);
+}
+
+.sb-scoreboard .sb-icon-sla {
+    color: var(--sb-sla);
+}
+
+.sb-scoreboard .sb-first-blood-mark {
+    margin-left: .15rem;
+    color: var(--bs-danger);
+}
+
+/* Status pills */
+.sb-scoreboard .sb-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    padding: .12rem .5rem;
+    border-radius: 999px;
+    font-size: .7rem;
+    font-weight: 600;
+    white-space: nowrap;
+    text-decoration: none;
+}
+
+.sb-scoreboard .sb-status-0 {
+    background-color: var(--bs-success-bg-subtle);
+    color: var(--bs-success-text-emphasis);
+}
+
+.sb-scoreboard .sb-status-1, .sb-scoreboard .sb-status-2 {
+    background-color: var(--bs-danger-bg-subtle);
+    color: var(--bs-danger-text-emphasis);
+}
+
+.sb-scoreboard .sb-status-3 {
+    background-color: var(--bs-warning-bg-subtle);
+    color: var(--bs-warning-text-emphasis);
+}
+
+.sb-scoreboard .sb-status-4 {
+    background-color: var(--bs-info-bg-subtle);
+    color: var(--bs-info-text-emphasis);
+}
+
+.sb-scoreboard .sb-status-none {
+    background-color: var(--bs-secondary-bg);
+    color: var(--bs-secondary-color);
+}
+
+/* Totals */
+.sb-scoreboard .sb-total {
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.sb-scoreboard .sb-gap {
+    color: var(--bs-secondary-color);
+    font-size: .72rem;
+}
+
+.sb-scoreboard .sb-composition {
+    display: flex;
+    width: 7rem;
+    height: 4px;
+    margin: .35rem 0 0 auto;
+    overflow: hidden;
+    border-radius: 2px;
+    background-color: var(--bs-secondary-bg);
+}
+
+.sb-scoreboard .sb-composition span:nth-child(1) {
+    background-color: var(--sb-offense);
+}
+
+.sb-scoreboard .sb-composition span:nth-child(2) {
+    background-color: var(--sb-defense);
+}
+
+.sb-scoreboard .sb-composition span:nth-child(3) {
+    background-color: var(--sb-sla);
+}
+
+/* Flag store breakdown tooltip (not scoped because tooltips get attached to <body>) */
+.sb-store-grid {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    gap: 0 .6rem;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.sb-store-grid .sb-store-label {
+    text-align: left;
+    opacity: .75;
+}

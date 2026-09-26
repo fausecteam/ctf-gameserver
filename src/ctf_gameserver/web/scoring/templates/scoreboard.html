@@ -1,11 +1,9 @@
 {% extends 'base-wide.html' %}
 {% load i18n %}
-{% load dict_access %}
-{% load status_css_class %}
 {% load static %}
 
 {% block content %}
-<script src="{% static 'service_util.js' %}" defer="defer"></script>
+<link rel="stylesheet" href="{% static 'scoreboard.css' %}" />
 <script src="{% static 'scoreboard.js' %}" defer="defer"></script>
 
 <noscript>
@@ -26,92 +24,111 @@
         Tick: <span id="tick"></span>
         {% endblocktrans %}
     </p>
+
+    <div class="form-check float-end me-4" hidden="hidden">
+        <input class="form-check-input" type="checkbox" id="sb-low-llm-filter" />
+        <label class="form-check-label" for="sb-low-llm-filter">{% trans 'Only show low-LLM teams' %}</label>
+    </div>
 </div>
 
-<div class="table-responsive small">
-    <table class="table">
-        <thead class="align-middle">
+<div class="table-responsive sb-scoreboard">
+    <table id="scoreboard" class="table table-hover align-middle small"
+           data-own-team="{{ user.pk|default_if_none:'' }}" hidden="hidden">
+        <thead>
             <tr>
-                <th scope="col"><!-- Rank --></th>
-                <th scope="col" class="image-column"><!-- Image --></th>
-                <th scope="col" class="name-column border-right">{% trans 'Team' %}</th>
-                {% for service in services %}
-                <th scope="col">{{ service.name }}</th>
-                {% endfor %}
-                <th scope="col" class="border-left">
-                    <i class="fa-solid fa-fire"></i>
-                    {% trans 'Total Offense' %}
-                </th>
-                <th scope="col">
-                    <i class="fa-solid fa-chess-rook"></i>
-                    {% trans 'Total Defense' %}
-                </th>
-                <th scope="col">
-                    <i class="fa-solid fa-gauge-high"></i>
-                    {% trans 'Total SLA' %}
-                </th>
-                <th scope="col" class="border-left">{% trans 'Total' %}</th>
+                <th scope="col" class="sb-col-rank">#</th>
+                <th scope="col" class="sb-col-team">{% trans 'Team' %}</th>
+                <!-- Service headers, inserted via JavaScript -->
+                <th scope="col" class="sb-col-total">{% trans 'Total' %}</th>
             </tr>
         </thead>
-
         <tbody>
-            <tr id="team-template-row" hidden="hidden">
-                <td><strong><!-- Position --></strong></td>
-
-                <td class="image-column">
-                    <!-- Image -->
-                    <a href="">
-                        <img class="team-image" src="" alt="" />
-                    </a>
-                </td>
-
-                <td class="name-column border-right text-break">
-                    <strong><!-- Name --></strong>
-                    <div class="low-llm-badge" hidden="hidden">
-                        <span class="badge text-bg-secondary">{% trans 'Low-LLM' %}</span>
-                    </div>
-                </td>
-
-                <!-- Services, copied via JavaScript -->
-                <td class="table-active">
-                    <span class="text-nowrap">
-                        <i class="fa-solid fa-fire" aria-label="Offense"></i>
-                        <span class="points-offense"><!-- Offense --></span> <br/>
-                    </span>
-                    <span class="text-nowrap">
-                        <i class="fa-solid fa-chess-rook" aria-label="Defense"></i>
-                        <span class="points-defense"><!-- Defense --></span> <br/>
-                    </span>
-                    <span class="text-nowrap">
-                        <i class="fa-solid fa-gauge-high" aria-label="SLA"></i>
-                        <span class="points-sla"><!-- SLA --></span> <br/>
-                    </span>
-
-                    <!-- Per-flagstore breakdown, populated via JavaScript for multi-store services -->
-                    <span class="flagstores-breakdown"></span>
-                    <span class="flagstore-template text-nowrap text-muted" hidden="hidden">
-                        <small>
-                            #<span class="flagstore-index"><!-- Store --></span>:
-                            <i class="fa-solid fa-fire" aria-label="Offense"></i>
-                            <span class="flagstore-offense"><!-- Offense --></span>
-                            <i class="fa-solid fa-chess-rook" aria-label="Defense"></i>
-                            <span class="flagstore-defense"><!-- Defense --></span>
-                        </small>
-                        <br/>
-                    </span>
-
-                    <a href="{% url 'service_status' %}">
-                    <!-- Status -->
-                    <span class="text-muted service-status">{% trans 'not checked' %}</span>
-                    </a>
-                </td>
-
-                <td class="border-left"><!-- Offense --></td>
-                <td><!-- Defense --></td>
-                <td><!-- SLA --></td>
-                <td class="border-left"><strong><!-- Total --></strong></td>
-            </tr>
+            <!-- Team rows, inserted via JavaScript -->
         </tbody>
     </table>
 </div>
+
+<template id="sb-service-head-template">
+    <th scope="col" class="sb-col-service">
+        <div class="sb-service-name"><!-- Name --></div>
+        <!-- First bloods, inserted via JavaScript -->
+    </th>
+</template>
+
+<template id="sb-first-blood-template">
+    <span class="sb-first-blood" data-bs-toggle="tooltip">
+        <i class="fa-solid fa-droplet"></i>
+        <span class="sb-first-blood-store"><!-- "#n", for multi-store services only --></span>
+        <span class="sb-first-blood-team"><!-- Team name --></span>
+        <s class="sb-first-blood-original" hidden="hidden"><!-- Overall first blood team name --></s>
+    </span>
+</template>
+
+<template id="sb-team-row-template">
+    <tr>
+        <th scope="row" class="sb-col-rank">
+            <span class="sb-rank"><!-- Rank or medal --></span>
+            <s class="sb-rank-original sb-number" hidden="hidden" data-bs-toggle="tooltip"
+               data-bs-title="{% trans 'Position on the full scoreboard' %}"><!-- Original rank --></s>
+        </th>
+
+        <td class="sb-col-team">
+            <div class="sb-team">
+                <span class="sb-team-image">
+                    <a href=""><img src="" alt="" /></a>
+                    <span class="sb-initials" hidden="hidden"></span>
+                </span>
+                <span>
+                    <span class="sb-team-name"><!-- Name --></span>
+                    <span class="sb-you" hidden="hidden">{% trans 'you' %}</span>
+                    <span class="sb-low-llm" hidden="hidden" role="img" aria-label="{% trans 'Low-LLM team' %}"
+                          data-bs-toggle="tooltip" data-bs-title="{% trans 'Low-LLM team' %}"><span
+                          aria-hidden="true">🤖</span><span aria-hidden="true">🚫</span></span>
+                </span>
+            </div>
+        </td>
+
+        <!-- Service cells, inserted via JavaScript -->
+
+        <td class="sb-col-total">
+            <div class="sb-total sb-number"><!-- Total --></div>
+            <div class="sb-gap sb-number"><!-- Gap to team above --></div>
+            <div class="sb-composition" data-bs-toggle="tooltip"><span></span><span></span><span></span></div>
+        </td>
+    </tr>
+</template>
+
+<template id="sb-service-cell-template">
+    <td class="sb-col-service">
+        <div class="sb-service-top">
+            <a class="sb-pill" href="{% url 'service_status' %}">
+                <i class="fa-solid"></i>
+                <span class="sb-pill-label"><!-- Status --></span>
+            </a>
+            <span class="sb-service-total sb-number">
+                <i class="fa-solid fa-layer-group sb-stores-icon" hidden="hidden"></i>
+                <span class="sb-value"><!-- Service total --></span>
+            </span>
+        </div>
+        <div class="sb-breakdown">
+            <span>
+                <i class="fa-solid fa-fire sb-icon-offense" data-bs-toggle="tooltip"
+                   data-bs-title="{% trans 'Offense' %}"></i>
+                <span class="sb-offense sb-number"></span>
+                <i class="fa-solid fa-droplet sb-first-blood-mark" data-bs-toggle="tooltip"
+                   data-bs-title="{% trans 'First blood' %}" hidden="hidden"></i>
+            </span>
+            <span>
+                <i class="fa-solid fa-shield sb-icon-defense" data-bs-toggle="tooltip"
+                   data-bs-title="{% trans 'Defense' %}"></i>
+                <span class="sb-defense sb-number"></span>
+            </span>
+            <span>
+                <i class="fa-solid fa-gauge-high sb-icon-sla" data-bs-toggle="tooltip"
+                   data-bs-title="{% trans 'SLA' %}"></i>
+                <span class="sb-sla sb-number"></span>
+            </span>
+        </div>
+    </td>
+</template>
 {% endblock %}
