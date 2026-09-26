@@ -77,14 +77,21 @@ class CaptureAdmin(admin.ModelAdmin):
         """
         return capture.flag.task.service
 
+    def flagstore(self, capture):
+        """
+        Returns the (number of the) flag store of the capture's flag for usage in `list_display`.
+        """
+        return capture.flag.flagstore
+
     def flag_tick(self, capture):
         """
         Returns the tick of the capture's flag for usage in `list_display`.
         """
         return capture.flag.task.tick
 
-    list_display = ('id', 'capturing_team', 'protecting_team', 'service', 'flag_tick', 'timestamp')
-    list_filter = (ServiceFilter,)
+    list_display = ('id', 'capturing_team', 'protecting_team', 'service', 'flagstore', 'flag_tick',
+                    'timestamp')
+    list_filter = (ServiceFilter, 'flag__flagstore')
     search_fields = ('capturing_team__user__username', 'flag__task__team__user__username',
                      'flag__task__service__name', 'flag__task__service__slug')
     ordering = ('timestamp',)
