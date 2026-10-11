@@ -52,7 +52,7 @@ use our [dev container](https://code.visualstudio.com/docs/devcontainers/contain
 Then, run `make dev`. Tests can be executed through `make test` and a development instance of the Web
 component can be launched with `make run_web`.
 
-We always aim to keep our Python dependencies compatible with the versions packaged in Debian stable.
+We always aim to keep our Python dependencies compatible with the versions packaged in Debian stable (possible including backports).
 Debian-based distributions are our primary target, but the Python code should generally be
 platform-independent.
 

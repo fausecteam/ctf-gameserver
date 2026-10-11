@@ -111,7 +111,7 @@ log entries. See the [docs on Checker logging](observability.md#checkers) for de
 ### Web
 #### Application Server
 To run the Web component, you will need a WSGI application server such as Gunicorn or uWSGI. Please refer
-to [Django's instructions on how to deploy with WSGI](https://docs.djangoproject.com/en/4.2/howto/deployment/wsgi/).
+to [Django's instructions on how to deploy with WSGI](https://docs.djangoproject.com/en/5.2/howto/deployment/wsgi/).
 
 The Web component uses Django's settings mechanism instead of the environment files described above. Its
 config file is located at `/etc/ctf-gameserver/web/prod_settings.py`. When using the Ansible role, that
@@ -132,8 +132,8 @@ Example config for uWSGI, using Debian packages `uwsgi` and `uwsgi-plugin-python
     master = True
     vacuum = True
 
-Medium-sized or larger setups should utilize [Django’s cache framework](https://docs.djangoproject.com/en/4.2/topics/cache/).
-We recommend [using Memcached](https://docs.djangoproject.com/en/4.2/topics/cache/#memcached) with
+Medium-sized or larger setups should utilize [Django’s cache framework](https://docs.djangoproject.com/en/5.2/topics/cache/).
+We recommend [using Memcached](https://docs.djangoproject.com/en/5.2/topics/cache/#memcached) with
 `django.core.cache.backends.memcached.PyMemcacheCache`. Memcached's memory limits should be increased by
 setting `-m 256` and `-I 5m`.
 

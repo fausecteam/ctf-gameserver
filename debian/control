@@ -10,7 +10,7 @@ Build-Depends:
  python3,
  python3-all,
  python3-argon2,
- python3-django,
+ python3-django (>= 3:5.2),
  python3-markdown,
  python3-pil,
  python3-setuptools,
@@ -26,12 +26,12 @@ Depends:
  ${misc:Depends},
  ${python3:Depends},
  iputils-ping,
-# ctf-gameserver brings its own JQuery, but python3-django requires Debian's JQUery (for the admin interface)
+# ctf-gameserver brings its own JQuery, but python3-django requires Debian's JQuery (for the admin interface)
 # and it's only a "Recommend" there
  libjs-jquery,
  procps,
  python3-configargparse,
- python3-django,
+ python3-django (>= 3:5.2),
  python3-markdown,
  python3-pil,
  python3-prometheus-client,
