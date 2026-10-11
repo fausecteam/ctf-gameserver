@@ -7,7 +7,6 @@ from django.db.models.fields.files import ImageField, ImageFieldFile
 from django.forms.widgets import ClearableFileInput
 from django.conf import settings
 from django.utils.encoding import filepath_to_uri
-from django.utils.html import conditional_escape, format_html
 from PIL import Image
 
 # Force an error when image decompression takes too much memory
@@ -83,9 +82,12 @@ class ClearableThumbnailImageInput(ClearableFileInput):
     thumbnail image instead of the image's filename.
     """
 
-    def get_template_substitution_values(self, value):
-        return {
-            'initial': format_html('<img class="clearable-input-image" src="{}" alt="{}" />',
-                                   value.get_thumbnail_url(), str(value)),
-            'initial_url': conditional_escape(value.url),
-        }
+    template_name = 'clearable_thumbnail_image_input.html'
+
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+
+        if context['widget']['is_initial']:
+            context['widget']['thumbnail_url'] = value.get_thumbnail_url()
+
+        return context

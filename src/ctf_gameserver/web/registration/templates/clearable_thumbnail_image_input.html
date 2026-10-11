@@ -1,0 +1,9 @@
+{% comment %}
+Variant of Django's "django/forms/widgets/clearable_file_input.html" which displays the thumbnail image
+instead of the file name.
+{% endcomment %}
+{% if widget.is_initial %}{{ widget.initial_text }}: <a href="{{ widget.value.url }}"><img class="clearable-input-image" src="{{ widget.thumbnail_url }}" alt="{{ widget.value }}"></a>{% if not widget.required %}
+<input type="checkbox" name="{{ widget.checkbox_name }}" id="{{ widget.checkbox_id }}"{% if widget.attrs.disabled %} disabled{% endif %}{% if widget.attrs.checked %} checked{% endif %}>
+<label for="{{ widget.checkbox_id }}">{{ widget.clear_checkbox_label }}</label>{% endif %}<br>
+{{ widget.input_text }}:{% endif %}
+<input type="{{ widget.type }}" name="{{ widget.name }}"{% include "django/forms/widgets/attrs.html" %}>
